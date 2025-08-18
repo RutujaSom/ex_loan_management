@@ -1,0 +1,205 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-08 15:14:36.116202",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "member_details_tab",
+  "member_id",
+  "group",
+  "email",
+  "gender",
+  "completed_age",
+  "occupation",
+  "loan_column",
+  "member_name",
+  "mobile_no",
+  "dob",
+  "entry_age",
+  "type_of_borrower",
+  "member_address_tab",
+  "address",
+  "state",
+  "country",
+  "city",
+  "pincode",
+  "address_column_break",
+  "nominee_details_tab",
+  "nominee_name",
+  "relation",
+  "nominee_dob"
+ ],
+ "fields": [
+  {
+   "fieldname": "member_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date Of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "completed_age",
+   "fieldtype": "Int",
+   "label": "Completed Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "entry_age",
+   "fieldtype": "Int",
+   "label": "Entry Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 25
+  },
+  {
+   "fieldname": "group",
+   "fieldtype": "Link",
+   "label": "Group",
+   "options": "Loan Group",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "member_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Member Address"
+  },
+  {
+   "fieldname": "address_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "member_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Member Details"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "fieldname": "type_of_borrower",
+   "fieldtype": "Select",
+   "label": "Type Of Borrower",
+   "options": "Borrower\nCo-Borrower",
+   "reqd": 1
+  },
+  {
+   "fieldname": "nominee_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Nominee Details"
+  },
+  {
+   "fieldname": "nominee_name",
+   "fieldtype": "Data",
+   "label": "Nominee  Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "relation",
+   "fieldtype": "Select",
+   "label": "Relation",
+   "options": "Mother\nFather\nBrother\nSister\nSpouse\nSon\nDaughter\nHusband\nWife"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State",
+   "reqd": 1
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country",
+   "reqd": 1
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City",
+   "reqd": 1
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Int",
+   "label": "Pincode",
+   "length": 6,
+   "reqd": 1
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Link",
+   "label": "Occupation",
+   "options": "Occupation"
+  },
+  {
+   "fieldname": "nominee_dob",
+   "fieldtype": "Date",
+   "label": "Date Of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-12 11:19:33.789835",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Loan Member",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "member_name"
+}

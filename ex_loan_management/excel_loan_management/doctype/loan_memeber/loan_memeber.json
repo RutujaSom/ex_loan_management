@@ -1,0 +1,90 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-08 15:14:36.116202",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "member_id",
+  "member_name",
+  "gender",
+  "dob",
+  "completed_age",
+  "entry_age",
+  "mobile_no"
+ ],
+ "fields": [
+  {
+   "fieldname": "entry_age",
+   "fieldtype": "Int",
+   "label": "Entry Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "member_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "Male\nFemale\nOther",
+   "reqd": 1
+  },
+  {
+   "fieldname": "completed_age",
+   "fieldtype": "Int",
+   "label": "Completed Age",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date Of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 10,
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-08 15:21:43.848035",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Loan Memeber",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
