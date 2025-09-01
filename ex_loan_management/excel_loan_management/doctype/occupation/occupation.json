@@ -20,7 +20,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-08 18:03:21.461816",
+ "modified": "2025-08-25 11:45:07.008963",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Occupation",
@@ -39,7 +39,9 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "occupation"
 }

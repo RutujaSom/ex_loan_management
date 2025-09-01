@@ -5,5 +5,5 @@
 from frappe.tests.utils import FrappeTestCase
 
 
-class TestLoanMemeber(FrappeTestCase):
+class TestCollectionInHand(FrappeTestCase):
 	pass

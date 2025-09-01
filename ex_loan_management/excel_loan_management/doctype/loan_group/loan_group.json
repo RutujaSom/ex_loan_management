@@ -7,7 +7,8 @@
  "field_order": [
   "group_id",
   "group_name",
-  "group_head"
+  "group_head",
+  "group_image"
  ],
  "fields": [
   {
@@ -28,12 +29,17 @@
    "fieldtype": "Link",
    "label": "Group Head",
    "options": "Loan Group"
+  },
+  {
+   "fieldname": "group_image",
+   "fieldtype": "Attach",
+   "label": "Group Image"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-08 16:08:26.912502",
+ "modified": "2025-08-30 19:05:21.134693",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Group",
@@ -50,6 +56,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "show_title_field_in_link": 1,

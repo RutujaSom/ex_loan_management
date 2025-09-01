@@ -6,8 +6,73 @@ import frappe
 from openpyxl import load_workbook
 from datetime import datetime
 
+# class LoanMember(Document):
+#     def before_save(self):
+#         # check if all required verifications are done
+#         if self.address_verified and self.pancard_verified and self.aadhar_verified:
+#             self.status = "Verified"
+#         if self.status ==  "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
+#             frappe.throw("To set status as 'Verified', all verifications must be completed.")
+        
+    
+
+import frappe
+from frappe.model.document import Document
+
 class LoanMember(Document):
-    pass
+    def before_save(self):
+        if self.address_verified and self.pancard_verified and self.aadhar_verified:
+            self.status = "Verified"
+        if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
+            frappe.throw("To set status as 'Verified', all verifications must be completed.")
+
+        self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
+
+
+# def get_list_query(doctype, txt, filters, limit_start, limit_page_length=20, order_by=None):
+
+def on_doctype_query(user):
+
+    print('in def ............')
+    user = frappe.session.user
+    print('user .....',user)
+
+    # Admin can see everything
+    if user == "Administrator":
+        allowed_groups = None
+    else:
+        allowed_groups = frappe.get_all(
+            "Loan Group Assignment",
+            filters={"user": user},
+            pluck="loan_group"
+        )
+
+    query = """
+        SELECT name, member_name, loan_group, status
+        FROM `tabLoan Member`
+        WHERE 1=1
+    """
+
+    # Restrict to user’s groups only (if not admin)
+    if allowed_groups:
+        groups = "', '".join(allowed_groups)
+        query += f" AND loan_group IN ('{groups}')"
+
+    # Support search box in list view
+    if txt:
+        query += f" AND (member_name LIKE '%{txt}%' OR name LIKE '%{txt}%')"
+
+    # Ordering
+    if order_by:
+        query += f" ORDER BY {order_by}"
+    else:
+        query += " ORDER BY creation DESC"
+
+    # Pagination
+    query += f" LIMIT {limit_start}, {limit_page_length}"
+
+    return query
+
 
 
 @frappe.whitelist()
@@ -167,3 +232,8 @@ def import_loan_members(file_url):
         msg += f"\n⏩ Skipped {len(skipped)} existing members: {', '.join(skipped)}"
 
     return msg
+
+
+
+
+    

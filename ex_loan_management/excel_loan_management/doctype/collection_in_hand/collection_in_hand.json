@@ -1,0 +1,115 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-27 14:57:02.820214",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "loan_repayment",
+  "given_to",
+  "applicant",
+  "column_break_6agu",
+  "posting_date",
+  "amount",
+  "loan",
+  "payment_proof",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "given_to",
+   "fieldtype": "Data",
+   "label": "Amount Given To"
+  },
+  {
+   "depends_on": "loan_repayment",
+   "fieldname": "loan_repayment",
+   "fieldtype": "Link",
+   "label": "Loan Repayment",
+   "options": "Loan Repayment",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Float",
+   "label": "Amount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_6agu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicant",
+   "fieldtype": "Link",
+   "label": "Loan Applicant",
+   "options": "Loan Member",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loan",
+   "fieldtype": "Link",
+   "label": "Loan",
+   "options": "Loan",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_proof",
+   "fieldtype": "Attach",
+   "label": "Payment Proof"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Collection In Hand",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-08-28 15:03:53.447005",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Collection In Hand",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,19 @@
+{
+ "content": null,
+ "creation": "2025-08-28 15:49:27.610739",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2025-08-28 15:53:22.852289",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "loan-emi",
+ "owner": "Administrator",
+ "page_name": "loan-emi",
+ "roles": [],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "Loan EMI"
+}

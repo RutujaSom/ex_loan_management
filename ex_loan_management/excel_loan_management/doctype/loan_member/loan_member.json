@@ -7,28 +7,57 @@
  "field_order": [
   "member_details_tab",
   "member_id",
+  "first_name",
+  "last_name",
   "group",
   "email",
   "gender",
   "completed_age",
-  "occupation",
+  "member_image",
   "loan_column",
+  "company",
+  "middle_name",
   "member_name",
   "mobile_no",
   "dob",
   "entry_age",
-  "type_of_borrower",
+  "occupation",
+  "status",
   "member_address_tab",
+  "address_column_break",
   "address",
   "state",
   "country",
   "city",
   "pincode",
-  "address_column_break",
+  "electricity_bill",
   "nominee_details_tab",
-  "nominee_name",
+  "nominee",
   "relation",
-  "nominee_dob"
+  "document_tab",
+  "aadhar",
+  "pancard",
+  "address_doc_type",
+  "document_column_break",
+  "aadhar_image",
+  "pancard_image",
+  "address_image",
+  "column_break_dgwj",
+  "aadhar_verified",
+  "pancard_verified",
+  "address_verified",
+  "cibil_tab",
+  "cibil_score",
+  "cibil_date",
+  "bank_details",
+  "bank_name",
+  "account_number",
+  "holder_name",
+  "branch",
+  "ifsc_code",
+  "account_type",
+  "bank_address",
+  "amended_from"
  ],
  "fields": [
   {
@@ -42,9 +71,9 @@
   {
    "fieldname": "member_name",
    "fieldtype": "Data",
+   "hidden": 1,
    "in_list_view": 1,
-   "label": "Member Name",
-   "reqd": 1
+   "label": "Member Name"
   },
   {
    "fieldname": "gender",
@@ -81,8 +110,7 @@
    "fieldname": "group",
    "fieldtype": "Link",
    "label": "Group",
-   "options": "Loan Group",
-   "reqd": 1
+   "options": "Loan Group"
   },
   {
    "fieldname": "loan_column",
@@ -108,22 +136,9 @@
    "label": "Email"
   },
   {
-   "fieldname": "type_of_borrower",
-   "fieldtype": "Select",
-   "label": "Type Of Borrower",
-   "options": "Borrower\nCo-Borrower",
-   "reqd": 1
-  },
-  {
    "fieldname": "nominee_details_tab",
    "fieldtype": "Tab Break",
    "label": "Nominee Details"
-  },
-  {
-   "fieldname": "nominee_name",
-   "fieldtype": "Data",
-   "label": "Nominee  Name",
-   "reqd": 1
   },
   {
    "fieldname": "relation",
@@ -138,6 +153,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "company.country",
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
@@ -164,21 +180,198 @@
    "options": "Occupation"
   },
   {
-   "fieldname": "nominee_dob",
-   "fieldtype": "Date",
-   "label": "Date Of Birth",
-   "reqd": 1
-  },
-  {
    "fieldname": "address",
    "fieldtype": "Small Text",
    "label": "Address"
+  },
+  {
+   "fieldname": "electricity_bill",
+   "fieldtype": "Attach",
+   "label": "Electricity Bill "
+  },
+  {
+   "fieldname": "member_image",
+   "fieldtype": "Attach",
+   "label": "Member Photo"
+  },
+  {
+   "fieldname": "aadhar_image",
+   "fieldtype": "Attach",
+   "label": "Aadhar"
+  },
+  {
+   "fieldname": "pancard_image",
+   "fieldtype": "Attach",
+   "label": "Pan Card"
+  },
+  {
+   "fieldname": "aadhar",
+   "fieldtype": "Data",
+   "label": "Aadhar ",
+   "length": 12
+  },
+  {
+   "fieldname": "pancard",
+   "fieldtype": "Data",
+   "label": "Pan Card",
+   "length": 10
+  },
+  {
+   "fieldname": "address_doc_type",
+   "fieldtype": "Select",
+   "label": "Address Document",
+   "options": "Electricity Bill\nRent Agreement"
+  },
+  {
+   "fieldname": "address_image",
+   "fieldtype": "Attach",
+   "label": "Address"
+  },
+  {
+   "fieldname": "document_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_tab",
+   "fieldtype": "Tab Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "cibil_tab",
+   "fieldtype": "Tab Break",
+   "label": "CIBIL"
+  },
+  {
+   "fieldname": "cibil_score",
+   "fieldtype": "Int",
+   "label": "Cibil Score"
+  },
+  {
+   "fieldname": "cibil_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank_details",
+   "fieldtype": "Tab Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number"
+  },
+  {
+   "fieldname": "holder_name",
+   "fieldtype": "Data",
+   "label": "Account Holder Name"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Data",
+   "label": "Branch"
+  },
+  {
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "IFSC Code"
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Select",
+   "label": "Account Type",
+   "options": "Saving\nCurrent\nSalaried"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "nominee",
+   "fieldtype": "Link",
+   "label": "Nominee",
+   "options": "Loan Member"
+  },
+  {
+   "default": "Open",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Open\nVerified\nRejected"
+  },
+  {
+   "fieldname": "column_break_dgwj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "aadhar_verified",
+   "fieldtype": "Check",
+   "label": "Aadhar Verified",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "address_verified",
+   "fieldtype": "Check",
+   "label": "Address Verified",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pancard_verified",
+   "fieldtype": "Check",
+   "label": "Pan Card Verified",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Loan Member",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "grid_page_length": 50,
+ "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-12 11:19:33.789835",
+ "modified": "2025-09-01 15:09:01.316274",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
@@ -193,6 +386,42 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
    "share": 1,
    "write": 1
   }
