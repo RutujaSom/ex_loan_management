@@ -12,10 +12,6 @@ app_license = "mit"
 
 
 # hooks.py
-doctype_list_query = {
-    "Loan Member": "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.on_doctype_query"
-}
-
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
