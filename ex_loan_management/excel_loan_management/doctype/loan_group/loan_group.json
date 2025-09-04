@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "LM-LG-.YYYY.-.#####",
  "creation": "2025-08-08 15:22:04.633924",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -39,10 +40,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-04 12:26:13.719632",
+ "modified": "2025-09-04 16:19:59.172269",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Group",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

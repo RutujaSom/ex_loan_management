@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "LM-LM-.YYYY.-.#####",
  "creation": "2025-08-08 15:14:36.116202",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -370,10 +371,11 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-03 18:52:34.081910",
+ "modified": "2025-09-04 16:13:59.828908",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {
