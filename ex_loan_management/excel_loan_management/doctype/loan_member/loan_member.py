@@ -138,11 +138,18 @@ def import_loan_members(file_url):
                    print('error ....', e)
               
         print('nominee_dob ....', nominee_dob, type(nominee_dob))
+        first_name, middle_name, last_name = split_name(member_name)
+        print('first_name: ',first_name," middle_name: ", middle_name," last_name: ", last_name)
+            
 
         # 5️⃣ Create Loan Member
         doc = frappe.new_doc("Loan Member")
         doc.member_id = member_id
         doc.member_name = member_name
+        doc.first_name = first_name
+        doc.middle_name = middle_name
+        doc.last_name = last_name
+        doc.status = "Verified"
         doc.type_of_borrower = type_of_borrower
         doc.mobile_no = str(mobile_no) if mobile_no else None
         doc.gender = gender
@@ -190,4 +197,86 @@ def import_loan_members(file_url):
 
 
 
+
+def split_name(full_name):
+    """Split full name into first, middle, last"""
+    parts = full_name.strip().split()
+    if len(parts) == 1:
+        return parts[0], "", ""   # only first name
+    elif len(parts) == 2:
+        return parts[0], "", parts[1]   # first + last
+    elif len(parts) == 3:
+        return parts[0], parts[1], parts[2]  # first + middle + last
+    else:
+        # more than 3 → treat first as first_name, last as last_name, middle = everything in between
+        return parts[0], " ".join(parts[1:-1]), parts[-1]
+
+
+@frappe.whitelist()
+def import_update_loan_members(file_url):
+    from frappe.utils.file_manager import get_file
+
+    file_doc = frappe.get_doc("File", {"file_url": file_url})
+    filename = file_doc.file_name.lower()
+
+    rows = []
+    print("file_doc ....", file_doc, filename)
+
+    # Read Excel file and convert rows to dictionary
+    if filename.endswith(".xlsx"):
+        file_path = file_doc.get_full_path()
+        with open(file_path, "rb") as f:
+            wb = load_workbook(f, data_only=True)
+            ws = wb.active
+            headers = [cell.value for cell in ws[1]]  # First row as headers
+            print("headers ....", headers)
+            for row in ws.iter_rows(min_row=2, values_only=True):
+                rows.append(dict(zip(headers, row)))
+
+    skipped = []
+    created_members = []
+
+    for row in rows:
+        member_id = str(row.get("MEMBER NO")).strip() if row.get("MEMBER NO") else None
+        if not member_id:
+            continue  # Skip if no member_id
+
+        # Member basic info
+        member_name = row.get("NAME OF MEMBER")
+        member_exists = frappe.db.exists("Loan Member", {"member_id": member_id})
+        
+        # If Loan Member already exists
+        if member_exists:
+            first_name, middle_name, last_name = split_name(member_name)
+            print('first_name: ',first_name," middle_name: ", middle_name," last_name: ", last_name)
+            
+            # 5️⃣ Create Loan Member
+            doc = frappe.get_doc("Loan Member", member_exists)  
+            print('doc ....',doc)
+            print()        
+            doc.member_name = member_name
+            doc.first_name = first_name
+            doc.middle_name = middle_name
+            doc.last_name = last_name
+            doc.status = "Verified"
+            doc.aadhar_verified = True
+            doc.pancard_verified = True
+            doc.address_verified = True
+            doc.company = "Excellminds (Demo)"
+            doc.save(ignore_permissions=True)
+            created_members.append(member_id)
+            
+    frappe.db.commit()
+
+    # Prepare Summary
+    msg = f"✅ Created {len(created_members)} Loan Members."
+    if skipped:
+        msg += f"\n⏩ Skipped {len(skipped)} existing members: {', '.join(skipped)}"
+
+    return msg
+
+
+
+
+    
     
