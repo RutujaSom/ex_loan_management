@@ -4,13 +4,13 @@
   "doctype": "Workflow",
   "document_type": "Loan Member",
   "is_active": 1,
-  "modified": "2025-09-05 14:52:49.859180",
+  "modified": "2025-09-10 10:57:25.373860",
   "name": "Loan Member Verification",
   "override_status": 0,
   "send_email_alert": 0,
   "states": [
    {
-    "allow_edit": "Agent",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -25,7 +25,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Agent",
+    "allow_edit": "Employee",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -119,7 +119,7 @@
    {
     "action": "Submit for verification",
     "allow_self_approval": 1,
-    "allowed": "Agent",
+    "allowed": "Employee",
     "condition": null,
     "next_state": "Pending",
     "parent": "Loan Member Verification",
@@ -210,7 +210,7 @@
   "doctype": "Workflow",
   "document_type": "Loan Application",
   "is_active": 1,
-  "modified": "2025-08-30 17:04:21.319799",
+  "modified": "2025-09-09 17:15:08.806232",
   "name": "Loan Application Verification",
   "override_status": 0,
   "send_email_alert": 0,
@@ -226,6 +226,21 @@
     "parentfield": "states",
     "parenttype": "Workflow",
     "state": "Open",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Employee",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Loan Application Verification",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Rejected",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -261,7 +276,7 @@
     "workflow_builder_id": null
    },
    {
-    "allow_edit": "Employee",
+    "allow_edit": "Accounts Manager",
     "avoid_status_override": 0,
     "doc_status": "0",
     "is_optional_state": 0,
@@ -270,7 +285,22 @@
     "parent": "Loan Application Verification",
     "parentfield": "states",
     "parenttype": "Workflow",
-    "state": "Rejected",
+    "state": "Approved",
+    "update_field": null,
+    "update_value": null,
+    "workflow_builder_id": null
+   },
+   {
+    "allow_edit": "Accounts Manager",
+    "avoid_status_override": 0,
+    "doc_status": "0",
+    "is_optional_state": 0,
+    "message": null,
+    "next_action_email_template": null,
+    "parent": "Loan Application Verification",
+    "parentfield": "states",
+    "parenttype": "Workflow",
+    "state": "Pending",
     "update_field": null,
     "update_value": null,
     "workflow_builder_id": null
@@ -305,6 +335,30 @@
     "action": "Reject",
     "allow_self_approval": 1,
     "allowed": "Loan Manager",
+    "condition": null,
+    "next_state": "Rejected",
+    "parent": "Loan Application Verification",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Pending",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Approve",
+    "allow_self_approval": 1,
+    "allowed": "Accounts Manager",
+    "condition": null,
+    "next_state": "Approved",
+    "parent": "Loan Application Verification",
+    "parentfield": "transitions",
+    "parenttype": "Workflow",
+    "state": "Pending",
+    "workflow_builder_id": null
+   },
+   {
+    "action": "Reject",
+    "allow_self_approval": 1,
+    "allowed": "Accounts Manager",
     "condition": null,
     "next_state": "Rejected",
     "parent": "Loan Application Verification",
