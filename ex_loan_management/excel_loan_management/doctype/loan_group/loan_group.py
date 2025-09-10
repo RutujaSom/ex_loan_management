@@ -75,3 +75,32 @@ def import_loan_groups(file_url):
         msg += f"\n⏩ Skipped {len(skipped)} items: {', '.join(skipped)}"
 
     return msg
+
+
+
+import frappe
+from ex_loan_management.api.utils import get_paginated_data
+
+"""
+    Get Loan Group List (with optional pagination, search & sorting)
+"""
+@frappe.whitelist()
+def loan_group_list(page=1, page_size=10,sort_by="group_name", sort_order="asc", search=None, is_pagination=False):
+    extra_params = {"search": search} if search else {}
+    base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
+
+    return get_paginated_data(
+        doctype="Loan Group",
+        fields=["name", "group_name", "group_head","group_image"],
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=int(page),
+        page_size=int(page_size),
+        search_fields=["group_name", "group_head","group_image"],
+        is_pagination=frappe.utils.sbool(is_pagination),
+        base_url=base_url,
+        extra_params=extra_params,
+        link_fields={"group_head": "member_name"},
+        image_fields=["group_image"]
+    )

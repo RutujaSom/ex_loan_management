@@ -1,6 +1,7 @@
 {
  "actions": [],
  "allow_rename": 1,
+ "autoname": "OCU.-.#####",
  "creation": "2025-08-08 18:02:54.345829",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -20,10 +21,11 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-25 11:45:07.008963",
+ "modified": "2025-09-08 18:11:17.440853",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Occupation",
+ "naming_rule": "Expression (old style)",
  "owner": "Administrator",
  "permissions": [
   {

@@ -31,7 +31,6 @@
   "country",
   "city",
   "pincode",
-  "electricity_bill",
   "nominee_details_tab",
   "nominee",
   "relation",
@@ -39,6 +38,7 @@
   "aadhar",
   "pancard",
   "address_doc_type",
+  "home_image",
   "document_column_break",
   "aadhar_image",
   "pancard_image",
@@ -105,7 +105,8 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 25
+   "length": 25,
+   "reqd": 1
   },
   {
    "fieldname": "group",
@@ -186,11 +187,6 @@
    "label": "Address"
   },
   {
-   "fieldname": "electricity_bill",
-   "fieldtype": "Attach",
-   "label": "Electricity Bill "
-  },
-  {
    "fieldname": "member_image",
    "fieldtype": "Attach",
    "label": "Member Photo"
@@ -198,7 +194,8 @@
   {
    "fieldname": "aadhar_image",
    "fieldtype": "Attach",
-   "label": "Aadhar"
+   "label": "Aadhar",
+   "reqd": 1
   },
   {
    "fieldname": "pancard_image",
@@ -209,7 +206,8 @@
    "fieldname": "aadhar",
    "fieldtype": "Data",
    "label": "Aadhar ",
-   "length": 12
+   "length": 12,
+   "reqd": 1
   },
   {
    "fieldname": "pancard",
@@ -365,13 +363,18 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "home_image",
+   "fieldtype": "Attach",
+   "label": "Home Image"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-05 11:39:15.070225",
+ "modified": "2025-09-10 10:43:47.305146",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

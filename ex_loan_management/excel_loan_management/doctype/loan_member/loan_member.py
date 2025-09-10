@@ -5,19 +5,9 @@ from frappe.model.document import Document
 import frappe
 from openpyxl import load_workbook
 from datetime import datetime
+from frappe.utils.file_manager import save_file
+from ex_loan_management.api.utils import get_paginated_data
 
-# class LoanMember(Document):
-#     def before_save(self):
-#         # check if all required verifications are done
-#         if self.address_verified and self.pancard_verified and self.aadhar_verified:
-#             self.status = "Verified"
-#         if self.status ==  "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
-#             frappe.throw("To set status as 'Verified', all verifications must be completed.")
-        
-    
-
-import frappe
-from frappe.model.document import Document
 
 class LoanMember(Document):
     def before_save(self):
@@ -278,5 +268,247 @@ def import_update_loan_members(file_url):
 
 
 
-    
-    
+
+
+@frappe.whitelist()
+def create_loan_member():
+    print('frappe.session.user ....', frappe.session.user)
+    try:
+        data = frappe.form_dict  # text fields
+        files = frappe.request.files  # uploaded files
+
+        # Get user and company
+        user_doc = frappe.get_doc("User", frappe.session.user)
+        try:
+            emp_details = frappe.get_doc("Employee", {"user_id": user_doc.name})
+            company = emp_details.company
+        except:
+            company = ""
+
+        # Step 1: Create Loan Member doc (without files)
+        doc = frappe.get_doc({
+            "doctype": "Loan Member",
+            "member_id": data.get("member_id"),
+            "first_name": data.get("first_name"),
+            "middle_name": data.get("middle_name"),
+            "last_name": data.get("last_name"),
+            "gender": data.get("gender"),
+            "dob": data.get("dob"),
+            "completed_age": data.get("completed_age"),
+            "entry_age": data.get("entry_age"),
+            "mobile_no": data.get("mobile_no"),
+            "company": company,
+            "state": data.get("state"),
+            "country": data.get("country"),
+            "city": data.get("city"),
+            "pincode": data.get("pincode"),
+            "status": data.get("status", "Open"),
+            "occupation": data.get("occupation"),
+
+            # Corrected mappings
+            "group": data.get("group"),
+            "email": data.get("email"),
+            "address": data.get("address"),
+            "nominee": data.get("nominee"),
+            "relation": data.get("relation"),
+            "aadhar": data.get("aadhar"),
+            "pancard": data.get("pancard"),
+            "address_doc_type": data.get("address_doc_type"),
+
+            # Verification flags (optional, uncomment if needed)
+            # "aadhar_verified": data.get("aadhar_verified"),
+            # "pancard_verified": data.get("pancard_verified"),
+            # "address_verified": data.get("address_verified"),
+
+            "cibil_score": data.get("cibil_score"),
+            "cibil_date": data.get("cibil_date"),
+
+            # Bank details
+            "bank_details": data.get("bank_details"),
+            "bank_name": data.get("bank_name"),
+            "account_number": data.get("account_number"),
+            "holder_name": data.get("holder_name"),
+            "branch": data.get("branch"),
+            "ifsc_code": data.get("ifsc_code"),
+            "account_type": data.get("account_type"),
+            "bank_address": data.get("bank_address"),
+        })
+        print('doc before insert ....',doc)
+
+        doc.insert(ignore_permissions=True)
+
+        # Step 2: Handle file uploads
+        for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image"]:
+            if field in files:
+                upload = files[field]
+                if not upload or not upload.filename:
+                    continue  
+                file_doc = save_file(
+                    fname=upload.filename,
+                    content=upload.stream.read(),
+                    dt="Loan Member",
+                    dn=doc.name,
+                    is_private=1
+                )
+                doc.set(field, file_doc.file_url)
+
+        # Step 3: Save updated doc with file URLs
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {"status": "success", "name": doc.name, "files": {
+            "member_image": doc.member_image,
+            "aadhar_image": doc.aadhar_image,
+            "pancard_image": doc.pancard_image
+        }}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Loan Member Multipart API Error")
+        return {"status": "error", "message": str(e)}
+
+
+"""
+	Get Occupation List (with optional pagination, search & sorting)
+"""
+@frappe.whitelist()
+def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc", is_pagination=False):
+    is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into int
+    extra_params = {"search": search} if search else {}
+    base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
+
+    return get_paginated_data(
+        doctype="Loan Member",
+        fields=["name", "member_name",
+        "member_id",
+        "first_name",
+        "last_name",
+        "group",
+        "email",
+        "gender",
+        "completed_age",
+        "member_image",
+        "company",
+        "middle_name",
+        "mobile_no",
+        "dob",
+        "entry_age",
+        "occupation",
+        "status",
+        "address",
+        "state",
+        "country",
+        "city",
+        "pincode",
+        "nominee",
+        "relation",
+        "aadhar",
+        "pancard",
+        "address_doc_type",
+        "home_image",
+        "aadhar_image",
+        "pancard_image",
+        "address_image",
+        "aadhar_verified",
+        "pancard_verified",
+        "address_verified",
+        "cibil_score",
+        "cibil_date",
+        "bank_name",
+        "account_number",
+        "holder_name",
+        "branch",
+        "ifsc_code",
+        "account_type",
+        "bank_address",
+        ],
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=int(page),
+        page_size=int(page_size),
+        search_fields=["member_name"],
+        is_pagination=is_pagination,
+        base_url=base_url,
+        extra_params=extra_params
+    )
+
+
+
+
+import frappe
+from frappe.utils.file_manager import save_file
+
+@frappe.whitelist()
+def update_loan_member():
+    try:
+        data = frappe.form_dict   # text fields
+        files = frappe.request.files  # uploaded files
+
+        loan_member_id = data.get("name")
+        if not loan_member_id:
+            return {"status": "error", "message": "Loan Member ID is required"}
+
+        # Fetch existing loan member doc
+        doc = frappe.get_doc("Loan Member", loan_member_id)
+
+        # Update fields (only those provided in request)
+        update_fields = [
+            "first_name", "last_name", "middle_name", "gender", "dob",
+            "completed_age", "entry_age", "mobile_no", "state", "country",
+            "city", "pincode", "status","occupation",
+            "group",
+            "email",
+            "address",
+            "nominee",
+            "relation",
+            "aadhar",
+            "pancard",
+            "address_doc_type",
+            "aadhar_image",
+            "pancard_image",
+            "address_image",
+            "aadhar_verified",
+            "pancard_verified",
+            "address_verified",
+            "cibil_score",
+            "cibil_date",
+            "bank_details",
+            "bank_name",
+            "account_number",
+            "holder_name",
+            "branch",
+            "ifsc_code",
+            "account_type",
+            "bank_address",
+        ]
+        for field in update_fields:
+            if data.get(field) is not None:
+                doc.set(field, data.get(field))
+
+        # Handle file uploads (replace only if new file is given)
+        for field in ["member_image", "aadhar_image", "pancard_image"]:
+            if field in files and files[field].filename:
+                upload = files[field]
+                file_doc = save_file(
+                    fname=upload.filename,
+                    content=upload.stream.read(),
+                    dt="Loan Member",
+                    dn=doc.name,
+                    is_private=1
+                )
+                doc.set(field, file_doc.file_url)
+
+        # Save changes
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "name": doc.name,
+            "workflow_state": doc.workflow_state,
+            "updated_fields": {f: doc.get(f) for f in update_fields if data.get(f) is not None}
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
+        return {"status": "error", "message": str(e)}
