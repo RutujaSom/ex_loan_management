@@ -1,0 +1,33 @@
+# Copyright (c) 2025, Rutuja Somvanshi and contributors
+# For license information, please see license.txt
+
+import frappe
+from frappe.model.document import Document
+from ex_loan_management.api.utils import get_paginated_data
+
+class State(Document):
+	pass
+
+
+
+"""
+	Get State List (with optional pagination, search & sorting)
+"""
+@frappe.whitelist()
+def state_list(page=1, page_size=10, search=None, sort_by="state_name", sort_order="asc", is_pagination=False):
+    page = int(page)
+    page_size = int(page_size)
+    is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into int
+
+    return get_paginated_data(
+        doctype="State",
+        fields=["name", "state_code", "state_name"],
+        search=search,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        page=page,
+        page_size=page_size,
+        search_fields=["state_name"],
+        is_pagination=is_pagination
+    )
+

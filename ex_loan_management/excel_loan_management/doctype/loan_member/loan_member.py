@@ -7,6 +7,7 @@ from openpyxl import load_workbook
 from datetime import datetime
 from frappe.utils.file_manager import save_file
 from ex_loan_management.api.utils import get_paginated_data
+from frappe.model.workflow import apply_workflow
 
 
 class LoanMember(Document):
@@ -315,11 +316,6 @@ def create_loan_member():
             "pancard": data.get("pancard"),
             "address_doc_type": data.get("address_doc_type"),
 
-            # Verification flags (optional, uncomment if needed)
-            # "aadhar_verified": data.get("aadhar_verified"),
-            # "pancard_verified": data.get("pancard_verified"),
-            # "address_verified": data.get("address_verified"),
-
             "cibil_score": data.get("cibil_score"),
             "cibil_date": data.get("cibil_date"),
 
@@ -333,9 +329,7 @@ def create_loan_member():
             "account_type": data.get("account_type"),
             "bank_address": data.get("bank_address"),
         })
-        print('doc before insert ....',doc)
 
-        doc.insert(ignore_permissions=True)
 
         # Step 2: Handle file uploads
         for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image"]:
@@ -347,13 +341,15 @@ def create_loan_member():
                     fname=upload.filename,
                     content=upload.stream.read(),
                     dt="Loan Member",
-                    dn=doc.name,
+                    # dn=doc.name,
+                    dn=1,
                     is_private=1
                 )
                 doc.set(field, file_doc.file_url)
 
         # Step 3: Save updated doc with file URLs
-        doc.save(ignore_permissions=True)
+        doc.insert(ignore_permissions=True)
+        new_doc = apply_workflow(doc, "Submit for verification")
         frappe.db.commit()
 
         return {"status": "success", "name": doc.name, "files": {
@@ -367,60 +363,58 @@ def create_loan_member():
         return {"status": "error", "message": str(e)}
 
 
+
+update_fields = [
+    "name",
+    "first_name", "last_name", "middle_name", "gender", "dob",
+    "completed_age", "entry_age", "mobile_no", "state", "country",
+    "city", "pincode", "status","occupation",
+    "group",
+    "email",
+    "address",
+    "nominee",
+    "relation",
+    "aadhar",
+    "pancard",
+    "aadhar_image",
+    "pancard_image",
+    "address_image",
+    "aadhar_verified",
+    "pancard_verified",
+    "address_verified",
+    "cibil_score",
+    "cibil_date",
+    "bank_name",
+    "account_number",
+    "holder_name",
+    "branch",
+    "ifsc_code",
+    "account_type",
+    "bank_address",
+]
+
 """
-	Get Occupation List (with optional pagination, search & sorting)
+	Get Loan Member List (with optional pagination, search & sorting)
 """
+
 @frappe.whitelist()
-def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc", is_pagination=False):
-    is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into int
+def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc", is_pagination=False, **kwargs):
+    is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
     extra_params = {"search": search} if search else {}
+    del kwargs['cmd']
+
+    # 🔹 Collect filters from kwargs (all query params except the defaults)
+    filters = {}
+    for k, v in kwargs.items():
+        if v not in [None, ""]:   # skip empty params
+            filters[k] = v
+
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 
     return get_paginated_data(
         doctype="Loan Member",
-        fields=["name", "member_name",
-        "member_id",
-        "first_name",
-        "last_name",
-        "group",
-        "email",
-        "gender",
-        "completed_age",
-        "member_image",
-        "company",
-        "middle_name",
-        "mobile_no",
-        "dob",
-        "entry_age",
-        "occupation",
-        "status",
-        "address",
-        "state",
-        "country",
-        "city",
-        "pincode",
-        "nominee",
-        "relation",
-        "aadhar",
-        "pancard",
-        "address_doc_type",
-        "home_image",
-        "aadhar_image",
-        "pancard_image",
-        "address_image",
-        "aadhar_verified",
-        "pancard_verified",
-        "address_verified",
-        "cibil_score",
-        "cibil_date",
-        "bank_name",
-        "account_number",
-        "holder_name",
-        "branch",
-        "ifsc_code",
-        "account_type",
-        "bank_address",
-        ],
+        fields=update_fields,
+        filters=filters,   # ✅ Now your filters will be applied
         search=search,
         sort_by=sort_by,
         sort_order=sort_order,
@@ -429,7 +423,9 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         search_fields=["member_name"],
         is_pagination=is_pagination,
         base_url=base_url,
-        extra_params=extra_params
+        extra_params=extra_params,
+        link_fields={"group": "group_name"},
+        image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image']
     )
 
 
@@ -452,35 +448,7 @@ def update_loan_member():
         doc = frappe.get_doc("Loan Member", loan_member_id)
 
         # Update fields (only those provided in request)
-        update_fields = [
-            "first_name", "last_name", "middle_name", "gender", "dob",
-            "completed_age", "entry_age", "mobile_no", "state", "country",
-            "city", "pincode", "status","occupation",
-            "group",
-            "email",
-            "address",
-            "nominee",
-            "relation",
-            "aadhar",
-            "pancard",
-            "address_doc_type",
-            "aadhar_image",
-            "pancard_image",
-            "address_image",
-            "aadhar_verified",
-            "pancard_verified",
-            "address_verified",
-            "cibil_score",
-            "cibil_date",
-            "bank_details",
-            "bank_name",
-            "account_number",
-            "holder_name",
-            "branch",
-            "ifsc_code",
-            "account_type",
-            "bank_address",
-        ]
+        update_fields = update_fields
         for field in update_fields:
             if data.get(field) is not None:
                 doc.set(field, data.get(field))

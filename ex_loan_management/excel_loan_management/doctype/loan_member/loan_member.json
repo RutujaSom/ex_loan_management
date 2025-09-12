@@ -57,8 +57,7 @@
   "branch",
   "ifsc_code",
   "account_type",
-  "bank_address",
-  "amended_from"
+  "bank_address"
  ],
  "fields": [
   {
@@ -135,7 +134,8 @@
   {
    "fieldname": "email",
    "fieldtype": "Data",
-   "label": "Email"
+   "label": "Email",
+   "reqd": 1
   },
   {
    "fieldname": "nominee_details_tab",
@@ -179,12 +179,14 @@
    "fieldname": "occupation",
    "fieldtype": "Link",
    "label": "Occupation",
-   "options": "Occupation"
+   "options": "Occupation",
+   "reqd": 1
   },
   {
    "fieldname": "address",
    "fieldtype": "Small Text",
-   "label": "Address"
+   "label": "Address",
+   "reqd": 1
   },
   {
    "fieldname": "member_image",
@@ -200,7 +202,8 @@
   {
    "fieldname": "pancard_image",
    "fieldtype": "Attach",
-   "label": "Pan Card"
+   "label": "Pan Card",
+   "reqd": 1
   },
   {
    "fieldname": "aadhar",
@@ -213,18 +216,21 @@
    "fieldname": "pancard",
    "fieldtype": "Data",
    "label": "Pan Card",
-   "length": 10
+   "length": 10,
+   "reqd": 1
   },
   {
    "fieldname": "address_doc_type",
    "fieldtype": "Select",
    "label": "Address Document",
-   "options": "Electricity Bill\nRent Agreement"
+   "options": "Electricity Bill\nRent Agreement",
+   "reqd": 1
   },
   {
    "fieldname": "address_image",
    "fieldtype": "Attach",
-   "label": "Address"
+   "label": "Address",
+   "reqd": 1
   },
   {
    "fieldname": "document_column_break",
@@ -282,38 +288,45 @@
   {
    "fieldname": "bank_name",
    "fieldtype": "Data",
-   "label": "Bank Name"
+   "label": "Bank Name",
+   "reqd": 1
   },
   {
    "fieldname": "account_number",
    "fieldtype": "Data",
-   "label": "Account Number"
+   "label": "Account Number",
+   "reqd": 1
   },
   {
    "fieldname": "holder_name",
    "fieldtype": "Data",
-   "label": "Account Holder Name"
+   "label": "Account Holder Name",
+   "reqd": 1
   },
   {
    "fieldname": "branch",
    "fieldtype": "Data",
-   "label": "Branch"
+   "label": "Branch",
+   "reqd": 1
   },
   {
    "fieldname": "ifsc_code",
    "fieldtype": "Data",
-   "label": "IFSC Code"
+   "label": "IFSC Code",
+   "reqd": 1
   },
   {
    "fieldname": "account_type",
    "fieldtype": "Select",
    "label": "Account Type",
-   "options": "Saving\nCurrent\nSalaried"
+   "options": "Saving\nCurrent\nSalaried",
+   "reqd": 1
   },
   {
    "fieldname": "bank_address",
    "fieldtype": "Small Text",
-   "label": "Address"
+   "label": "Address",
+   "reqd": 1
   },
   {
    "fieldname": "nominee",
@@ -355,26 +368,17 @@
    "permlevel": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Loan Member",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
    "fieldname": "home_image",
    "fieldtype": "Attach",
-   "label": "Home Image"
+   "label": "Home Image",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 10:43:47.305146",
+ "modified": "2025-09-10 13:05:38.738531",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

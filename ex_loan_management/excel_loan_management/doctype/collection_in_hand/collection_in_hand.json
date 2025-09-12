@@ -7,11 +7,11 @@
  "field_order": [
   "employee",
   "loan_repayment",
+  "amount",
   "given_to",
-  "applicant",
   "column_break_6agu",
   "posting_date",
-  "amount",
+  "applicant",
   "loan",
   "payment_proof",
   "amended_from"
@@ -90,7 +90,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-03 15:31:30.478904",
+ "modified": "2025-09-11 10:12:15.336056",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Collection In Hand",
@@ -133,22 +133,15 @@
    "write": 1
   },
   {
+   "create": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Agent",
-   "share": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Employee",
-   "share": 1
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
