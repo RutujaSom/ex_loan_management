@@ -19,6 +19,10 @@ class LoanMember(Document):
 
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
 
+    def on_update(self):
+        if self.workflow_state == "Approved" and self.docstatus == 0:
+            self.status = "Verified"
+            self.submit()
 
 @frappe.whitelist()
 def import_loan_members(file_url):

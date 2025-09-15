@@ -31,7 +31,7 @@
   "country",
   "city",
   "pincode",
-  "nominee_details_tab",
+  "section_break_bcvu",
   "nominee",
   "relation",
   "document_tab",
@@ -136,11 +136,6 @@
    "fieldtype": "Data",
    "label": "Email",
    "reqd": 1
-  },
-  {
-   "fieldname": "nominee_details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Nominee Details"
   },
   {
    "fieldname": "relation",
@@ -372,13 +367,17 @@
    "fieldtype": "Attach",
    "label": "Home Image",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_bcvu",
+   "fieldtype": "Section Break"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-10 13:05:38.738531",
+ "modified": "2025-09-12 17:46:24.050541",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
