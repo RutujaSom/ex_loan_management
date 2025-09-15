@@ -27,11 +27,11 @@
   "member_address_tab",
   "address_column_break",
   "address",
-  "state",
   "country",
+  "state",
   "city",
   "pincode",
-  "section_break_bcvu",
+  "column_break_pnne",
   "nominee",
   "relation",
   "document_tab",
@@ -145,8 +145,9 @@
   },
   {
    "fieldname": "state",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "State",
+   "options": "State",
    "reqd": 1
   },
   {
@@ -369,15 +370,15 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_bcvu",
-   "fieldtype": "Section Break"
+   "fieldname": "column_break_pnne",
+   "fieldtype": "Column Break"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-12 17:46:24.050541",
+ "modified": "2025-09-15 12:37:41.027025",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

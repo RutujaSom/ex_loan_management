@@ -21,7 +21,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-08 18:11:17.440853",
+ "modified": "2025-09-15 12:27:54.241153",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Occupation",
@@ -39,6 +39,15 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
   }
  ],
  "show_title_field_in_link": 1,
