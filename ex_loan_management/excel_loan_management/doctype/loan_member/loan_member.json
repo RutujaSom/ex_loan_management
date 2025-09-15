@@ -26,14 +26,12 @@
   "status",
   "member_address_tab",
   "address_column_break",
-  "address",
   "country",
-  "state",
   "city",
   "pincode",
-  "column_break_pnne",
-  "nominee",
-  "relation",
+  "column_break_khge",
+  "state",
+  "address",
   "document_tab",
   "aadhar",
   "pancard",
@@ -53,11 +51,12 @@
   "bank_details",
   "bank_name",
   "account_number",
-  "holder_name",
   "branch",
+  "bank_address",
+  "column_break_brge",
+  "holder_name",
   "ifsc_code",
-  "account_type",
-  "bank_address"
+  "account_type"
  ],
  "fields": [
   {
@@ -136,12 +135,6 @@
    "fieldtype": "Data",
    "label": "Email",
    "reqd": 1
-  },
-  {
-   "fieldname": "relation",
-   "fieldtype": "Select",
-   "label": "Relation",
-   "options": "Mother\nFather\nBrother\nSister\nSpouse\nSon\nDaughter\nHusband\nWife"
   },
   {
    "fieldname": "state",
@@ -325,12 +318,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "nominee",
-   "fieldtype": "Link",
-   "label": "Nominee",
-   "options": "Loan Member"
-  },
-  {
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -370,7 +357,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_pnne",
+   "fieldname": "column_break_khge",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_brge",
    "fieldtype": "Column Break"
   }
  ],
@@ -378,7 +369,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-15 12:37:41.027025",
+ "modified": "2025-09-15 12:58:58.263376",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
