@@ -16,6 +16,16 @@ frappe.ui.form.on('Loan Member', {
             open_import_dialog_to_update_records(frm);
         });
 
+
+        if (frappe.user.has_role("Agent") && !frappe.user.has_role("Administrator")) {
+            // Hide status field for Agents
+            frm.set_df_property("status", "hidden", 1);
+
+            // If status is Pending → make the whole form read-only
+            if (!frm.is_new() && frm.doc.status == "Pending") {
+                frm.disable_form();
+            }
+        }
         if (frm.doc.status === "Verified" || frm.doc.status === "Rejected") {
             // If record is updated after Approved/Rejected → go back to Pending
             frm.doc.status = "Pending";
