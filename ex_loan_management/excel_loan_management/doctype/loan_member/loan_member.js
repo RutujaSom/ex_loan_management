@@ -7,40 +7,6 @@
 // 	},
 // });
 
-
-
-// frappe.ui.form.on('Loan Member', {
-//     refresh(frm) {
-//         if (!frm.is_new()) {
-//             frm.add_custom_button(__('Import Loan Members'), function () {
-//                 frappe.prompt([
-//                     {
-//                         fieldname: 'file_url',
-//                         label: 'File URL (from File Manager)',
-//                         fieldtype: 'Data',
-//                         reqd: 1
-//                     }
-//                 ],
-//                 function(values){
-//                     frappe.call({
-//                         method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_loan_members",
-//                         args: {
-//                             file_url: values.file_url
-//                         },
-//                         callback: function(r) {
-//                             frappe.msgprint(r.message);
-//                         }
-//                     });
-//                 },
-//                 __('Import Loan Members'),
-//                 __('Start Import'));
-//             });
-//         }
-//     }
-// });
-
-
-
 frappe.ui.form.on('Loan Member', {
     refresh(frm) {
         frm.add_custom_button('Import Loan Member', () => {
@@ -49,6 +15,15 @@ frappe.ui.form.on('Loan Member', {
         frm.add_custom_button('Update Loan Member', () => {
             open_import_dialog_to_update_records(frm);
         });
+
+        if (frm.doc.status === "Verified" || frm.doc.status === "Rejected") {
+            // If record is updated after Approved/Rejected → go back to Pending
+            frm.doc.status = "Pending";
+        }
+        // If Draft → keep it Draft until explicitly changed
+        if (frm.is_new()) {
+            frm.doc.status = "Pending";
+        }
     }
 });
 
@@ -134,4 +109,19 @@ function open_import_dialog_to_update_records() {
     });
 
     d.show();
+}
+
+
+
+function update_status(frm, status) {
+    frappe.call({
+        method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.update_status",
+        args: {
+            docname: frm.doc.name,
+            status: status
+        },
+        callback: function() {
+            frm.reload_doc();
+        }
+    });
 }

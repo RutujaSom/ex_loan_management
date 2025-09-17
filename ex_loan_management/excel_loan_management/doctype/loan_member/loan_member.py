@@ -5,17 +5,19 @@ from frappe.model.document import Document
 import frappe
 from openpyxl import load_workbook
 from datetime import datetime
-from frappe.utils.file_manager import save_file
+from frappe.utils.file_manager import save_file, get_file
 from ex_loan_management.api.utils import get_paginated_data
 from frappe.model.workflow import apply_workflow
 
 
+
 class LoanMember(Document):
     def before_save(self):
-        if self.address_verified and self.pancard_verified and self.aadhar_verified:
-            self.status = "Verified"
-        if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
-            frappe.throw("To set status as 'Verified', all verifications must be completed.")
+        if self.status != "Pending":
+            if self.address_verified and self.pancard_verified and self.aadhar_verified:
+                self.status = "Verified"
+            if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
+                frappe.throw("To set status as 'Verified', all verifications must be completed.")
 
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
 
@@ -24,15 +26,12 @@ class LoanMember(Document):
             self.status = "Verified"
             self.submit()
 
+
 @frappe.whitelist()
 def import_loan_members(file_url):
-    from frappe.utils.file_manager import get_file
-
     file_doc = frappe.get_doc("File", {"file_url": file_url})
     filename = file_doc.file_name.lower()
-
     rows = []
-    print("file_doc ....", file_doc, filename)
 
     # Read Excel file and convert rows to dictionary
     if filename.endswith(".xlsx"):
@@ -83,7 +82,6 @@ def import_loan_members(file_url):
 
         # 1️⃣ Create Loan Group if not exists
         if group_id and not frappe.db.exists("Loan Group", {"group_id": group_id}):
-            print("in group_id ...", group_id)
             grp_doc = frappe.new_doc("Loan Group")
             grp_doc.group_id = group_id
             grp_doc.group_name = group_name
@@ -92,12 +90,10 @@ def import_loan_members(file_url):
 
         # 2️⃣ Create Branch if not exists
         if branch_code and not frappe.db.exists("Branch", {"branch": branch_code}):
-            print("in branch_code ...", branch_code, 'branch_name ....',branch_name)
             br_doc = frappe.new_doc("Branch")
             br_doc.branch = branch_code
             br_doc.branch_name = branch_name
             br_doc.insert(ignore_permissions=True)
-            print('br_doc ....',br_doc)
             created_branches.append(branch_code)
 
         # 3️⃣ Create Occupation if not exists
@@ -109,7 +105,6 @@ def import_loan_members(file_url):
                 occ_doc.occupation = occupation
                 occ_doc.insert(ignore_permissions=True)
                 created_occupations.append(occupation)
-                print("Created new Occupation:", occupation)
             occupation_link = frappe.db.get_value("Occupation", {"occupation": occupation})
 
         # 4️⃣ Skip if Loan Member already exists
@@ -122,7 +117,6 @@ def import_loan_members(file_url):
         else:
             type_of_borrower = 'Co-Borrower'
 		
-        print('dob ....', dob, 'nominee_dob ...',nominee_dob, type(nominee_dob))
         if isinstance(nominee_dob, str):
             try:
               nominee_dob = datetime.strptime(str(nominee_dob), "%d-%m-%Y").date()
@@ -132,9 +126,7 @@ def import_loan_members(file_url):
                 except Exception as e:
                    print('error ....', e)
               
-        print('nominee_dob ....', nominee_dob, type(nominee_dob))
         first_name, middle_name, last_name = split_name(member_name)
-        print('first_name: ',first_name," middle_name: ", middle_name," last_name: ", last_name)
             
 
         # 5️⃣ Create Loan Member
@@ -165,7 +157,6 @@ def import_loan_members(file_url):
         # Link fields
         if group_id:
             group_id=frappe.db.exists("Loan Group", {"group_id": group_id})
-            print('group_id .....',group_id)
             doc.group = group_id
         if branch_code:
             branch_code = frappe.db.exists("Branch", {"branch_code": branch_code})
@@ -207,15 +198,13 @@ def split_name(full_name):
         return parts[0], " ".join(parts[1:-1]), parts[-1]
 
 
+
 @frappe.whitelist()
 def import_update_loan_members(file_url):
-    from frappe.utils.file_manager import get_file
-
     file_doc = frappe.get_doc("File", {"file_url": file_url})
     filename = file_doc.file_name.lower()
 
     rows = []
-    print("file_doc ....", file_doc, filename)
 
     # Read Excel file and convert rows to dictionary
     if filename.endswith(".xlsx"):
@@ -247,8 +236,6 @@ def import_update_loan_members(file_url):
             
             # 5️⃣ Create Loan Member
             doc = frappe.get_doc("Loan Member", member_exists)  
-            print('doc ....',doc)
-            print()        
             doc.member_name = member_name
             doc.first_name = first_name
             doc.middle_name = middle_name
@@ -273,11 +260,8 @@ def import_update_loan_members(file_url):
 
 
 
-
-
 @frappe.whitelist()
 def create_loan_member():
-    print('frappe.session.user ....', frappe.session.user)
     try:
         data = frappe.form_dict  # text fields
         files = frappe.request.files  # uploaded files
@@ -332,6 +316,7 @@ def create_loan_member():
             "ifsc_code": data.get("ifsc_code"),
             "account_type": data.get("account_type"),
             "bank_address": data.get("bank_address"),
+            "status": "Pending"
         })
 
 
@@ -353,7 +338,6 @@ def create_loan_member():
 
         # Step 3: Save updated doc with file URLs
         doc.insert(ignore_permissions=True)
-        new_doc = apply_workflow(doc, "Submit for verification")
         frappe.db.commit()
 
         return {"status": "success", "name": doc.name, "files": {
@@ -395,6 +379,10 @@ update_fields = [
     "ifsc_code",
     "account_type",
     "bank_address",
+
+    "member_id", "member_image", "company", "member_name",
+    "address_doc_type", "home_image",
+
 ]
 
 """
@@ -434,32 +422,39 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
 
 
 
-
-import frappe
-from frappe.utils.file_manager import save_file
-
 @frappe.whitelist()
-def update_loan_member():
+def update_loan_member(name):
     try:
         data = frappe.form_dict   # text fields
         files = frappe.request.files  # uploaded files
 
-        loan_member_id = data.get("name")
+        print(data  ,' ......... data')
+        print(files ," ......... files")
+
+        loan_member_id = name
         if not loan_member_id:
             return {"status": "error", "message": "Loan Member ID is required"}
 
         # Fetch existing loan member doc
         doc = frappe.get_doc("Loan Member", loan_member_id)
 
-        # Update fields (only those provided in request)
-        update_fields = update_fields
-        for field in update_fields:
-            if data.get(field) is not None:
-                doc.set(field, data.get(field))
+        # ✅ Define which fields are allowed for update
+        update_fields = [
+            "first_name", "last_name", "mobile_no", "email_id",  # example text fields
+            "member_image", "aadhar_image", "pancard_image"     # file fields
+        ]
 
-        # Handle file uploads (replace only if new file is given)
+        # Update text fields
+        for field in update_fields:
+            if field not in ["member_image", "aadhar_image", "pancard_image"]:
+                if data.get(field) is not None:
+                    doc.set(field, data.get(field))
+
+        # Handle file uploads OR existing path strings
         for field in ["member_image", "aadhar_image", "pancard_image"]:
             if field in files and files[field].filename:
+                print("in if .....", field)
+                # If new file uploaded → save and replace
                 upload = files[field]
                 file_doc = save_file(
                     fname=upload.filename,
@@ -469,6 +464,12 @@ def update_loan_member():
                     is_private=1
                 )
                 doc.set(field, file_doc.file_url)
+            elif data.get(field):
+                print("if elif ......", field, ' ... ', data.get(field))
+                # If frontend sends string (URL/path) → just set it
+                doc.set(field, data.get(field))
+
+        doc.set("status", "Pending")
 
         # Save changes
         doc.save(ignore_permissions=True)
@@ -478,9 +479,23 @@ def update_loan_member():
             "status": "success",
             "name": doc.name,
             "workflow_state": doc.workflow_state,
-            "updated_fields": {f: doc.get(f) for f in update_fields if data.get(f) is not None}
+            "updated_fields": {
+                f: doc.get(f) for f in update_fields if data.get(f) is not None
+            }
         }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
         return {"status": "error", "message": str(e)}
+
+
+
+
+@frappe.whitelist()
+def update_status(docname, status):
+    """Update verification_status of a Loan Member"""
+    doc = frappe.get_doc("Loan Member", docname)
+    doc.status = status
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    return {"status": "success", "new_state": status}

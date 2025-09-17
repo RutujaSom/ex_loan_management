@@ -318,12 +318,12 @@
    "reqd": 1
   },
   {
-   "default": "Open",
+   "default": "Pending",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nVerified\nRejected"
+   "options": "Pending\nVerified\nRejected"
   },
   {
    "fieldname": "column_break_dgwj",
@@ -369,7 +369,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-15 12:58:58.263376",
+ "modified": "2025-09-17 12:29:08.031928",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
