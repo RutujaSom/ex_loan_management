@@ -28,32 +28,6 @@ def get_paginated_data(
         for f in search_fields:
             or_filters.append([doctype, f, "like", f"%{search}%"])
 
-    # def extend_linked_fields(data):
-    #     """Add linked field values without loop-heavy queries"""
-    #     if not link_fields or not data:
-    #         return data
-
-    #     # collect all link field values for batch query
-    #     for link_field, target_field in link_fields.items():
-    #         ids = [d[link_field] for d in data if d.get(link_field)]
-    #         if ids:
-    #             records = frappe.get_all(
-    #                 frappe.get_meta(doctype).get_field(link_field).options,
-    #                 filters={"name": ["in", ids]},
-    #                 fields=["name", target_field]
-    #             )
-    #             print('records ....',records)
-
-    #             values_map = {r["name"]: r[target_field] for r in records}
-
-    #             print('values_map ....',values_map,' .... doctype ....',doctype)
-    #             for d in data:
-    #                 if d.get(link_field):
-    #                     d[f"{link_field}_{target_field}"] = values_map.get(d[link_field])
-    #                 else:
-    #                     d[f"{link_field}_{target_field}"] = ""
-    #     return data
-
     def extend_linked_fields(data):
         """Add linked field values without loop-heavy queries"""
         if not link_fields or not data:
@@ -176,23 +150,57 @@ def get_paginated_data(
 
 
 
+def api_response(status="success", status_code=200, message=None, data=None):
+    """Standardized API response"""
+    resp = {
+        "status": status,
+        "status_code": status_code,
+        "message": message or "",
+    }
+    if data:
+        resp["data"] = data
+    return resp
 
 
+def api_error(e, status_code=406):
+    """Return dynamic standardized error response"""
+    errors = []
+
+    # Check frappe validation errors (_server_messages or message_log)
+    if hasattr(frappe.local, "message_log") and frappe.local.message_log:
+        print("frappe.local.message_log ////// .. ",frappe.local.message_log)
+        for m in frappe.local.message_log:
+            try:
+                if isinstance(m, dict) and "message" in m:
+                    errors.append(clean_error_message(m["message"]))
+                elif isinstance(m, str):
+                    errors.append(clean_error_message(m))
+            except Exception:
+                errors.append(str(m))
+
+        frappe.clear_messages()
+
+    # If nothing found, fallback to exception string
+    if not errors:
+        errors = [str(e)]
+
+    return {
+        "status": "error",
+        "status_code": status_code,
+        "message": ", ".join(errors)
+    }
 
 
+def clean_error_message(msg: str) -> str:
+    msg = msg.strip()
 
+    # Handle "missing value" type
+    if msg.startswith("Error: Value missing for Loan Member:"):
+        field = msg.replace("Error: Value missing for Loan Member:", "").strip()
+        return f"{field} is required"
 
-
-
-
-
-
-
-
-
-
-
-
+    # Otherwise, return message as it is
+    return msg
 
 
 

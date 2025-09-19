@@ -2,13 +2,14 @@ import frappe
 import random
 import string
 from frappe.utils import now_datetime, add_to_date
+from ex_loan_management.api.utils import api_error
 
 # Step 1: Send OTP to email
-@frappe.whitelist(allow_guest=False)
+@frappe.whitelist(allow_guest=True)
 def send_forgot_password_otp(email):
     user = frappe.db.get_value("User", {"email": email}, ["name", "email"])
     if not user:
-        frappe.throw("User with this email does not exist.")
+        return api_error("User with this email does not exist.")
 
     # Generate 6-digit OTP
     otp = ''.join(random.choices(string.digits, k=6))
@@ -28,7 +29,10 @@ def send_forgot_password_otp(email):
     #     message=f"Your OTP for password reset is {otp}. It will expire in 10 minutes."
     # )
 
-    return {"message": "OTP sent to your email."}
+    return {
+        "status": "success",
+        "status_code": 201,
+        "msg": "OTP sent to your email."}
 
 
 # Step 2: Verify OTP
@@ -37,15 +41,19 @@ def verify_forgot_password_otp(email, otp):
     stored_otp, expiry_time = frappe.db.get_value("User", {"email": email}, ["otp", "otp_expire_time"])
 
     if not stored_otp:
-        frappe.throw("No OTP found. Please request OTP again.")
+        return api_error("No OTP found. Please request OTP again.")
 
     if now_datetime() > expiry_time:
-        frappe.throw("OTP expired. Please request OTP again.")
+        return api_error("OTP expired. Please request OTP again.")
 
     if otp != stored_otp:
-        frappe.throw("Invalid OTP.")
+        return api_error("Invalid OTP.")
 
-    return {"message": "OTP verified successfully."}
+    return {
+        "status": "success",
+        "status_code": 201,
+        "msg": "OTP verified successfully."
+    }
 
 
 # Step 3: Reset password
@@ -53,18 +61,18 @@ def verify_forgot_password_otp(email, otp):
 @frappe.whitelist()
 def reset_password_with_otp(email, otp, new_password, confirm_password):
     if new_password != confirm_password:
-        frappe.throw("New password and confirm password do not match.")
+        return api_error("New password and confirm password do not match.")
 
     stored_otp, expiry_time = frappe.db.get_value("User", {"email": email}, ["otp", "otp_expire_time"])
 
     if not stored_otp:
-        frappe.throw("No OTP found. Please request OTP again.")
+        return api_error("No OTP found. Please request OTP again.")
 
     if now_datetime() > expiry_time:
-        frappe.throw("OTP expired. Please request OTP again.")
+        return api_error("OTP expired. Please request OTP again.")
 
     if otp != stored_otp:
-        frappe.throw("Invalid OTP.")
+        return api_error("Invalid OTP.")
 
     # Update password
     user = frappe.get_doc("User", {"email": email})
@@ -77,4 +85,8 @@ def reset_password_with_otp(email, otp, new_password, confirm_password):
         "otp_expire_time": None
     })
 
-    return {"message": "Password updated successfully."}
+    return {
+            "status": "success",
+            "status_code": 201,
+            "msg": ("Password updated successfully")
+    }

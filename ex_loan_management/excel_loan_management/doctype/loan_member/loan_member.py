@@ -6,7 +6,7 @@ import frappe
 from openpyxl import load_workbook
 from datetime import datetime
 from frappe.utils.file_manager import save_file, get_file
-from ex_loan_management.api.utils import get_paginated_data
+from ex_loan_management.api.utils import get_paginated_data, api_error
 from frappe.model.workflow import apply_workflow
 
 
@@ -40,7 +40,6 @@ def import_loan_members(file_url):
             wb = load_workbook(f, data_only=True)
             ws = wb.active
             headers = [cell.value for cell in ws[1]]  # First row as headers
-            print("headers ....", headers)
             for row in ws.iter_rows(min_row=2, values_only=True):
                 rows.append(dict(zip(headers, row)))
 
@@ -111,7 +110,6 @@ def import_loan_members(file_url):
         if frappe.db.exists("Loan Member", {"member_id": member_id}):
             skipped.append(member_id)
             continue
-        print("member ....", member_id, 'entry_age ....',entry_age, 'relation ...',relation)
         if type_of_borrower == 'BORROWER':
             type_of_borrower ='Borrower'
         else:
@@ -213,7 +211,7 @@ def import_update_loan_members(file_url):
             wb = load_workbook(f, data_only=True)
             ws = wb.active
             headers = [cell.value for cell in ws[1]]  # First row as headers
-            print("headers ....", headers)
+
             for row in ws.iter_rows(min_row=2, values_only=True):
                 rows.append(dict(zip(headers, row)))
 
@@ -232,7 +230,6 @@ def import_update_loan_members(file_url):
         # If Loan Member already exists
         if member_exists:
             first_name, middle_name, last_name = split_name(member_name)
-            print('first_name: ',first_name," middle_name: ", middle_name," last_name: ", last_name)
             
             # 5️⃣ Create Loan Member
             doc = frappe.get_doc("Loan Member", member_exists)  
@@ -340,15 +337,15 @@ def create_loan_member():
         doc.insert(ignore_permissions=True)
         frappe.db.commit()
 
-        return {"status": "success", "name": doc.name, "files": {
-            "member_image": doc.member_image,
-            "aadhar_image": doc.aadhar_image,
-            "pancard_image": doc.pancard_image
-        }}
+        return {
+            "status": "success",
+            "status_code": 201,
+            "msg": "Loan Member Created Successfully"
+        }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Loan Member Multipart API Error")
-        return {"status": "error", "message": str(e)}
+        frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
+        return api_error(e)
 
 
 
@@ -428,21 +425,12 @@ def update_loan_member(name):
         data = frappe.form_dict   # text fields
         files = frappe.request.files  # uploaded files
 
-        print(data  ,' ......... data')
-        print(files ," ......... files")
-
         loan_member_id = name
         if not loan_member_id:
             return {"status": "error", "message": "Loan Member ID is required"}
 
-        # Fetch existing loan member doc
+        # # Fetch existing loan member doc
         doc = frappe.get_doc("Loan Member", loan_member_id)
-
-        # ✅ Define which fields are allowed for update
-        update_fields = [
-            "first_name", "last_name", "mobile_no", "email_id",  # example text fields
-            "member_image", "aadhar_image", "pancard_image"     # file fields
-        ]
 
         # Update text fields
         for field in update_fields:
@@ -453,7 +441,6 @@ def update_loan_member(name):
         # Handle file uploads OR existing path strings
         for field in ["member_image", "aadhar_image", "pancard_image"]:
             if field in files and files[field].filename:
-                print("in if .....", field)
                 # If new file uploaded → save and replace
                 upload = files[field]
                 file_doc = save_file(
@@ -465,7 +452,6 @@ def update_loan_member(name):
                 )
                 doc.set(field, file_doc.file_url)
             elif data.get(field):
-                print("if elif ......", field, ' ... ', data.get(field))
                 # If frontend sends string (URL/path) → just set it
                 doc.set(field, data.get(field))
 
@@ -477,16 +463,14 @@ def update_loan_member(name):
 
         return {
             "status": "success",
-            "name": doc.name,
-            "workflow_state": doc.workflow_state,
-            "updated_fields": {
-                f: doc.get(f) for f in update_fields if data.get(f) is not None
-            }
+            "status_code": 201,
+            "msg": "Loan Member Updated Successfully"
         }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
-        return {"status": "error", "message": str(e)}
+        # return {"status": "error", "message": str(e)}
+        return api_error(e)
 
 
 

@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from ex_loan_management.api.utils import api_error
 
 @frappe.whitelist()
 def get_user_profile():
@@ -7,7 +8,7 @@ def get_user_profile():
     user = frappe.session.user
 
     if not user or user == "Guest":
-        frappe.throw(_("You must be logged in to access profile info."))
+        return api_error(_("You must be logged in to access profile info."))
 
     # Get user details
     user_doc = frappe.get_doc("User", user)

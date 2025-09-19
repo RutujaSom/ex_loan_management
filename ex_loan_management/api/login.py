@@ -2,6 +2,7 @@
 import frappe
 from frappe import _
 from frappe.auth import LoginManager
+from ex_loan_management.api.utils import api_error
 
 @frappe.whitelist(allow_guest=True)
 def login_and_get_token():
@@ -54,11 +55,13 @@ def login_and_get_token():
 
     except frappe.AuthenticationError:
         frappe.local.response.http_status_code = 401
-        return {"status": "error", "message": _("Invalid login credentials")}
+        # return {"status": "error", "message": _("Invalid login credentials")}
+        return api_error("Invalid login credentials")
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Login and Token API Error")
         frappe.local.response.http_status_code = 500
-        return {"status": "error", "message": str(e)}
+        # return {"status": "error", "message": str(e)}
+        return api_error(e)
 
 
 def get_user_id_from_input(login_input):
@@ -109,7 +112,7 @@ def reset_password():
     Requires authentication.
     """
     if frappe.session.user == "Guest":
-        frappe.throw(_("You must be logged in to change your password"), frappe.PermissionError)
+        return api_error("You must be logged in to change your password")
 
     data = frappe.local.form_dict or frappe.request.get_json(force=True, silent=True) or {}
     previous_password = data.get("previous_password")
@@ -118,10 +121,10 @@ def reset_password():
 
     # Validate inputs
     if not previous_password or not new_password or not confirm_password:
-        frappe.throw(_("All fields (previous_password, new_password, confirm_password) are required"))
+        return api_error("All fields (previous_password, new_password, confirm_password) are required")
 
     if new_password != confirm_password:
-        frappe.throw(_("New password and confirm password do not match"))
+        return api_error("New password and confirm password do not match")
 
     try:
         # Check old password
@@ -132,12 +135,12 @@ def reset_password():
 
         return {
             "status": "success",
-            "message": _("Password updated successfully")
+            "status_code": 201,
+            "msg": ("Password updated successfully")
         }
 
     except frappe.AuthenticationError:
-        frappe.throw(_("Previous password is incorrect"), frappe.AuthenticationError)
+        return api_error("Previous password is incorrect")
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Reset Password API Error")
-        frappe.local.response.http_status_code = 500
-        return {"status": "error", "message": str(e)}
+        return api_error(e)

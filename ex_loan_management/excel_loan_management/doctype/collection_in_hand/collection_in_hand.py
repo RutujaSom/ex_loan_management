@@ -7,6 +7,7 @@ import frappe
 from ex_loan_management.api.utils import get_paginated_data
 from frappe.utils.data import nowdate
 from frappe.utils.file_manager import save_file
+from ex_loan_management.api.utils import api_error
 
 class CollectionInHand(Document):
     pass
@@ -70,14 +71,11 @@ def create_collection_in_hand():
         data = frappe.form_dict  # works for JSON body and form-data
         files = frappe.request.files  # uploaded files
 
-        # user_doc = frappe.get_doc("User", frappe.session.user)
-        # print('user_doc ......',user_doc)
-        
         # Step 1: Prepare Loan Application doc
         doc = frappe.get_doc({
             "doctype": "Collection In Hand",
             "employee":data.get("employee"),
-            "amount":data.get("amount"),
+            "amount":(data.get("amount")),
             "given_to":data.get("given_to"),
             "posting_date":data.get("posting_date") or nowdate(),
         })
@@ -88,7 +86,6 @@ def create_collection_in_hand():
                     fname=upload.filename,
                     content=upload.stream.read(),
                     dt="Loan Member",
-                    # dn=doc.name,
                     dn=1,
                     is_private=1
                 )
@@ -102,12 +99,12 @@ def create_collection_in_hand():
 
         return {
             "status": "success",
-            "name": doc.name,
-            "loan_repayment": doc.as_dict()
+            "status_code": 201,
+            "msg": "Collection In Hand Created Successfully"
         }
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
-        return {"status": "error", "message": str(e)}
+        return api_error(e)
 
 

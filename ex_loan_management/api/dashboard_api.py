@@ -5,7 +5,6 @@ from frappe.utils import nowdate
 @frappe.whitelist()
 def get_loan_members():
     user = frappe.session.user
-    print('user .....',user)
     roles = frappe.get_roles(user)
 
     groups = []
@@ -25,7 +24,6 @@ def get_loan_members():
             filters={"employee": employee_id},
             pluck="loan_group"
         )
-        print('group ....', groups)
 
     assigned_members = frappe.get_all(
         "Loan Member",
@@ -79,7 +77,6 @@ def get_loan_summary(group=None):
     Get loan application and repayment counts, filtered by group and role.
     """
     user = frappe.session.user
-    print("user ,,,,,",user)
     roles = frappe.get_roles(user)
     try:
         employee = frappe.get_doc("Employee", {"user_id": user.name}, "name")
@@ -111,7 +108,6 @@ def get_loan_summary(group=None):
         loan_filters["group"] = group
         repayment_filters["group"] = group
 
-    print("assigned_members ...",assigned_members)
 
     # Loan Applications count
     total_loans = frappe.get_all("Loan Application", filters={"applicant": ["in", assigned_members]}, fields=["name","status"] )
