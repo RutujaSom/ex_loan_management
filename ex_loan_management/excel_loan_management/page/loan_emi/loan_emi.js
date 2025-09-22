@@ -18,8 +18,8 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 </div>
 
                 <div class="d-flex flex-column" style="margin-right: 1.5rem;">
-                    <label for="current-date" class="form-label" style="font-weight: 500;">Selected Date</label>
-                    <input type="date" id="current-date" class="input-with-feedback form-control" style="width:180px;" />
+                    <label for="selected-date" class="form-label" style="font-weight: 500;">Selected Date</label>
+                    <input type="date" id="selected-date" class="input-with-feedback form-control" style="width:180px;" />
                 </div>
 
                 <div class="d-flex flex-column" style="margin-right: 1.5rem;">
@@ -57,7 +57,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
     // Set today's date by default
     let today = frappe.datetime.get_today();
     $("#emi-date").val(today);
-    // $("#current-date").val(today);
+    // $("#selected-date").val(today);
 
     // ✅ Employee & Loan Group filter
     frappe.call({
@@ -157,17 +157,17 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
         }
     });
 
-    function load_emis(selected_date=null, search_text=null, sort_by=null, sort_order=null, employee=null, loan_group=null, current_date=null) {
+    function load_emis(upto_date=null, search_text=null, sort_by=null, sort_order=null, employee=null, loan_group=null, selected_date=null) {
         frappe.call({
             method: "lending.loan_management.doctype.repayment_schedule.repayment_schedule.get_todays_emis",
             args: { 
-                selected_date: selected_date,
+                upto_date: upto_date,
                 search_text: search_text,
                 sort_by: sort_by,
                 sort_order: sort_order,
                 employee: employee,
                 loan_group: loan_group,
-                current_date: current_date
+                selected_date: selected_date
             },
             callback: function(r) {
                 if (!r.message || r.message.length === 0) {
@@ -238,34 +238,31 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
     // Filter events
     $(document).on("click", "#filter-emi", function() {
-        let selected_date = $("#emi-date").val();
+        let upto_date = $("#emi-date").val();
         let search_text = $("#emi-search").val();
         let employee = $("#emi-employee").val();
         let loan_group = $("#emi-loan-group").val();
-        let current_date = $("#current-date").val();
-        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group, current_date);
+        let selected_date = $("#selected-date").val();
+        load_emis(upto_date, search_text, current_sort.field, current_sort.order, employee, loan_group, selected_date);
     });
 
-    $(document).on("change", "#emi-date, #emi-employee, #emi-loan-group, #current-date", function(e) {
-        let selected_date = $("#emi-date").val();
+    $(document).on("change", "#emi-date, #emi-employee, #emi-loan-group, #selected-date", function(e) {
+        let upto_date = $("#emi-date").val();
         let search_text = $("#emi-search").val();
         let employee = $("#emi-employee").val();
         let loan_group = $("#emi-loan-group").val();
-        let current_date = $("#current-date").val();
+        let selected_date = $("#selected-date").val();
 
-        // 👉 If emi-date changed → clear current-date
-        if (e.target.id === "emi-date" && selected_date) {
-            alert("in if .......1")
-            $("#current-date").val("");
-            current_date = "";
-        }
-        if (e.target.id === "current-date" && current_date) {
-            alert('in if 12222222222')
-            $("#emi-date").val("");
+        // 👉 If emi-date changed → clear selected-date
+        if (e.target.id === "emi-date" && upto_date) {
+            $("#selected-date").val("");
             selected_date = "";
         }
-        alert('selected_date .....'+selected_date+" ..current_date ."+current_date)
-        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group, current_date);
+        if (e.target.id === "selected-date" && selected_date) {
+            $("#emi-date").val("");
+            upto_date = "";
+        }
+        load_emis(upto_date, search_text, current_sort.field, current_sort.order, employee, loan_group, selected_date);
     });
 
 };
