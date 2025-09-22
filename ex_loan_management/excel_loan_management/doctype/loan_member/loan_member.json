@@ -36,15 +36,18 @@
   "aadhar",
   "pancard",
   "address_doc_type",
+  "voter_id",
   "home_image",
   "document_column_break",
   "aadhar_image",
   "pancard_image",
   "address_image",
+  "voter_id_image",
   "column_break_dgwj",
   "aadhar_verified",
   "pancard_verified",
   "address_verified",
+  "voter_id_verified",
   "cibil_tab",
   "cibil_score",
   "cibil_date",
@@ -314,7 +317,7 @@
   {
    "fieldname": "bank_address",
    "fieldtype": "Small Text",
-   "label": "Address",
+   "label": "Bank Address",
    "reqd": 1
   },
   {
@@ -363,13 +366,31 @@
   {
    "fieldname": "column_break_brge",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voter_id",
+   "fieldtype": "Data",
+   "label": "Voter Id",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voter_id_image",
+   "fieldtype": "Attach",
+   "label": "Voter Id",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "voter_id_verified",
+   "fieldtype": "Check",
+   "label": "Voter Id Verified"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-17 12:29:08.031928",
+ "modified": "2025-09-22 11:44:25.288488",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

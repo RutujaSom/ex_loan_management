@@ -66,6 +66,8 @@ def import_loan_members(file_url):
         occupation = row.get("OCCUPATION")
         address = row.get("ADDRESS")
         state = row.get("STATE")
+        if str(state).upper() == "MAHARASHTRA":
+            state = "MH"
         country = "India"
         city = row.get("CITY")
         pincode = row.get("PIN CODE")
@@ -151,6 +153,24 @@ def import_loan_members(file_url):
         doc.nominee_name = nominee_name
         doc.relation = relation if str(relation)not in['None', None, ""] else ""
         doc.nominee_dob = nominee_dob
+        doc.aadhar = row.get("AADHAR NO")
+        doc.pancard = row.get("PAN")
+        doc.address_doc_type= row.get("Electricity Bill")
+        doc.voter_id = row.get("CITY")
+        doc.aadhar_verified = True
+        doc.pancard_verified = True
+        doc.address_verified= True
+        doc.voter_id_verified = True
+        doc.bank_name = row.get("BANK NAME")
+        doc.account_number = row.get("SAVING ACCOUNT NUMBER")
+        doc.branch = row.get("BRANCH NAME")
+        doc.bank_address = row.get("BRANCH NAME")
+        doc.holder_name = member_name
+        doc.ifsc_code = row.get("IFSC CODE")
+        doc.account_type = "Saving"
+        # doc.holder_name = row.get("PAN"),
+
+        print('doc ...........', doc, '.....', member_id)
 
         # Link fields
         if group_id:
@@ -299,6 +319,7 @@ def create_loan_member():
             "relation": data.get("relation"),
             "aadhar": data.get("aadhar"),
             "pancard": data.get("pancard"),
+            "voter_id":data.get("voter_id"),
             "address_doc_type": data.get("address_doc_type"),
 
             "cibil_score": data.get("cibil_score"),
@@ -318,7 +339,7 @@ def create_loan_member():
 
 
         # Step 2: Handle file uploads
-        for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image"]:
+        for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image"]:
             if field in files:
                 upload = files[field]
                 if not upload or not upload.filename:
@@ -378,8 +399,7 @@ update_fields = [
     "bank_address",
 
     "member_id", "member_image", "company", "member_name",
-    "address_doc_type", "home_image",
-
+    "address_doc_type", "home_image","voter_id","voter_id_image"
 ]
 
 """
@@ -414,7 +434,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"group": "group_name"},
-        image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image']
+        image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image']
     )
 
 
@@ -434,12 +454,12 @@ def update_loan_member(name):
 
         # Update text fields
         for field in update_fields:
-            if field not in ["member_image", "aadhar_image", "pancard_image"]:
+            if field not in ["member_image", "aadhar_image", "pancard_image","voter_id_image"]:
                 if data.get(field) is not None:
                     doc.set(field, data.get(field))
 
         # Handle file uploads OR existing path strings
-        for field in ["member_image", "aadhar_image", "pancard_image"]:
+        for field in ["member_image", "aadhar_image", "pancard_image","voter_id_image"]:
             if field in files and files[field].filename:
                 # If new file uploaded → save and replace
                 upload = files[field]
