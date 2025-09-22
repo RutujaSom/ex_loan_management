@@ -383,14 +383,15 @@
    "default": "0",
    "fieldname": "voter_id_verified",
    "fieldtype": "Check",
-   "label": "Voter Id Verified"
+   "label": "Voter Id Verified",
+   "permlevel": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-22 11:44:25.288488",
+ "modified": "2025-09-22 15:14:11.416841",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

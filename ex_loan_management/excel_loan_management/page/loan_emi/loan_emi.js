@@ -1,13 +1,3 @@
-// frappe.pages['loan-emi'].on_page_load = function(wrapper) {
-// 	var page = frappe.ui.make_app_page({
-// 		parent: wrapper,
-// 		title: 'Loan EMI',
-// 		single_column: true
-// 	});
-// }
-
-
-
 
 frappe.pages['loan-emi'].on_page_load = function(wrapper) {
     var page = frappe.ui.make_app_page({
@@ -20,22 +10,40 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
     $(page.body).append(`
         <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap">
             <!-- Left Side -->
-            <div class="d-flex gap-2 align-items-center flex-wrap">
-                <input type="date" id="emi-date" class="input-with-feedback form-control" style="width:180px;margin-right: 1.5rem;" />
+            <div class="d-flex gap-3 align-items-center flex-wrap">
 
-                <select id="emi-employee" class="form-control" style="width:220px; display:none; margin-right: 1.5rem;">
-                    <option value="">-- All Employees --</option>
-                </select>
+                <div class="d-flex flex-column" style="margin-right: 1.5rem;">
+                    <label for="emi-date" class="form-label" style="font-weight: 500;">Upto Date</label>
+                    <input type="date" id="emi-date" class="input-with-feedback form-control" style="width:180px;" />
+                </div>
 
-                <select id="emi-loan-group" class="form-control" style="width:220px; display:none;">
-                    <option value="">-- All Loan Groups --</option>
-                </select>
+                <div class="d-flex flex-column" style="margin-right: 1.5rem;">
+                    <label for="current-date" class="form-label" style="font-weight: 500;">Selected Date</label>
+                    <input type="date" id="current-date" class="input-with-feedback form-control" style="width:180px;" />
+                </div>
+
+                <div class="d-flex flex-column" style="margin-right: 1.5rem;">
+                    <label for="emi-employee" class="form-label" style="font-weight: 500;">Employee</label>
+                    <select id="emi-employee" class="form-control" style="width:220px; display:none;">
+                        <option value="">-- All Employees --</option>
+                    </select>
+                </div>
+
+                <div class="d-flex flex-column">
+                    <label for="emi-loan-group" class="form-label" style="font-weight: 500;">Loan Group</label>
+                    <select id="emi-loan-group" class="form-control" style="width:220px; display:none;">
+                        <option value="">-- All Loan Groups --</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Right Side -->
-            <div class="d-flex gap-2 align-items-center flex-wrap">
-                <input type="text" id="emi-search" class="input-with-feedback form-control" style="width:200px;margin-right: 1rem;" placeholder="Search loan/applicant" />
-                <button class="btn btn-primary btn-sm" id="filter-emi">Search</button>
+            <div class="d-flex gap-2 align-items-end flex-wrap">
+                <div class="d-flex flex-column" style="margin-right: 1rem;">
+                    <label for="emi-search" class="form-label" style="font-weight: 500;">Search</label>
+                    <input type="text" id="emi-search" class="input-with-feedback form-control" style="width:200px;" placeholder="Search loan/applicant" />
+                </div>
+                <button class="btn btn-primary btn-sm" id="filter-emi" style="height:38px;">Search</button>
             </div>
         </div>
 
@@ -45,9 +53,11 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
         </div>
     `);
 
+
     // Set today's date by default
     let today = frappe.datetime.get_today();
     $("#emi-date").val(today);
+    // $("#current-date").val(today);
 
     // ✅ Employee & Loan Group filter
     frappe.call({
@@ -147,7 +157,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
         }
     });
 
-    function load_emis(selected_date=null, search_text=null, sort_by=null, sort_order=null, employee=null, loan_group=null) {
+    function load_emis(selected_date=null, search_text=null, sort_by=null, sort_order=null, employee=null, loan_group=null, current_date=null) {
         frappe.call({
             method: "lending.loan_management.doctype.repayment_schedule.repayment_schedule.get_todays_emis",
             args: { 
@@ -156,7 +166,8 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 sort_by: sort_by,
                 sort_order: sort_order,
                 employee: employee,
-                loan_group: loan_group   // 👈 Pass Loan Group
+                loan_group: loan_group,
+                current_date: current_date
             },
             callback: function(r) {
                 if (!r.message || r.message.length === 0) {
@@ -231,15 +242,30 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
         let search_text = $("#emi-search").val();
         let employee = $("#emi-employee").val();
         let loan_group = $("#emi-loan-group").val();
-        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group);
+        let current_date = $("#current-date").val();
+        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group, current_date);
     });
 
-    $(document).on("change", "#emi-date, #emi-employee, #emi-loan-group", function() {
+    $(document).on("change", "#emi-date, #emi-employee, #emi-loan-group, #current-date", function(e) {
         let selected_date = $("#emi-date").val();
         let search_text = $("#emi-search").val();
         let employee = $("#emi-employee").val();
         let loan_group = $("#emi-loan-group").val();
-        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group);
+        let current_date = $("#current-date").val();
+
+        // 👉 If emi-date changed → clear current-date
+        if (e.target.id === "emi-date" && selected_date) {
+            alert("in if .......1")
+            $("#current-date").val("");
+            current_date = "";
+        }
+        if (e.target.id === "current-date" && current_date) {
+            alert('in if 12222222222')
+            $("#emi-date").val("");
+            selected_date = "";
+        }
+        alert('selected_date .....'+selected_date+" ..current_date ."+current_date)
+        load_emis(selected_date, search_text, current_sort.field, current_sort.order, employee, loan_group, current_date);
     });
 
 };
