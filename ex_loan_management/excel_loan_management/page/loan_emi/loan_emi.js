@@ -23,7 +23,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 </div>
 
                 <div class="d-flex flex-column" style="margin-right: 1.5rem;">
-                    <label for="emi-employee" class="form-label" style="font-weight: 500;">Employee</label>
+                    <label id="emi-employee-label" for="emi-employee" class="form-label" style="font-weight: 500;">Employee</label>
                     <select id="emi-employee" class="form-control" style="width:220px; display:none;">
                         <option value="">-- All Employees --</option>
                     </select>
@@ -74,6 +74,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
             if (frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("System Manager")) {
                 $("#emi-employee").show();
                 $("#emi-loan-group").show();
+                $("#emi-employee-label").show()
 
                 // Load employees
                 frappe.call({
@@ -116,6 +117,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
             } else if (employee_id) {
                 // Normal Employee → Load only assigned Loan Groups
                 $("#emi-loan-group").show();
+                $("#emi-employee-label").hide();
                 frappe.call({
                     method: "frappe.client.get_list",
                     args: {
