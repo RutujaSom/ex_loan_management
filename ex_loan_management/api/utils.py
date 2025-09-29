@@ -161,6 +161,8 @@ def api_response(status="success", status_code=200, message=None, data=None):
         resp["data"] = data
     return resp
 
+from frappe.utils.response import build_response
+
 
 def api_error(e, status_code=406):
     """Return dynamic standardized error response"""
@@ -184,11 +186,14 @@ def api_error(e, status_code=406):
     if not errors:
         errors = [str(e)]
 
-    return {
+    # Force HTTP status
+    frappe.local.response["http_status_code"] = status_code
+    frappe.local.response["message"] = {
         "status": "error",
         "status_code": status_code,
         "message": ", ".join(errors)
     }
+    return build_response("json")
 
 
 def clean_error_message(msg: str) -> str:

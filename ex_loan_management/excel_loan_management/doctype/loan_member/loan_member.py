@@ -13,18 +13,33 @@ from frappe.model.workflow import apply_workflow
 
 class LoanMember(Document):
     def before_save(self):
+        prev_status = self.get_db_value("status") if not self.is_new() else None
+        
+        if self.status =="Pending":
+            # pass
+            # Fetch all fieldnames of this DocType except system/internal fields
+            docfields = [df.fieldname for df in frappe.get_meta(self.doctype).fields 
+                         if df.fieldtype not in ["Section Break", "Column Break", "Tab Break", "Table"]]
+
+            # Check each field is filled
+            missing_fields = []
+            for fieldname in docfields:
+                value = self.get(fieldname)
+                if value in [None, ""]:
+                    missing_fields.append(fieldname)
+
+            if missing_fields:
+                frappe.throw(f"To set status as 'Pending', the following fields must be filled: {', '.join(missing_fields)}")
+
         if self.status != "Pending":
-            if self.address_verified and self.pancard_verified and self.aadhar_verified:
+            if prev_status == "Draft" and self.status != "Draft":
+                frappe.throw("Status can only be changed from 'Draft' to 'Pending'.")
+            if self.address_verified and self.pancard_verified and self.aadhar_verified and self.voter_id_verified:
                 self.status = "Verified"
-            if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified):
+            if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified or not self.voter_id_verified):
                 frappe.throw("To set status as 'Verified', all verifications must be completed.")
 
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
-
-    # def on_update(self):
-    #     if self.workflow_state == "Approved" and self.docstatus == 0:
-    #         self.status = "Verified"
-    #         self.submit()
 
 
 @frappe.whitelist()
@@ -334,7 +349,7 @@ def create_loan_member():
             "ifsc_code": data.get("ifsc_code"),
             "account_type": data.get("account_type"),
             "bank_address": data.get("bank_address"),
-            "status": "Pending"
+            "status": "Draft"
         })
 
 
@@ -475,7 +490,7 @@ def update_loan_member(name):
                 # If frontend sends string (URL/path) → just set it
                 doc.set(field, data.get(field))
 
-        doc.set("status", "Pending")
+        doc.set("status", "Draft")
 
         # Save changes
         doc.save(ignore_permissions=True)
@@ -503,3 +518,20 @@ def update_status(docname, status):
     doc.save(ignore_permissions=True)
     frappe.db.commit()
     return {"status": "success", "new_state": status}
+
+
+@frappe.whitelist()
+def update_loan_member(name):
+    try:
+        doc = frappe.get_doc("Loan Member", name)
+        doc.set("status", "Pending")
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+        return {
+            "status": "success",
+            "status_code": 201,
+            "msg": "Loan Member Sent for Verification Successfully"
+        }
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
+        return api_error(e)
