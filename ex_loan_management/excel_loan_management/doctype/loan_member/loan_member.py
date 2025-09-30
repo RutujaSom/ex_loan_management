@@ -14,7 +14,7 @@ from frappe.model.workflow import apply_workflow
 class LoanMember(Document):
     def before_save(self):
         prev_status = self.get_db_value("status") if not self.is_new() else None
-        
+        print("self.status  ......",self.status)
         if self.status =="Pending":
             # pass
             # Fetch all fieldnames of this DocType except system/internal fields
@@ -455,7 +455,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
 
 
 @frappe.whitelist()
-def update_loan_member(name):
+def update_loan_member_api(name):
     try:
         data = frappe.form_dict   # text fields
         files = frappe.request.files  # uploaded files
