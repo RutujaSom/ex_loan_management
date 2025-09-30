@@ -22,7 +22,7 @@ frappe.ui.form.on('Loan Member', {
             frm.set_df_property("status", "hidden", 1);
 
             // If status is Pending → make the whole form read-only
-            if (!frm.is_new() && frm.doc.status == "Pending") {
+            if (!frm.is_new() && frm.doc.status == "Draft") {
                 frm.disable_form();
             }
         }
@@ -32,7 +32,7 @@ frappe.ui.form.on('Loan Member', {
         }
         // If Draft → keep it Draft until explicitly changed
         if (frm.is_new()) {
-            frm.doc.status = "Pending";
+            frm.doc.status = "Draft";
         }
     }
 });
@@ -131,6 +131,7 @@ function update_status(frm, status) {
             status: status
         },
         callback: function() {
+            alert(".......")
             frm.reload_doc();
         }
     });

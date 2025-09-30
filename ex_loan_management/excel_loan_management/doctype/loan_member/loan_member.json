@@ -303,7 +303,7 @@
    "label": "Bank Address"
   },
   {
-   "default": "Pending",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_standard_filter": 1,
@@ -370,7 +370,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-29 15:09:58.278952",
+ "modified": "2025-09-30 13:02:12.573322",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
