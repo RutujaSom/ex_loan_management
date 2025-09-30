@@ -14,7 +14,7 @@ from frappe.model.workflow import apply_workflow
 class LoanMember(Document):
     def before_save(self):
         prev_status = self.get_db_value("status") if not self.is_new() else None
-        print("self.status  ......",self.status)
+
         if self.status =="Pending":
             # pass
             # Fetch all fieldnames of this DocType except system/internal fields
@@ -25,8 +25,9 @@ class LoanMember(Document):
             missing_fields = []
             for fieldname in docfields:
                 value = self.get(fieldname)
-                if value in [None, ""]:
-                    missing_fields.append(fieldname)
+                if fieldname not in ["group"]:
+                    if value in [None, ""]:
+                        missing_fields.append(fieldname)
 
             if missing_fields:
                 frappe.throw(f"To set status as 'Pending', the following fields must be filled: {', '.join(missing_fields)}")

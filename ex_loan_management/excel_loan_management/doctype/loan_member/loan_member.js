@@ -16,24 +16,29 @@ frappe.ui.form.on('Loan Member', {
             open_import_dialog_to_update_records(frm);
         });
 
-
-        if (frappe.user.has_role("Agent") && !frappe.user.has_role("Administrator")) {
-            // Hide status field for Agents
+        // If Draft → keep it Draft until explicitly changed
+        if (frm.is_new()) {
+            frm.doc.status = "Draft";
             frm.set_df_property("status", "hidden", 1);
-
+        }
+        if (frappe.user.has_role("Agent") && !frappe.user.has_role("Administrator")) {
+            
             // If status is Pending → make the whole form read-only
-            if (!frm.is_new() && frm.doc.status == "Draft") {
+            if (!frm.is_new() && frm.doc.status == "Pending") {
                 frm.disable_form();
+            }
+            // Restrict allowed options for Agent
+            if (frm.doc.status === "Draft") {
+                frm.set_df_property("status", "options", ["Draft", "Pending"]);
+            }else{
+                frm.set_df_property("status", "hidden", 1);
             }
         }
         if (frm.doc.status === "Verified" || frm.doc.status === "Rejected") {
             // If record is updated after Approved/Rejected → go back to Pending
             frm.doc.status = "Pending";
         }
-        // If Draft → keep it Draft until explicitly changed
-        if (frm.is_new()) {
-            frm.doc.status = "Draft";
-        }
+        
     }
 });
 
