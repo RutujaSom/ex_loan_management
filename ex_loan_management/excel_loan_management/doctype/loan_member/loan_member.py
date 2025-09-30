@@ -470,12 +470,12 @@ def update_loan_member_api(name):
 
         # Update text fields
         for field in update_fields:
-            if field not in ["member_image", "aadhar_image", "pancard_image","voter_id_image"]:
+            if field not in ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",]:
                 if data.get(field) is not None:
                     doc.set(field, data.get(field))
 
         # Handle file uploads OR existing path strings
-        for field in ["member_image", "aadhar_image", "pancard_image","voter_id_image"]:
+        for field in ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",]:
             if field in files and files[field].filename:
                 # If new file uploaded → save and replace
                 upload = files[field]
