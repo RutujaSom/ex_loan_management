@@ -86,6 +86,11 @@ def get_loan_summary(group=None):
     loan_filters = {}
     repayment_filters = {}
 
+    assigned_members = frappe.get_all(
+        "Loan Member",
+        pluck="name"
+    )
+
     if "Agent" in roles and not "Administrator" in roles:
 
         
@@ -95,7 +100,6 @@ def get_loan_summary(group=None):
             filters={"employee": employee},
             pluck="loan_group"
         )
-        print('groups ../// ....', groups)
 
         assigned_members = frappe.get_all(
         "Loan Member",
