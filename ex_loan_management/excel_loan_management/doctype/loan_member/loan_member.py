@@ -7,8 +7,7 @@ from openpyxl import load_workbook
 from datetime import datetime
 from frappe.utils.file_manager import save_file, get_file
 from ex_loan_management.api.utils import get_paginated_data, api_error
-from frappe.model.workflow import apply_workflow
-
+from urllib.parse import urljoin
 
 
 class LoanMember(Document):
@@ -536,3 +535,43 @@ def update_loan_member(name):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Loan Member Update API Error")
         return api_error(e)
+
+
+
+
+
+@frappe.whitelist()
+def loan_member_get(name):
+    """
+    Get Loan Member by name (primary key)
+    Returns linked Loan Group name and full URLs for image fields
+    """
+    if not name:
+        frappe.throw("Loan Member name is required")
+
+    # Fetch Loan Member
+    members = frappe.get_all(
+        "Loan Member",
+        filters={"name": name},
+        fields=update_fields
+    )
+
+    if not members:
+        return {}
+
+    member = members[0]
+
+    # 🔹 Get linked Loan Group name
+    if member.get("group"):
+        group_doc = frappe.get_value("Loan Group", member["group"], "group_name")
+        member["group_name"] = group_doc or ""
+
+    # 🔹 Full URL for image fields
+    host_url = frappe.request.host_url.rstrip("/")  # e.g. http://localhost:8000
+    image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image']
+
+    for f in image_fields:
+        if member.get(f):
+            member[f] = urljoin(host_url, member[f])
+
+    return member
