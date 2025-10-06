@@ -376,7 +376,8 @@ def create_loan_member():
         return {
             "status": "success",
             "status_code": 201,
-            "msg": "Loan Member Created Successfully"
+            "msg": "Loan Member Created Successfully",
+            "data":doc.as_dict()
         }
 
     except Exception as e:
