@@ -499,7 +499,8 @@ def update_loan_member_api(name):
         return {
             "status": "success",
             "status_code": 201,
-            "msg": "Loan Member Updated Successfully"
+            "msg": "Loan Member Updated Successfully",
+            "data":doc.as_dict()
         }
 
     except Exception as e:
