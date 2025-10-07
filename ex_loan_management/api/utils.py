@@ -191,7 +191,7 @@ def api_error(e, status_code=406):
     frappe.local.response["message"] = {
         "status": "error",
         "status_code": status_code,
-        "message": ", ".join(errors)
+        "msg": ", ".join(errors)
     }
     return build_response("json")
 
