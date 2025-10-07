@@ -431,9 +431,23 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
     # 🔹 Collect filters from kwargs (all query params except the defaults)
     filters = {}
     for k, v in kwargs.items():
-        if v not in [None, ""]:   # skip empty params
-            filters[k] = v
+        if k not in 'is_group':
+            if v not in [None, ""]:   # skip empty params
+                filters[k] = v
 
+    # 🔹 Handle is_group filter for Link field
+    is_group = kwargs.get("is_group")
+    if is_group is not None:
+        is_group = frappe.utils.sbool(is_group)
+        if is_group:
+            # Members with a group assigned (group is not null/empty)
+            filters["group"] = ["!=", ""]
+        else:
+            # Members without a group assigned (group is null/empty)
+            filters["group"] = ["in", [None, ""]]
+
+
+    print("filters ...",filters)
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 
     return get_paginated_data(
