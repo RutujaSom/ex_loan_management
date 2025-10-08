@@ -591,3 +591,54 @@ def loan_member_get(name):
             member[f] = urljoin(host_url, member[f])
 
     return member
+
+
+@frappe.whitelist()
+def loan_member_list_as_per_group_assignment(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc", is_pagination=False, **kwargs):
+    user = frappe.session.user
+
+    if "Agent" in frappe.get_roles(user):
+        # Get employee id
+        employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+        if not employee_id:
+            return []
+
+        # Get loan groups for this employee
+        groups = frappe.get_all(
+            "Loan Group Assignment",
+            filters={"employee": employee_id},
+            pluck="loan_group"
+        )
+        if not groups:
+            groups = []
+
+        is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
+        extra_params = {"search": search} if search else {}
+        del kwargs['cmd']
+
+        # 🔹 Collect filters from kwargs (all query params except the defaults)
+        filters = {}
+        filters["group"] = ["in", groups]
+        filters["status"] = ["in", "Verified"]  
+
+        print("filters ...",filters)
+        base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
+
+        return get_paginated_data(
+            doctype="Loan Member",
+            fields=update_fields,
+            filters=filters,   # ✅ Now your filters will be applied
+            search=search,
+            sort_by=sort_by,
+            sort_order=sort_order,
+            page=int(page),
+            page_size=int(page_size),
+            search_fields=["member_name"],
+            is_pagination=is_pagination,
+            base_url=base_url,
+            extra_params=extra_params,
+            link_fields={"group": "group_name"},
+            image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image']
+        )
+    else:
+        return {}
