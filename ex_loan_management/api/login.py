@@ -36,6 +36,7 @@ def login_and_get_token():
             company = emp_details.company
         except:
             company = ""
+            emp_details = {}
 
         # 3️⃣ Return success with tokens + user info
         return {
@@ -45,7 +46,8 @@ def login_and_get_token():
                 "email": user_doc.email,
                 "full_name": user_doc.full_name,
                 "roles": [r.role for r in user_doc.roles],
-                "company":company
+                "company":company,
+                "emp_details":emp_details,
             },
             "token": {
                 "api_key": api_key,
