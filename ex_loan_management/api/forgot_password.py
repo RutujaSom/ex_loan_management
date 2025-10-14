@@ -21,14 +21,15 @@ def send_forgot_password_otp(email):
         "otp": otp,
         "otp_expire_time": expiry_time
     })
-
-    # Send email
-    # frappe.sendmail(
-    #     recipients=[email],
-    #     subject="Password Reset OTP",
-    #     message=f"Your OTP for password reset is {otp}. It will expire in 10 minutes."
-    # )
-
+    try:
+        # Send email
+        frappe.sendmail(
+            recipients=[email],
+            subject="Password Reset OTP",
+            message=f"Your OTP for password reset is {otp}. It will expire in 10 minutes."
+        )
+    except Exception as e:
+        print("E ..................",e)
     return {
         "status": "success",
         "status_code": 201,
@@ -57,8 +58,7 @@ def verify_forgot_password_otp(email, otp):
 
 
 # Step 3: Reset password
-# @frappe.whitelist(allow_guest=True)
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def reset_password_with_otp(email, otp, new_password, confirm_password):
     if new_password != confirm_password:
         return api_error("New password and confirm password do not match.")
