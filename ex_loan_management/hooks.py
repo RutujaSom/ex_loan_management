@@ -10,7 +10,15 @@ app_license = "mit"
 
 # required_apps = []
 
-fixtures = ["Workflow", "Workflow State", "Workflow Action Master"]
+fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
+            {
+        "dt": "Client Script",
+        "filters": [
+            ["name", "in", [
+                "Make collection in hand amount negative",
+            ]]
+        ]
+    },]
 
 
 

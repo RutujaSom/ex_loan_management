@@ -145,6 +145,13 @@ def get_loan_summary(group=None):
           AND reference_date = %s
     """, (employee.name, nowdate(),))[0][0] or 0
 
+    # ------------------ Employee collection by this user ------------------
+    collection_in_hand = frappe.db.sql("""
+        SELECT COALESCE(SUM(amount), 0)
+        FROM `tabCollection In Hand`
+        WHERE employee = %s
+    """, (employee.name,))[0][0] or 0
+
 
 
     return {
@@ -153,6 +160,7 @@ def get_loan_summary(group=None):
         "rejected_loans": rejected_loans,
         "remaining_amount": remaining_amount,
         "total_emis":total_emis,
+        "collection_in_hand":collection_in_hand,
         "todays_collection": todays_collection,
         "monthly_collection": monthly_collection,
     }

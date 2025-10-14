@@ -1,0 +1,13 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Collection In Hand",
+  "enabled": 1,
+  "modified": "2025-10-14 18:24:40.539038",
+  "module": null,
+  "name": "Make collection in hand amount negative",
+  "script": "frappe.ui.form.on('Collection In Hand', {\n    before_save(frm) {\n        if (frm.doc.amount > 0) {\n            frm.set_value('amount', -Math.abs(frm.doc.amount));\n        }\n    }\n});\n",
+  "view": "Form"
+ }
+]
