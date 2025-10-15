@@ -431,7 +431,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
     # 🔹 Collect filters from kwargs (all query params except the defaults)
     filters = {}
     for k, v in kwargs.items():
-        if k not in 'is_group':
+        if k != 'is_group':
             if v not in [None, ""]:   # skip empty params
                 filters[k] = v
 
