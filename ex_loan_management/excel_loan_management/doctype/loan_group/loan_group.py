@@ -89,10 +89,34 @@ def loan_group_list(page=1, page_size=10,sort_by="group_name", sort_order="asc",
     extra_params = {"search": search} if search else {}
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 
+    user = frappe.session.user
+    filters = {}
+    if "Agent" in frappe.get_roles(user):
+        print("in if ....")
+        # Get employee id
+        employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+        if not employee_id:
+            return []
+
+        # Get loan groups for this employee
+        groups = frappe.get_all(
+            "Loan Group Assignment",
+            filters={"employee": employee_id},
+            pluck="loan_group"
+        )
+        
+        if groups:
+            filters["name"] = ["in", groups]
+
+        else:
+            # Members without a group assigned (group is null/empty)
+            filters["name"] = ["=", ""]
+
     return get_paginated_data(
         doctype="Loan Group",
         fields=["name", "group_name", "group_head","group_image"],
         search=search,
+        filters=filters,
         sort_by=sort_by,
         sort_order=sort_order,
         page=int(page),
