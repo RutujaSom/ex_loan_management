@@ -25,6 +25,8 @@ update_fields = [
     "applicant",
     "loan",
     "payment_proof",
+    "amount_given_emp",
+    "description",
 ]
 
 """
@@ -79,13 +81,14 @@ def create_collection_in_hand():
             if amount > 0:
                 amount = -amount
 
-
         doc = frappe.get_doc({
             "doctype": "Collection In Hand",
             "employee":data.get("employee"),
             "amount":amount,
             "given_to":data.get("given_to"),
             "posting_date":data.get("posting_date") or nowdate(),
+            "amount_given_emp":data.get("amount_given_emp"),
+            "description":data.get("description")
         })
         if "payment_proof" in files:
             upload = files["payment_proof"] 
@@ -102,7 +105,6 @@ def create_collection_in_hand():
 
         # Step 2: Insert Collection In Hand (runs validate() automatically)
         doc.insert(ignore_permissions=True)
-        doc.submit()
         frappe.db.commit()
 
         return {
@@ -116,3 +118,93 @@ def create_collection_in_hand():
         return api_error(e)
 
 
+
+
+
+@frappe.whitelist()
+def approve_collection_record(name):
+    try:
+        data = frappe.form_dict  # works for JSON body and form-data
+
+        # Step 1: Prepare Loan Application doc
+        amount = data.get("amount")
+        if amount:
+            # Convert to float and make negative if positive
+            amount = float(amount)
+            if amount > 0:
+                amount = -amount
+
+        doc = frappe.get_doc({
+            "doctype": "Collection In Hand",
+            "employee":data.get("employee"),
+            "amount":amount,
+            "given_to":data.get("given_to"),
+            "posting_date":data.get("posting_date") or nowdate(),
+            "amount_given_emp":data.get("amount_given_emp"),
+            "description":data.get("description")
+        })
+
+        # Step 2: Insert Collection In Hand (runs validate() automatically)
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "status_code": 201,
+            "msg": "Collection In Hand Created Successfully"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Collection in hand API Error")
+        return api_error(e)
+
+
+
+@frappe.whitelist()
+def approve_or_reject_collection(name, status):
+    try:
+        """
+        Approve or reject Collection In Hand based on session user.
+        - If amount_given_emp exists → that employee can approve.
+        - If not → admin user can approve.
+        """
+
+        doc = frappe.get_doc("Collection In Hand", name)
+        current_user = frappe.session.user
+
+        # Determine the user who is allowed to approve
+        if doc.amount_given_emp:
+            # Get the user linked to the Employee
+            expected_approver = frappe.db.get_value("Employee", doc.amount_given_emp, "user_id")
+            if not expected_approver:
+                frappe.throw("Employee linked in amount_given_emp has no user assigned.")
+        else:
+            # If no employee assigned, only Administrator can approve
+            expected_approver = "Administrator"  # or frappe.db.get_single_value("Global Defaults", "default_administrator")
+
+        # Check permission
+        if current_user != expected_approver:
+            frappe.throw(f"User can not approve/reject this record.")
+
+        # Set status based on status
+        if status.lower() == "approved":
+            doc.status = "Approved"
+        elif status.lower() == "rejected":
+            doc.status = "Rejected"
+        else:
+            frappe.throw("Invalid status. Use 'approved' or 'rejected'.")
+
+        # Record who approved/rejected
+        doc.approved_by = current_user
+        doc.approval_date = frappe.utils.now()
+
+        doc.save(ignore_permissions=True)
+        doc.submit()
+        frappe.db.commit()
+
+        return f"Collection In Hand has been {doc.status} by {current_user}."
+
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Collection In Hand API Error")
+        return api_error(e)

@@ -186,7 +186,7 @@ def create_loan_group():
 
         # Step 2: Insert Collection In Hand (runs validate() automatically)
         doc.insert(ignore_permissions=True)
-        doc.submit()
+        doc.db_set("workflow_state", "Pending", update_modified=False)
         frappe.db.commit()
 
         return {

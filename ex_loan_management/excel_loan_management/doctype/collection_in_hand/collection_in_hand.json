@@ -9,12 +9,15 @@
   "loan_repayment",
   "amount",
   "given_to",
+  "amount_given_emp",
+  "description",
   "column_break_6agu",
   "posting_date",
   "applicant",
   "loan",
   "payment_proof",
-  "amended_from"
+  "amended_from",
+  "status"
  ],
  "fields": [
   {
@@ -27,8 +30,10 @@
   },
   {
    "fieldname": "given_to",
-   "fieldtype": "Data",
-   "label": "Amount Given To"
+   "fieldtype": "Select",
+   "label": "Given To",
+   "options": "\nEmployee\nBank",
+   "reqd": 1
   },
   {
    "depends_on": "loan_repayment",
@@ -84,13 +89,31 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "amount_given_emp",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "mandatory_depends_on": "doc.given_to == 'Employee'",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Data",
+   "label": "Description"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nApproved\nRejected"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-09-11 10:12:15.336056",
+ "modified": "2025-10-17 17:37:45.795009",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Collection In Hand",
