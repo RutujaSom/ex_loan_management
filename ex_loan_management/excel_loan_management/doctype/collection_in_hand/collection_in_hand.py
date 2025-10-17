@@ -89,11 +89,11 @@ def create_collection_in_hand():
         })
         if "payment_proof" in files:
             upload = files["payment_proof"] 
-            if not upload or not upload.filename:
+            if upload and upload.filename:
                 file_doc = save_file(
                     fname=upload.filename,
                     content=upload.stream.read(),
-                    dt="Loan Member",
+                    dt="Collection In Hand",
                     dn=1,
                     is_private=1
                 )

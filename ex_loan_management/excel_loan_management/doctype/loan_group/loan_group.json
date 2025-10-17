@@ -16,7 +16,7 @@
    "fieldname": "group_id",
    "fieldtype": "Data",
    "label": "Group Id",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "group_name",
@@ -40,7 +40,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-04 16:19:59.172269",
+ "modified": "2025-10-17 14:26:53.916479",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Group",
@@ -60,13 +60,15 @@
    "write": 1
   },
   {
+   "create": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Employee",
-   "share": 1
+   "share": 1,
+   "write": 1
   }
  ],
  "show_title_field_in_link": 1,

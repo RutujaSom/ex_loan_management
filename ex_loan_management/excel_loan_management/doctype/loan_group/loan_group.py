@@ -5,10 +5,36 @@
 from frappe.model.document import Document
 from openpyxl import load_workbook
 import frappe
-
+from frappe.utils.file_manager import save_file
+from ex_loan_management.api.utils import api_error
+import re
 
 class LoanGroup(Document):
-	pass
+    def autoname(self):
+        prefix = "GC"
+
+        # Fetch latest member_id (not name)
+        last_record = frappe.db.get_all(
+            "Loan Group",
+            filters={"group_id": ["like", f"{prefix}%"]},
+            fields=["group_id"],
+            order_by="group_id desc",
+            limit=1
+        )
+
+        if last_record:
+            last_id = last_record[0].group_id
+            match = re.search(r"GC(\d+)", last_id)
+            new_num = int(match.group(1)) + 1 if match else 1
+        else:
+            new_num = 1
+        # Safe padding
+        if new_num <= 9999:
+            new_id = f"{prefix}{new_num:04d}"
+        else:
+            new_id = f"{prefix}{new_num}"
+        self.name = new_id
+        self.group_id = new_id
 
 
 @frappe.whitelist()
@@ -128,3 +154,49 @@ def loan_group_list(page=1, page_size=10,sort_by="group_name", sort_order="asc",
         link_fields={"group_head": "member_name"},
         image_fields=["group_image"]
     )
+
+
+
+
+@frappe.whitelist()
+def create_loan_group():
+    try:
+        data = frappe.form_dict  # works for JSON body and form-data
+        files = frappe.request.files  # uploaded files
+
+        #
+        doc = frappe.get_doc({
+            "doctype": "Loan Group",
+            "group_id":data.get("group_id"),
+            "group_name":data.get("group_name"),
+            "group_head":data.get("group_head"),
+        })
+        if "group_image" in files:
+            upload = files["group_image"] 
+            if not upload or not upload.filename:
+                file_doc = save_file(
+                    fname=upload.filename,
+                    content=upload.stream.read(),
+                    dt="Loan Group",
+                    dn=1,
+                    is_private=1
+                )
+                doc.set("group_image", file_doc.file_url)
+
+
+        # Step 2: Insert Collection In Hand (runs validate() automatically)
+        doc.insert(ignore_permissions=True)
+        doc.submit()
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "status_code": 201,
+            "msg": "Loan Group Created Successfully"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
+        return api_error(e)
+
+

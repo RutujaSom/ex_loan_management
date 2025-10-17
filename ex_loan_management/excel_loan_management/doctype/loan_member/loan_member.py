@@ -76,7 +76,7 @@ class LoanMember(Document):
         
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
 
-        existing_member = check_unique_member(self.member_name, self.pancard)
+        existing_member = check_unique_member(self.member_name, self.pancard, self.name)
         if existing_member:
             frappe.throw(existing_member)
 
@@ -280,17 +280,21 @@ def split_name(full_name):
         return parts[0], " ".join(parts[1:-1]), parts[-1]
 
 
-def check_unique_member(member_name, pancard):
-    """Check if a Loan Member with the same name and PAN already exists."""
-    existing_member = frappe.get_all(
+def check_unique_member(member_name, pancard, current_name=None):
+    """Check if Loan Member with same name & PAN exists (excluding current)."""
+    existing = frappe.db.exists(
         "Loan Member",
-        filters={"member_name": member_name, "pancard":pancard},
-        fields=["name"]
+        {
+            "member_name": member_name,
+            "pancard": pancard,
+            "name": ["!=", current_name] if current_name else ["!=", ""]
+        }
     )
-    if existing_member:
+
+    if existing:
         return "Loan member with the same name and PAN already exists."
-    else:
-        return None
+    return None
+
     
 def calculate_member_age(dob):
 
@@ -473,7 +477,8 @@ def create_loan_member():
 update_fields = [
     "name",
     "first_name", "last_name", "middle_name", "gender", "dob",
-    "completed_age", "entry_age", "mobile_no", "state", "country",
+    "completed_age", "entry_age", "mobile_no", "mobile_no_2",
+    "state", "country",
     "city", "pincode", "status","occupation",
     "group",
     "email",

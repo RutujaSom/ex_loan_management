@@ -13,8 +13,8 @@
   "group",
   "mobile_no_2",
   "email",
-  "gender",
   "completed_age",
+  "gender",
   "member_image",
   "loan_column",
   "company",
@@ -22,8 +22,8 @@
   "member_name",
   "mobile_no",
   "dob",
-  "entry_age",
   "occupation",
+  "entry_age",
   "status",
   "member_address_tab",
   "address_column_break",
@@ -79,7 +79,6 @@
    "in_list_view": 1,
    "label": "Member ID",
    "read_only": 1,
-   "reqd": 1,
    "unique": 1
   },
   {
@@ -106,13 +105,13 @@
    "fieldname": "completed_age",
    "fieldtype": "Int",
    "label": "Completed Age",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "entry_age",
    "fieldtype": "Int",
    "label": "Entry Age",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fieldname": "mobile_no",
@@ -430,7 +429,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-17 11:00:54.030323",
+ "modified": "2025-10-17 12:27:48.257641",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
