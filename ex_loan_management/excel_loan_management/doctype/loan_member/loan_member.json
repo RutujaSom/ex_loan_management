@@ -11,6 +11,7 @@
   "first_name",
   "last_name",
   "group",
+  "mobile_no_2",
   "email",
   "gender",
   "completed_age",
@@ -32,22 +33,32 @@
   "column_break_khge",
   "state",
   "address",
+  "address_line_2",
   "document_tab",
   "aadhar",
-  "pancard",
-  "address_doc_type",
-  "voter_id",
-  "home_image",
-  "document_column_break",
   "aadhar_image",
-  "pancard_image",
-  "address_image",
-  "voter_id_image",
-  "column_break_dgwj",
+  "aadhar_image_back",
+  "document_column_break",
   "aadhar_verified",
+  "section_break_oeil",
+  "pancard",
+  "pancard_image",
+  "pancard_image_back",
+  "column_break_nytu",
   "pancard_verified",
-  "address_verified",
+  "section_break_knhg",
+  "voter_id",
+  "voter_id_image",
+  "voter_id_image_back",
+  "column_break_lhuq",
   "voter_id_verified",
+  "section_break_siuy",
+  "address_doc_type",
+  "address_image",
+  "column_break_svga",
+  "address_verified",
+  "section_break_qnda",
+  "home_image",
   "cibil_tab",
   "cibil_score",
   "cibil_date",
@@ -67,6 +78,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Member ID",
+   "read_only": 1,
    "reqd": 1,
    "unique": 1
   },
@@ -136,8 +148,7 @@
   {
    "fieldname": "email",
    "fieldtype": "Data",
-   "label": "Email",
-   "reqd": 1
+   "label": "Email"
   },
   {
    "fieldname": "state",
@@ -173,7 +184,7 @@
   {
    "fieldname": "address",
    "fieldtype": "Small Text",
-   "label": "Address"
+   "label": "Address Line 1"
   },
   {
    "fieldname": "member_image",
@@ -311,10 +322,6 @@
    "options": "Draft\nPending\nVerified\nRejected"
   },
   {
-   "fieldname": "column_break_dgwj",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "fieldname": "aadhar_verified",
    "fieldtype": "Check",
@@ -364,13 +371,66 @@
    "fieldtype": "Check",
    "label": "Voter Id Verified",
    "permlevel": 1
+  },
+  {
+   "fieldname": "aadhar_image_back",
+   "fieldtype": "Attach",
+   "label": "Aadhar Image Back"
+  },
+  {
+   "fieldname": "voter_id_image_back",
+   "fieldtype": "Attach",
+   "label": "Voter Id Back"
+  },
+  {
+   "fieldname": "pancard_image_back",
+   "fieldtype": "Attach",
+   "label": "Pan Card Image Back"
+  },
+  {
+   "fieldname": "section_break_siuy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_svga",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_oeil",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nytu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_knhg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lhuq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qnda",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "address_line_2",
+   "fieldtype": "Small Text",
+   "label": "Address LIne 2"
+  },
+  {
+   "fieldname": "mobile_no_2",
+   "fieldtype": "Int",
+   "label": "Mobile Number 2"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-09-30 13:02:12.573322",
+ "modified": "2025-10-17 11:00:54.030323",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

@@ -8,18 +8,47 @@ from datetime import datetime
 from frappe.utils.file_manager import save_file, get_file
 from ex_loan_management.api.utils import get_paginated_data, api_error
 from urllib.parse import urljoin
-
+import re
+from datetime import date
 
 class LoanMember(Document):
+
+    def autoname(self):
+        prefix = "TMA"
+
+        # Fetch latest member_id (not name)
+        last_record = frappe.db.get_all(
+            "Loan Member",
+            filters={"member_id": ["like", f"{prefix}%"]},
+            fields=["member_id"],
+            order_by="member_id desc",
+            limit=1
+        )
+
+        if last_record:
+            last_id = last_record[0].member_id
+            match = re.search(r"TMA(\d+)", last_id)
+            new_num = int(match.group(1)) + 1 if match else 1
+        else:
+            new_num = 1
+        # Safe padding
+        if new_num <= 99999:
+            new_id = f"{prefix}{new_num:05d}"
+        else:
+            new_id = f"{prefix}{new_num}"
+        self.name = new_id
+        self.member_id = new_id
+
     def before_save(self):
         # ✅ Skip validation if called during import
         if getattr(frappe.flags, "in_import", False):
             return
 
+        self.completed_age, self.entry_age= calculate_member_age(self.dob)
+
         prev_status = self.get_db_value("status") if not self.is_new() else None
 
         if self.status =="Pending":
-            # pass
             # Fetch all fieldnames of this DocType except system/internal fields
             docfields = [df.fieldname for df in frappe.get_meta(self.doctype).fields 
                          if df.fieldtype not in ["Section Break", "Column Break", "Tab Break", "Table"]]
@@ -28,7 +57,9 @@ class LoanMember(Document):
             missing_fields = []
             for fieldname in docfields:
                 value = self.get(fieldname)
-                if fieldname not in ["group"]:
+                if fieldname not in ["group","aadhar_image_back", "pancard_image_back","voter_id_image_back",
+                                     "address_line_2","cibil_score","bank_address","mobile_no_2",
+                                    "cibil_date"]:
                     if value in [None, ""]:
                         missing_fields.append(fieldname)
 
@@ -42,8 +73,15 @@ class LoanMember(Document):
                 self.status = "Verified"
             if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified or not self.voter_id_verified):
                 frappe.throw("To set status as 'Verified', all verifications must be completed.")
-
+        
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
+
+        existing_member = check_unique_member(self.member_name, self.pancard)
+        if existing_member:
+            frappe.throw(existing_member)
+
+        
+        
 
 
 @frappe.whitelist()
@@ -242,6 +280,39 @@ def split_name(full_name):
         return parts[0], " ".join(parts[1:-1]), parts[-1]
 
 
+def check_unique_member(member_name, pancard):
+    """Check if a Loan Member with the same name and PAN already exists."""
+    existing_member = frappe.get_all(
+        "Loan Member",
+        filters={"member_name": member_name, "pancard":pancard},
+        fields=["name"]
+    )
+    if existing_member:
+        return "Loan member with the same name and PAN already exists."
+    else:
+        return None
+    
+def calculate_member_age(dob):
+
+    """
+    dob: datetime.date or string in 'YYYY-MM-DD'
+    Returns: dict with completed_age and current_age
+    """
+    if isinstance(dob, str):
+        dob = date.fromisoformat(dob)
+
+    today = date.today()
+
+    # Completed age in full years
+    completed_age = today.year - dob.year
+    if (today.month, today.day) < (dob.month, dob.day):
+        completed_age -= 1
+
+    # Current age = completed + 1
+    current_age = completed_age + 1
+
+    return  completed_age, current_age
+
 
 @frappe.whitelist()
 def import_update_loan_members(file_url):
@@ -336,6 +407,7 @@ def create_loan_member():
             "pincode": data.get("pincode"),
             "status": data.get("status", "Open"),
             "occupation": data.get("occupation"),
+            "address_line_2": data.get("address_line_2"),
 
             # Corrected mappings
             "group": data.get("group"),
@@ -365,7 +437,8 @@ def create_loan_member():
 
 
         # Step 2: Handle file uploads
-        for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image"]:
+        for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image",
+                      "aadhar_image_back", "pancard_image_back","voter_id_image_back"]:
             if field in files:
                 upload = files[field]
                 if not upload or not upload.filename:
@@ -404,7 +477,7 @@ update_fields = [
     "city", "pincode", "status","occupation",
     "group",
     "email",
-    "address",
+    "address", "address_line_2",
     "nominee",
     "relation",
     "aadhar",
@@ -426,7 +499,8 @@ update_fields = [
     "bank_address",
 
     "member_id", "member_image", "company", "member_name",
-    "address_doc_type", "home_image","voter_id","voter_id_image"
+    "address_doc_type", "home_image","voter_id","voter_id_image",
+    "aadhar_image_back", "pancard_image_back","voter_id_image_back"
 ]
 
 """
@@ -475,7 +549,8 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"group": "group_name"},
-        image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image']
+        image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
+                      "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
     )
 
 
@@ -493,14 +568,17 @@ def update_loan_member_api(name):
         # # Fetch existing loan member doc
         doc = frappe.get_doc("Loan Member", loan_member_id)
 
+        image_fields = ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",
+                             "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
+
         # Update text fields
         for field in update_fields:
-            if field not in ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",]:
+            if field not in image_fields:
                 if data.get(field) is not None:
                     doc.set(field, data.get(field))
 
         # Handle file uploads OR existing path strings
-        for field in ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",]:
+        for field in image_fields:
             if field in files and files[field].filename:
                 # If new file uploaded → save and replace
                 upload = files[field]

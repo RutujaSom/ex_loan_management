@@ -72,15 +72,23 @@ def create_collection_in_hand():
         files = frappe.request.files  # uploaded files
 
         # Step 1: Prepare Loan Application doc
+        amount = data.get("amount")
+        if amount:
+            # Convert to float and make negative if positive
+            amount = float(amount)
+            if amount > 0:
+                amount = -amount
+
+
         doc = frappe.get_doc({
             "doctype": "Collection In Hand",
             "employee":data.get("employee"),
-            "amount":(data.get("amount")),
+            "amount":amount,
             "given_to":data.get("given_to"),
             "posting_date":data.get("posting_date") or nowdate(),
         })
         if "payment_proof" in files:
-            upload = "payment_proof"
+            upload = files["payment_proof"] 
             if not upload or not upload.filename:
                 file_doc = save_file(
                     fname=upload.filename,
