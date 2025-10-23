@@ -8,6 +8,15 @@
 // });
 
 frappe.ui.form.on('Loan Member', {
+    onload: function(frm) {
+        frm.set_query("group", function() {
+            return {
+                filters: {
+                    workflow_state: "Approved"
+                }
+            };
+        });
+    },
     refresh(frm) {
         frm.add_custom_button('Import Loan Member', () => {
             open_import_dialog(frm);
@@ -22,11 +31,12 @@ frappe.ui.form.on('Loan Member', {
             frm.set_df_property("status", "hidden", 1);
         }
         if (frappe.user.has_role("Agent") && !frappe.user.has_role("Administrator")) {
-            
+            console.log("in if ............")
             // If status is Pending → make the whole form read-only
             if (!frm.is_new() && frm.doc.status == "Pending") {
                 frm.disable_form();
             }
+            console.log("frm.doc.status ....",frm.doc.status)
             // Restrict allowed options for Agent
             if (frm.doc.status === "Draft") {
                 frm.set_df_property("status", "options", ["Draft", "Pending"]);
@@ -136,7 +146,6 @@ function update_status(frm, status) {
             status: status
         },
         callback: function() {
-            alert(".......")
             frm.reload_doc();
         }
     });

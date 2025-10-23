@@ -60,6 +60,10 @@
   "address_verified",
   "section_break_qnda",
   "home_image",
+  "longitude",
+  "column_break_cnpj",
+  "latitude",
+  "geo_location",
   "cibil_tab",
   "cibil_score",
   "cibil_date",
@@ -430,13 +434,32 @@
    "fieldtype": "Data",
    "label": "Created By",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cnpj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "geo_location",
+   "fieldtype": "Small Text",
+   "label": "Geo Location"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-23 11:17:14.853707",
+ "modified": "2025-10-23 18:51:17.716427",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
@@ -540,6 +563,7 @@
    "write": 1
   }
  ],
+ "row_format": "Dynamic",
  "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
