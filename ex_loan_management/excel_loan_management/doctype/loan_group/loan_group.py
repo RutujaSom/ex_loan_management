@@ -171,21 +171,25 @@ def create_loan_group():
             "group_name":data.get("group_name"),
             "group_head":data.get("group_head"),
         })
+        doc.insert(ignore_permissions=True)
+        
         if "group_image" in files:
             upload = files["group_image"] 
-            if not upload or not upload.filename:
+            print("upload ...",upload,'... ', upload.filename)
+            if upload or upload.filename:
+                print("in if ....")
                 file_doc = save_file(
                     fname=upload.filename,
                     content=upload.stream.read(),
                     dt="Loan Group",
-                    dn=1,
+                    dn=doc.name,
                     is_private=1
                 )
                 doc.set("group_image", file_doc.file_url)
 
 
         # Step 2: Insert Collection In Hand (runs validate() automatically)
-        doc.insert(ignore_permissions=True)
+        doc.save(ignore_permissions=True)
         doc.db_set("workflow_state", "Pending", update_modified=False)
         frappe.db.commit()
 
@@ -193,6 +197,56 @@ def create_loan_group():
             "status": "success",
             "status_code": 201,
             "msg": "Loan Group Created Successfully"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
+        return api_error(e)
+
+
+
+
+
+@frappe.whitelist()
+def update_loan_group(name):
+    try:
+        data = frappe.form_dict  # works for JSON body and form-data
+        files = frappe.request.files  # uploaded files
+        
+        loan_group_id = name
+        if not loan_group_id:
+            return {"status": "error", "message": "Loan Group ID is required"}
+
+        # # Fetch existing loan member doc
+        doc = frappe.get_doc("Loan Group", loan_group_id)
+        
+        if data.get("group_name"):
+            doc.group_name = data.get("group_name")
+        if data.get("group_head"):
+            doc.group_head = data.get("group_head")
+
+
+        if "group_image" in files:
+            upload = files["group_image"] 
+            if upload or upload.filename:
+                file_doc = save_file(
+                    fname=upload.filename,
+                    content=upload.stream.read(),
+                    dt="Loan Group",
+                    dn=doc.name,
+                    is_private=1
+                )
+                doc.set("group_image", file_doc.file_url)
+
+
+        # Step 2: Insert Collection In Hand (runs validate() automatically)
+        doc.save(ignore_permissions=True)
+        frappe.db.commit()
+
+        return {
+            "status": "success",
+            "status_code": 201,
+            "msg": "Loan Group Updated Successfully"
         }
 
     except Exception as e:

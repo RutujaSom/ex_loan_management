@@ -80,8 +80,10 @@ class LoanMember(Document):
         if existing_member:
             frappe.throw(existing_member)
 
-        
-        
+        if not self.created_by:
+            # Get the full name from the User DocType
+            owner_full_name = frappe.db.get_value("User", self.owner, "full_name")
+            self.db_set("created_by",owner_full_name)
 
 
 @frappe.whitelist()
@@ -439,6 +441,8 @@ def create_loan_member():
             "status": "Draft"
         })
 
+        doc.insert(ignore_permissions=True)
+
 
         # Step 2: Handle file uploads
         for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image",
@@ -451,15 +455,16 @@ def create_loan_member():
                     fname=upload.filename,
                     content=upload.stream.read(),
                     dt="Loan Member",
-                    # dn=doc.name,
-                    dn=1,
+                    dn=doc.name,
+                    # dn=1,
                     is_private=1
                 )
                 doc.set(field, file_doc.file_url)
 
         # Step 3: Save updated doc with file URLs
-        doc.insert(ignore_permissions=True)
-        frappe.db.commit()
+        # doc.insert(ignore_permissions=True)
+        doc.save(ignore_permissions=True)
+        # frappe.db.commit()
 
         return {
             "status": "success",

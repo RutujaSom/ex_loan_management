@@ -93,6 +93,7 @@
   {
    "fieldname": "amount_given_emp",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Employee",
    "mandatory_depends_on": "doc.given_to == 'Employee'",
    "options": "Employee"
@@ -113,7 +114,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-17 17:37:45.795009",
+ "modified": "2025-10-23 12:29:36.438848",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Collection In Hand",

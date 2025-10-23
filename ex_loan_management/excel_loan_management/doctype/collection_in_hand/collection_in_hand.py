@@ -208,3 +208,42 @@ def approve_or_reject_collection(name, status):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Collection In Hand API Error")
         return api_error(e)
+
+
+
+
+# /////////////////////////////////////////////////////////
+@frappe.whitelist()
+def get_user_collections():
+    print("in collection ....")
+    user = frappe.session.user
+    roles = frappe.get_roles(user)
+
+    # Admin or Loan Manager sees all records
+    if "System Manager" in roles or "Loan Manager" in roles:
+        collections = frappe.get_list(
+            "Collection In Hand",
+            fields=["name", "employee", "amount_given_emp", "amount", "status"],
+            order_by="creation desc"
+        )
+    else:
+        # Get Employee linked to this user
+        emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
+        if not emp:
+            return []
+
+        # Fetch records where either employee OR amount_given_emp is the logged-in employee
+        collections = frappe.get_list(
+            "Collection In Hand",
+            fields=["name", "employee", "amount_given_emp", "amount", "status"],
+            filters={
+                "docstatus": 0  # optional, only draft/pending
+            },
+            or_filters=[
+                ["employee", "=", emp],
+                ["amount_given_emp", "=", emp]
+            ],
+            order_by="creation desc"
+        )
+
+    return collections

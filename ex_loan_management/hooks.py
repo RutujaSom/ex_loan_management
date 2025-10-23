@@ -16,9 +16,20 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "filters": [
             ["name", "in", [
                 "Make collection in hand amount negative",
+                "Add filter on loan group in loan member form",
+                "Add filter on loan group assignment",
             ]]
         ]
-    },]
+    },
+    {
+        "dt": "Server Script",
+        "filters": [
+            ["name", "in", [
+                "Get Loan Group Data For Application",
+            ]]
+        ]
+    }
+]
 
 
 

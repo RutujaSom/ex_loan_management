@@ -9,5 +9,27 @@
   "name": "Make collection in hand amount negative",
   "script": "frappe.ui.form.on('Collection In Hand', {\n    before_save(frm) {\n        if (frm.doc.amount > 0) {\n            frm.set_value('amount', -Math.abs(frm.doc.amount));\n        }\n    }\n});\n",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Loan Group Assignment",
+  "enabled": 1,
+  "modified": "2025-10-23 11:41:08.612226",
+  "module": null,
+  "name": "Add filter on loan group assignment",
+  "script": "frappe.ui.form.on(\"Loan Group Assignment\", {\n    onload: function(frm) {\n        frm.set_query(\"loan_group\", function() {\n            return {\n                filters: {\n                    workflow_state: \"Approved\"\n                }\n            };\n        });\n    }\n});\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Loan Member",
+  "enabled": 1,
+  "modified": "2025-10-23 11:42:10.720995",
+  "module": null,
+  "name": "Add filter on loan group in loan member form",
+  "script": "frappe.ui.form.on(\"Loan Member\", {\n    onload: function(frm) {\n        frm.set_query(\"group\", function() {\n            return {\n                filters: {\n                    workflow_state: \"Approved\"\n                }\n            };\n        });\n    }\n});\n",
+  "view": "Form"
  }
 ]
