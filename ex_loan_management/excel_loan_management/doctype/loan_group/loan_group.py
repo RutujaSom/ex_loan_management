@@ -200,7 +200,7 @@ def create_loan_group():
         }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
+        frappe.log_error(frappe.get_traceback(), "Loan Group API Error")
         return api_error(e)
 
 
@@ -219,6 +219,9 @@ def update_loan_group(name):
 
         # # Fetch existing loan member doc
         doc = frappe.get_doc("Loan Group", loan_group_id)
+
+        if doc.workflow_state == "Pending":
+            frappe.throw("Cannot update Loan Group in Pending state.")
         
         if data.get("group_name"):
             doc.group_name = data.get("group_name")
@@ -241,6 +244,8 @@ def update_loan_group(name):
 
         # Step 2: Insert Collection In Hand (runs validate() automatically)
         doc.save(ignore_permissions=True)
+        doc.db_set("workflow_state", "Pending", update_modified=False)
+
         frappe.db.commit()
 
         return {
@@ -250,7 +255,7 @@ def update_loan_group(name):
         }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
+        frappe.log_error(frappe.get_traceback(), "Loan Group API Error")
         return api_error(e)
 
 

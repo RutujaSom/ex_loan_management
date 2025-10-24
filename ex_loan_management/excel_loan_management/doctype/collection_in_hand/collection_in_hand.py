@@ -114,7 +114,7 @@ def create_collection_in_hand():
         }
 
     except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Loan Repayment API Error")
+        frappe.log_error(frappe.get_traceback(), "Collection In Hand API Error")
         return api_error(e)
 
 

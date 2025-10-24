@@ -1,14 +1,9 @@
 // Copyright (c) 2025, Rutuja Somvanshi and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Loan Member", {
-// 	refresh(frm) {
-
-// 	},
-// });
-
 frappe.ui.form.on('Loan Member', {
     onload: function(frm) {
+        // Apply filter on "group" field → show only Approved groups
         frm.set_query("group", function() {
             return {
                 filters: {
@@ -17,43 +12,64 @@ frappe.ui.form.on('Loan Member', {
             };
         });
     },
+
     refresh(frm) {
+        // --- Custom Buttons ---
+        // Import new Loan Members
         frm.add_custom_button('Import Loan Member', () => {
             open_import_dialog(frm);
         });
+        // Update existing Loan Members
         frm.add_custom_button('Update Loan Member', () => {
             open_import_dialog_to_update_records(frm);
         });
 
-        // If Draft → keep it Draft until explicitly changed
+        // --- Default Status Handling ---
+        // Set default status as Draft for new records
         if (frm.is_new()) {
             frm.doc.status = "Draft";
             frm.set_df_property("status", "hidden", 1);
         }
+
+        // --- Role-based Restrictions for Agent ---
         if (frappe.user.has_role("Agent") && !frappe.user.has_role("Administrator")) {
-            console.log("in if ............")
-            // If status is Pending → make the whole form read-only
+            // Make form read-only if status = Pending
             if (!frm.is_new() && frm.doc.status == "Pending") {
                 frm.disable_form();
             }
-            console.log("frm.doc.status ....",frm.doc.status)
-            // Restrict allowed options for Agent
+
+            console.log("frm.doc.status ....", frm.doc.status);
+
+            // Limit status options for Agent
             if (frm.doc.status === "Draft") {
                 frm.set_df_property("status", "options", ["Draft", "Pending"]);
-            }else{
+            } else {
+                // Hide status field after submission
                 frm.set_df_property("status", "hidden", 1);
             }
         }
+
+        // --- Status Reversion Logic ---
+        // If record is reopened after verification/rejection → revert to Pending
         if (frm.doc.status === "Verified" || frm.doc.status === "Rejected") {
-            // If record is updated after Approved/Rejected → go back to Pending
             frm.doc.status = "Pending";
         }
-        
+
+        // --- Mobile Number Prefix Handling ---
+        // Add +91 prefix automatically if missing
+        if (!frm.doc.mobile_no) {
+            frm.set_value("mobile_no", "+91");
+        }
+        if (!frm.doc.mobile_no_2) {
+            frm.set_value("mobile_no_2", "+91");
+        }
     }
 });
 
 
-
+// -----------------------------------------------------------------------------
+// Dialog to Import Loan Members
+// -----------------------------------------------------------------------------
 function open_import_dialog() {
     const d = new frappe.ui.Dialog({
         title: 'Import Loan Member',
@@ -74,6 +90,7 @@ function open_import_dialog() {
         ],
         primary_action_label: 'Import',
         primary_action(values) {
+            // Call server-side method to import members
             frappe.call({
                 method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_loan_members",
                 args: {
@@ -83,7 +100,7 @@ function open_import_dialog() {
                 callback(r) {
                     if (r.message) {
                         frappe.msgprint(r.message);
-                        frappe.listview.refresh();  // refresh the list view
+                        frappe.listview.refresh();  // Refresh list view after import
                     }
                     d.hide();
                 }
@@ -95,10 +112,12 @@ function open_import_dialog() {
 }
 
 
-
+// -----------------------------------------------------------------------------
+// Dialog to Update Existing Loan Members
+// -----------------------------------------------------------------------------
 function open_import_dialog_to_update_records() {
     const d = new frappe.ui.Dialog({
-        title: 'Import Loan Member',
+        title: 'Update Loan Member',
         fields: [
             {
                 label: 'File Type',
@@ -116,6 +135,7 @@ function open_import_dialog_to_update_records() {
         ],
         primary_action_label: 'Import',
         primary_action(values) {
+            // Call server-side method to update records
             frappe.call({
                 method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_update_loan_members",
                 args: {
@@ -125,7 +145,7 @@ function open_import_dialog_to_update_records() {
                 callback(r) {
                     if (r.message) {
                         frappe.msgprint(r.message);
-                        frappe.listview.refresh();  // refresh the list view
+                        frappe.listview.refresh();  // Refresh list view after update
                     }
                     d.hide();
                 }
@@ -137,7 +157,9 @@ function open_import_dialog_to_update_records() {
 }
 
 
-
+// -----------------------------------------------------------------------------
+// Utility function to update status via server call
+// -----------------------------------------------------------------------------
 function update_status(frm, status) {
     frappe.call({
         method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.update_status",
@@ -146,7 +168,7 @@ function update_status(frm, status) {
             status: status
         },
         callback: function() {
-            frm.reload_doc();
+            frm.reload_doc(); // Reload document after status update
         }
     });
 }
