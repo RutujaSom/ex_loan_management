@@ -100,12 +100,15 @@ class LoanMember(Document):
                 frappe.throw("Invalid PAN Card format. It should be like 'ABCDE1234F' (5 letters, 4 digits, 1 letter).")
 
          # Validate both mobile numbers
+        print("self.mobile_no_2 ...",self.mobile_no_2)
         self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
         self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
+        print("in num .....", number, '....',fieldname)
         digits = number.replace("+91", "").strip()
+        print("digits ...",digits)
         if not digits:
             if required:
                 frappe.throw(f"{fieldname} is required")
@@ -443,6 +446,7 @@ def create_loan_member():
             "completed_age": data.get("completed_age"),
             "entry_age": data.get("entry_age"),
             "mobile_no": data.get("mobile_no"),
+            "mobile_no_2":data.get("mobile_no_2"),
             "company": company,
             "state": data.get("state"),
             "country": data.get("country"),
@@ -475,6 +479,11 @@ def create_loan_member():
             "ifsc_code": data.get("ifsc_code"),
             "account_type": data.get("account_type"),
             "bank_address": data.get("bank_address"),
+
+            "longitude": data.get("longitude"),
+            "latitude": data.get("latitude"),
+            "geo_location": data.get("geo_location"),
+
             "status": "Draft"
         })
 
