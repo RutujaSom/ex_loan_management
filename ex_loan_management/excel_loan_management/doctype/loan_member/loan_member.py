@@ -99,6 +99,36 @@ class LoanMember(Document):
             if not re.match(pan_pattern, self.pancard):
                 frappe.throw("Invalid PAN Card format. It should be like 'ABCDE1234F' (5 letters, 4 digits, 1 letter).")
 
+         # Validate both mobile numbers
+        self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
+        self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
+
+    def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
+        if not number:
+            if required:
+                frappe.throw(f"{fieldname} is required")
+            else:
+                return  # optional blank field is allowed
+
+        # Ensure +91 prefix
+        if not number.startswith("+91"):
+            if required:
+                frappe.throw(f"{fieldname} must start with +91")
+            else:
+                # optional field: if no +91, treat as blank
+                return
+
+        # Extract digits after +91
+        digits = number.replace("+91", "").strip()
+
+        # If optional and digits empty, skip
+        if not digits:
+            return
+
+        # Check that exactly 10 digits remain
+        if not digits.isdigit() or len(digits) != 10:
+            frappe.throw(f"Enter a valid 10-digit number after +91 for {fieldname}")
+
 
 
 @frappe.whitelist()
@@ -522,10 +552,11 @@ update_fields = [
     "ifsc_code",
     "account_type",
     "bank_address",
-
+    "created_by",
     "member_id", "member_image", "company", "member_name",
     "address_doc_type", "home_image","voter_id","voter_id_image",
-    "aadhar_image_back", "pancard_image_back","voter_id_image_back"
+    "aadhar_image_back", "pancard_image_back","voter_id_image_back",
+    "longitude", "latitude", "geo_location",
 ]
 
 """
@@ -694,11 +725,12 @@ def loan_member_get(name):
     # 🔹 Get linked Loan Group name
     if member.get("group"):
         group_doc = frappe.get_value("Loan Group", member["group"], "group_name")
-        member["group_name"] = group_doc or ""
+        member["group_group_name"] = group_doc or ""
 
     # 🔹 Full URL for image fields
     host_url = frappe.request.host_url.rstrip("/")  # e.g. http://localhost:8000
-    image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image']
+    image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
+                    "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
 
     for f in image_fields:
         if member.get(f):
