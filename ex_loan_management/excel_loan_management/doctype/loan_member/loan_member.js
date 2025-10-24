@@ -42,6 +42,7 @@ frappe.ui.form.on('Loan Member', {
 
             // Limit status options for Agent
             if (frm.doc.status === "Draft") {
+                frm.set_df_property("status", "hidden", 0);
                 frm.set_df_property("status", "options", ["Draft", "Pending"]);
             } else {
                 // Hide status field after submission

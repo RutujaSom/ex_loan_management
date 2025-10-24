@@ -104,27 +104,19 @@ class LoanMember(Document):
         self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
-        if not number:
+        # Extract digits after +91
+        digits = number.replace("+91", "").strip()
+        if not digits:
             if required:
                 frappe.throw(f"{fieldname} is required")
             else:
                 return  # optional blank field is allowed
 
         # Ensure +91 prefix
-        if not number.startswith("+91"):
-            if required:
+        if number:
+            if not number.startswith("+91"):
                 frappe.throw(f"{fieldname} must start with +91")
-            else:
-                # optional field: if no +91, treat as blank
-                return
-
-        # Extract digits after +91
-        digits = number.replace("+91", "").strip()
-
-        # If optional and digits empty, skip
-        if not digits:
-            return
-
+            
         # Check that exactly 10 digits remain
         if not digits.isdigit() or len(digits) != 10:
             frappe.throw(f"Enter a valid 10-digit number after +91 for {fieldname}")
