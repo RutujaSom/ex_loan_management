@@ -37,7 +37,7 @@ update_fields = [
 """
 
 @frappe.whitelist()
-def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee", sort_order="asc", is_pagination=False, **kwargs):
+def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee", sort_order="asc", employee=None, is_pagination=False, **kwargs):
     is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
     extra_params = {"search": search} if search else {}
     del kwargs['cmd']
@@ -49,7 +49,14 @@ def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee
             filters[k] = v
 
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
-
+    
+    or_filters = []
+    if employee:
+        or_filters = [
+            {"employee": employee},
+            {"amount_given_emp": employee}
+        ]
+    
     return get_paginated_data(
         doctype="Collection In Hand",
         fields=update_fields,
@@ -59,11 +66,12 @@ def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee
         sort_order=sort_order,
         page=int(page),
         page_size=int(page_size),
-        search_fields=["employee"],
+        search_fields=["employee","amount_given_emp","description","given_to",],
         is_pagination=is_pagination,
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"employee": "employee_name"},
+        or_filters = or_filters,
     )
 
 

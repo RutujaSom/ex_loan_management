@@ -17,9 +17,10 @@ def get_paginated_data(
     extra_params=None,
     link_fields=None,  # NEW: dict of {link_field: target_field}
     image_fields=None,
+    or_filters = []
 ):
     filters = filters or {}
-    or_filters = []
+    or_filters = or_filters or []
     extra_params = extra_params or {}
     link_fields = link_fields or {}
 
