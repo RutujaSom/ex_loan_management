@@ -67,6 +67,7 @@ class LoanMember(Document):
                 frappe.throw(f"To set status as 'Pending', the following fields must be filled: {', '.join(missing_fields)}")
 
         if self.status != "Pending":
+            print(self.address_verified , self.pancard_verified , self.aadhar_verified , self.voter_id_verified)
             if prev_status == "Draft" and self.status != "Draft":
                 frappe.throw("Status can only be changed from 'Draft' to 'Pending'.")
             if self.address_verified and self.pancard_verified and self.aadhar_verified and self.voter_id_verified:
@@ -100,15 +101,12 @@ class LoanMember(Document):
                 frappe.throw("Invalid PAN Card format. It should be like 'ABCDE1234F' (5 letters, 4 digits, 1 letter).")
 
          # Validate both mobile numbers
-        print("self.mobile_no_2 ...",self.mobile_no_2)
         self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
         self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
-        print("in num .....", number, '....',fieldname)
         digits = number.replace("+91", "").strip()
-        print("digits ...",digits)
         if not digits:
             if required:
                 frappe.throw(f"{fieldname} is required")

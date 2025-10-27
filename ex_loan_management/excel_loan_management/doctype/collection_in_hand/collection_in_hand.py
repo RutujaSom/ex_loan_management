@@ -27,6 +27,9 @@ update_fields = [
     "payment_proof",
     "amount_given_emp",
     "description",
+    "status",
+    "approval_by",
+    "approval_date",
 ]
 
 """
@@ -119,47 +122,6 @@ def create_collection_in_hand():
 
 
 
-
-
-@frappe.whitelist()
-def approve_collection_record(name):
-    try:
-        data = frappe.form_dict  # works for JSON body and form-data
-
-        # Step 1: Prepare Loan Application doc
-        amount = data.get("amount")
-        if amount:
-            # Convert to float and make negative if positive
-            amount = float(amount)
-            if amount > 0:
-                amount = -amount
-
-        doc = frappe.get_doc({
-            "doctype": "Collection In Hand",
-            "employee":data.get("employee"),
-            "amount":amount,
-            "given_to":data.get("given_to"),
-            "posting_date":data.get("posting_date") or nowdate(),
-            "amount_given_emp":data.get("amount_given_emp"),
-            "description":data.get("description")
-        })
-
-        # Step 2: Insert Collection In Hand (runs validate() automatically)
-        doc.insert(ignore_permissions=True)
-        frappe.db.commit()
-
-        return {
-            "status": "success",
-            "status_code": 201,
-            "msg": "Collection In Hand Created Successfully"
-        }
-
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Collection in hand API Error")
-        return api_error(e)
-
-
-
 @frappe.whitelist()
 def approve_or_reject_collection(name, status):
     try:
@@ -171,7 +133,7 @@ def approve_or_reject_collection(name, status):
 
         doc = frappe.get_doc("Collection In Hand", name)
         current_user = frappe.session.user
-
+        
         # Determine the user who is allowed to approve
         if doc.amount_given_emp:
             # Get the user linked to the Employee
@@ -181,10 +143,11 @@ def approve_or_reject_collection(name, status):
         else:
             # If no employee assigned, only Administrator can approve
             expected_approver = "Administrator"  # or frappe.db.get_single_value("Global Defaults", "default_administrator")
-
+        print("expected_approver ...",expected_approver)
         # Check permission
-        if current_user != expected_approver:
-            frappe.throw(f"User can not approve/reject this record.")
+        if "Administrator" not in frappe.get_roles(current_user):
+            if current_user != expected_approver:
+                frappe.throw(f"User can not approve/reject this record.")
 
         # Set status based on status
         if status.lower() == "approved":
@@ -195,7 +158,7 @@ def approve_or_reject_collection(name, status):
             frappe.throw("Invalid status. Use 'approved' or 'rejected'.")
 
         # Record who approved/rejected
-        doc.approved_by = current_user
+        doc.approval_by = current_user
         doc.approval_date = frappe.utils.now()
 
         doc.save(ignore_permissions=True)
