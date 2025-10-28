@@ -64,6 +64,7 @@ def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"employee": "employee_name"},
+        image_fields=['payment_proof',]
     )
 
 

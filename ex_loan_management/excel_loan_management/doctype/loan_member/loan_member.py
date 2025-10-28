@@ -39,6 +39,7 @@ class LoanMember(Document):
         self.name = new_id
         self.member_id = new_id
 
+
     def before_save(self):
         # ✅ Skip validation if called during import
         if getattr(frappe.flags, "in_import", False):
@@ -106,6 +107,7 @@ class LoanMember(Document):
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
+        print("number ....",number , ' fieldname ....',fieldname)
         digits = number.replace("+91", "").strip()
         if not digits:
             if required:
@@ -180,7 +182,7 @@ def import_loan_members(file_url):
             group_name = row.get("NAME OF GROUP")
             branch_code = str(row.get("BRANCH CODE")).strip() if row.get("BRANCH CODE") else None
             branch_name = row.get("BRANCH NAME")
-            print("branch_name .....",branch_name)
+            print("branch_name .....",branch_name, '  mobile_no ....',mobile_no)
             # 1️⃣ Create Loan Group if not exists
             if group_id and not frappe.db.exists("Loan Group", {"group_id": group_id}):
                 grp_doc = frappe.new_doc("Loan Group")
@@ -239,7 +241,8 @@ def import_loan_members(file_url):
                 doc.last_name = last_name
                 doc.status = "Verified"
                 doc.type_of_borrower = type_of_borrower
-                doc.mobile_no = str(mobile_no) if mobile_no else None
+                doc.mobile_no = f"+91{mobile_no}" if mobile_no else None
+                doc.mobile_no_2 = ""
                 doc.gender = gender
                 doc.email = email
                 doc.dob = dob
@@ -257,7 +260,6 @@ def import_loan_members(file_url):
                 doc.aadhar = row.get("AADHAR NO")
                 doc.pancard = row.get("PAN")
                 doc.address_doc_type= row.get("Electricity Bill")
-                doc.voter_id = row.get("CITY")
                 doc.aadhar_verified = True
                 doc.pancard_verified = True
                 doc.address_verified= True
@@ -269,7 +271,6 @@ def import_loan_members(file_url):
                 doc.holder_name = member_name
                 doc.ifsc_code = row.get("IFSC CODE")
                 doc.account_type = "Saving"
-                # doc.holder_name = row.get("PAN"),
 
                 print('doc ...........', doc, '.....', member_id)
 
