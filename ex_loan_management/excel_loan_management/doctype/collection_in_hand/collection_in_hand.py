@@ -50,13 +50,6 @@ def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee
 
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
     
-    or_filters = []
-    if employee:
-        or_filters = [
-            {"employee": employee},
-            {"amount_given_emp": employee}
-        ]
-    
     return get_paginated_data(
         doctype="Collection In Hand",
         fields=update_fields,
@@ -71,7 +64,6 @@ def collection_in_hand_list(page=1, page_size=10, search=None, sort_by="employee
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"employee": "employee_name"},
-        or_filters = or_filters,
     )
 
 
