@@ -92,6 +92,7 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.given_to === \"Employee\"",
    "fieldname": "amount_given_emp",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -100,6 +101,7 @@
    "options": "Employee"
   },
   {
+   "depends_on": "eval:doc.given_to === \"Bank\"",
    "fieldname": "description",
    "fieldtype": "Data",
    "label": "Description"
@@ -128,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-27 14:28:52.792466",
+ "modified": "2025-10-29 11:14:33.098433",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Collection In Hand",
