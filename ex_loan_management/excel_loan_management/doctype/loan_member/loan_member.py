@@ -13,31 +13,31 @@ from datetime import date
 
 class LoanMember(Document):
 
-    def autoname(self):
-        prefix = "TMA"
+    # def autoname(self):
+    #     prefix = "TMA"
 
-        # Fetch latest member_id (not name)
-        last_record = frappe.db.get_all(
-            "Loan Member",
-            filters={"member_id": ["like", f"{prefix}%"]},
-            fields=["member_id"],
-            order_by="member_id desc",
-            limit=1
-        )
+    #     # Fetch latest member_id (not name)
+    #     last_record = frappe.db.get_all(
+    #         "Loan Member",
+    #         filters={"member_id": ["like", f"{prefix}%"]},
+    #         fields=["member_id"],
+    #         order_by="member_id desc",
+    #         limit=1
+    #     )
 
-        if last_record:
-            last_id = last_record[0].member_id
-            match = re.search(r"TMA(\d+)", last_id)
-            new_num = int(match.group(1)) + 1 if match else 1
-        else:
-            new_num = 1
-        # Safe padding
-        if new_num <= 99999:
-            new_id = f"{prefix}{new_num:05d}"
-        else:
-            new_id = f"{prefix}{new_num}"
-        self.name = new_id
-        self.member_id = new_id
+    #     if last_record:
+    #         last_id = last_record[0].member_id
+    #         match = re.search(r"TMA(\d+)", last_id)
+    #         new_num = int(match.group(1)) + 1 if match else 1
+    #     else:
+    #         new_num = 1
+    #     # Safe padding
+    #     if new_num <= 99999:
+    #         new_id = f"{prefix}{new_num:05d}"
+    #     else:
+    #         new_id = f"{prefix}{new_num}"
+    #     self.name = new_id
+    #     self.member_id = new_id
 
 
     def before_save(self):
@@ -88,22 +88,22 @@ class LoanMember(Document):
             self.db_set("created_by",owner_full_name)
 
 
-    def validate(self):
-        # ✅ Validate Voter ID
-        if self.voter_id:
-            voter_pattern = r'^[A-Z]{3}[0-9]{7}$'
-            if not re.match(voter_pattern, self.voter_id):
-                frappe.throw("Invalid Voter ID format. It should be like 'ABC1234567' (3 letters followed by 7 digits).")
+    # def validate(self):
+    #     # ✅ Validate Voter ID
+    #     if self.voter_id:
+    #         voter_pattern = r'^[A-Z]{3}[0-9]{7}$'
+    #         if not re.match(voter_pattern, self.voter_id):
+    #             frappe.throw("Invalid Voter ID format. It should be like 'ABC1234567' (3 letters followed by 7 digits).")
 
-        # ✅ Validate PAN Card
-        if self.pancard:
-            pan_pattern = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'
-            if not re.match(pan_pattern, self.pancard):
-                frappe.throw("Invalid PAN Card format. It should be like 'ABCDE1234F' (5 letters, 4 digits, 1 letter).")
+    #     # ✅ Validate PAN Card
+    #     if self.pancard:
+    #         pan_pattern = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'
+    #         if not re.match(pan_pattern, self.pancard):
+    #             frappe.throw("Invalid PAN Card format. It should be like 'ABCDE1234F' (5 letters, 4 digits, 1 letter).")
 
-         # Validate both mobile numbers
-        self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
-        self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
+    #      # Validate both mobile numbers
+    #     self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
+    #     self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
@@ -128,6 +128,7 @@ class LoanMember(Document):
 
 @frappe.whitelist()
 def import_loan_members(file_url):
+    print("in import")
     frappe.flags.in_import = True  # ✅ Set import flag
     try:
         file_doc = frappe.get_doc("File", {"file_url": file_url})
