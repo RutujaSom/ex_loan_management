@@ -515,7 +515,6 @@ update_fields = [
     "group",
     "email",
     "address", "address_line_2",
-    "relation",
     "aadhar",
     "pancard",
     "aadhar_image",
