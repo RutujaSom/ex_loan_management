@@ -31,6 +31,13 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
 ]
 
 
+doc_events = {
+    "File": {
+        "before_insert": "ex_loan_management.api.make_all_files_public.make_all_files_public"
+    }
+}
+
+
 
 # hooks.py
 # Each item in the list will be shown as an app in the apps page

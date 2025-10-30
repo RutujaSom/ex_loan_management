@@ -15,6 +15,7 @@ class CollectionInHand(Document):
 
 
 
+
 update_fields = [
     "name",
     "employee",
@@ -102,7 +103,7 @@ def create_collection_in_hand():
                     content=upload.stream.read(),
                     dt="Collection In Hand",
                     dn=1,
-                    is_private=1
+                    is_private=0
                 )
                 doc.set("payment_proof", file_doc.file_url)
 
@@ -211,3 +212,37 @@ def get_user_collections():
         )
 
     return collections
+
+
+
+
+# import frappe
+
+# @frappe.whitelist()
+# def get_filtered_records_for_user():
+#     user = frappe.session.user
+#     roles = frappe.get_roles(user)
+#     emp = frappe.db.get_value("Employee", {"user_id": user}, "name")
+
+#     # Admin or Loan Manager → see all
+#     if "Administrator" in roles or "Loan Manager" in roles:
+#         return frappe.db.get_all(
+#             "Collection In Hand",
+#             fields=["name", "employee", "amount_given_emp", "status", "amount", "owner", "given_to"],
+#             order_by="creation desc",
+#             limit_page_length=200,
+#             ignore_permissions=True
+#         )
+
+#     # Otherwise: only their related records
+#     return frappe.db.get_all(
+#         "Collection In Hand",
+#         fields=["name", "employee", "amount_given_emp", "status", "amount", "owner", "given_to"],
+#         or_filters=[
+#             ["employee", "=", emp],
+#             ["amount_given_emp", "=", emp],
+#             ["owner", "=", user],
+#         ],
+#         order_by="creation desc",
+#         ignore_permissions=True
+#     )

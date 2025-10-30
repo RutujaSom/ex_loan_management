@@ -220,7 +220,7 @@ def create_loan_group():
                     content=upload.stream.read(),
                     dt="Loan Group",
                     dn=doc.name,
-                    is_private=1
+                    is_private=0
                 )
                 doc.set("group_image", file_doc.file_url)
 
@@ -275,7 +275,7 @@ def update_loan_group(name):
                     content=upload.stream.read(),
                     dt="Loan Group",
                     dn=doc.name,
-                    is_private=1
+                    is_private=0
                 )
                 doc.set("group_image", file_doc.file_url)
 

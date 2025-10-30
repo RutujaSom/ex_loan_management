@@ -484,7 +484,7 @@ def create_loan_member():
                     dt="Loan Member",
                     dn=doc.name,
                     # dn=1,
-                    is_private=1
+                    is_private=0
                 )
                 doc.set(field, file_doc.file_url)
 
@@ -665,7 +665,7 @@ def update_loan_member_api(name):
                     content=upload.stream.read(),
                     dt="Loan Member",
                     dn=doc.name,
-                    is_private=1
+                    is_private=0
                 )
                 doc.set(field, file_doc.file_url)
             elif data.get(field):
