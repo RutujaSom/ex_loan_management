@@ -149,7 +149,7 @@ def get_loan_summary(group=None):
     collection_in_hand = frappe.db.sql("""
         SELECT COALESCE(SUM(amount), 0)
         FROM `tabCollection In Hand`
-        WHERE employee = %s
+        WHERE employee = %s AND status = "Approved"
     """, (employee.name,))[0][0] or 0
 
 

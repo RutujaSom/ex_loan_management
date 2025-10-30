@@ -172,9 +172,6 @@ def import_loan_members(file_url):
             country = "India"
             city = row.get("CITY")
             pincode = row.get("PIN CODE")
-            nominee_name = row.get("NOMINEE FULL NAME")
-            relation = str(row.get("RELATIONSHIP OF NOMINEE WITH BORROWER")).title()
-            nominee_dob = row.get("NOMINEE DATE OF BIRTH")
 
             # Group and branch info
             group_id = str(row.get("GROUP CODE")).strip() if row.get("GROUP CODE") else None
@@ -218,15 +215,6 @@ def import_loan_members(file_url):
             else:
                 type_of_borrower = 'Co-Borrower'
             
-            if isinstance(nominee_dob, str):
-                try:
-                    nominee_dob = datetime.strptime(str(nominee_dob), "%d-%m-%Y").date()
-                except:
-                    try:
-                        nominee_dob = datetime.strptime(str(nominee_dob), "%d/%m/%Y").date()
-                    except Exception as e:
-                        print('error ....', e)
-                
             first_name, middle_name, last_name = split_name(member_name)
                 
             try:
@@ -253,9 +241,6 @@ def import_loan_members(file_url):
                 doc.country = country
                 doc.city = city
                 doc.pincode = pincode
-                doc.nominee_name = nominee_name
-                doc.relation = relation if str(relation)not in['None', None, ""] else ""
-                doc.nominee_dob = nominee_dob
                 doc.aadhar = row.get("AADHAR NO")
                 doc.pancard = row.get("PAN")
                 doc.address_doc_type= row.get("Electricity Bill")
@@ -458,8 +443,6 @@ def create_loan_member():
             "group": data.get("group"),
             "email": data.get("email"),
             "address": data.get("address"),
-            "nominee": data.get("nominee"),
-            "relation": data.get("relation"),
             "aadhar": data.get("aadhar"),
             "pancard": data.get("pancard"),
             "voter_id":data.get("voter_id"),
@@ -532,7 +515,6 @@ update_fields = [
     "group",
     "email",
     "address", "address_line_2",
-    "nominee",
     "relation",
     "aadhar",
     "pancard",
@@ -586,7 +568,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
             # Members without a group assigned (group is null/empty)
             filters["group"] = ["in", [None, ""]]
 
-
+    filters["owner"] = frappe.session.user
     print("filters ...",filters)
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 

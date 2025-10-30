@@ -8,7 +8,7 @@ import frappe
 from frappe.utils.file_manager import save_file
 from ex_loan_management.api.utils import api_error
 import re
-
+from datetime import datetime
 class LoanGroup(Document):
     def autoname(self):
         prefix = "GC"
@@ -35,6 +35,41 @@ class LoanGroup(Document):
             new_id = f"{prefix}{new_num}"
         self.name = new_id
         self.group_id = new_id
+
+    
+    def on_update(self):
+        # When workflow is approved, create loan group assignment
+        if self.workflow_state == "Approved":
+            create_loan_group_assigned(self)
+
+
+def create_loan_group_assigned(doc):
+    """Create a Loan Group Assignment record when Loan Group is approved"""
+
+    # Step 1: Check if group is already assigned to someone
+    existing_assignment = frappe.db.get_value(
+        "Loan Group Assignment", 
+        {"loan_group": doc.name}, 
+        ["employee"]
+    )
+    print("existing_assignment ....",existing_assignment)
+
+    if existing_assignment:
+        return  # stop, since group already assigned
+
+    # Step 2: Get Employee linked with the Loan Group owner (via user_id)
+    employee = frappe.db.get_value("Employee", {"user_id": doc.owner}, "name")
+
+    # Step 3: Create new Loan Group Assignment record
+    assigned = frappe.new_doc("Loan Group Assignment")
+    assigned.loan_group = doc.name
+    assigned.employee = employee
+    assigned.start_date = datetime.now()
+    assigned.owner = doc.owner  # make owner same as the user who owns the Loan Group
+    assigned.insert(ignore_permissions=True)
+
+    frappe.msgprint(f"✅ Loan Group '{doc.name}' assigned successfully to Employee '{employee}'.")
+
 
 
 @frappe.whitelist()
@@ -192,6 +227,7 @@ def create_loan_group():
         doc.save(ignore_permissions=True)
         doc.db_set("workflow_state", "Pending", update_modified=False)
         frappe.db.commit()
+        
 
         return {
             "status": "success",

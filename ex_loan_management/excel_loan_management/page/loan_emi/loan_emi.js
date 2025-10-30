@@ -222,11 +222,11 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 // 🔄 Update button
                 $(".update-repayment").off("click").on("click", function() {
                     let loan_id = $(this).data("loan");
-                    let posting_date = $(this).data("payment_date");
+                    let value_date = $(this).data("payment_date");
 
                     frappe.new_doc("Loan Repayment", {
                         against_loan: loan_id,
-                        posting_date: posting_date
+                        value_date: value_date
                     });
                 });
 
