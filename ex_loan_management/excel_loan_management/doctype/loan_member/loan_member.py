@@ -549,7 +549,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
     extra_params = {"search": search} if search else {}
     print("kwargs ...",kwargs)
     kwargs.pop('cmd', None)
-
+    user = frappe.session.user
 
     # 🔹 Collect filters from kwargs (all query params except the defaults)
     filters = {}
@@ -564,14 +564,29 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         is_group = frappe.utils.sbool(is_group)
         if is_group:
             # Members with a group assigned (group is not null/empty)
-            filters["group"] = ["!=", ""]
+            # filters["group"] = ["!=", ""]
+            employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+            if not employee_id:
+                return []
+
+            # Get loan groups for this employee
+            groups = frappe.get_all(
+                "Loan Group Assignment",
+                filters={"employee": employee_id},
+                pluck="loan_group"
+            )
+            if not groups:
+                groups = []
+
+            # 🔹 Collect filters from kwargs (all query params except the defaults)
+            filters["group"] = ["in", groups]
         else:
             # Members without a group assigned (group is null/empty)
             filters["group"] = ["in", [None, ""]]
             filters["owner"] = frappe.session.user
 
     # filters["owner"] = frappe.session.user
-    user = frappe.session.user
+    
     if status in ["Verified", "Pending"]:
         print("in if ...................", status)
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -586,9 +601,6 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         )
         if not groups:
             groups = []
-
-        is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
-        extra_params = {"search": search} if search else {}
 
         # 🔹 Collect filters from kwargs (all query params except the defaults)
         filters["group"] = ["in", groups]
