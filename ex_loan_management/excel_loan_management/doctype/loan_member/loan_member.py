@@ -544,10 +544,12 @@ update_fields = [
 """
 
 @frappe.whitelist()
-def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc", is_pagination=False, **kwargs):
+def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc",status=None, is_pagination=False, **kwargs):
     is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
     extra_params = {"search": search} if search else {}
-    del kwargs['cmd']
+    print("kwargs ...",kwargs)
+    kwargs.pop('cmd', None)
+
 
     # 🔹 Collect filters from kwargs (all query params except the defaults)
     filters = {}
@@ -566,8 +568,36 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         else:
             # Members without a group assigned (group is null/empty)
             filters["group"] = ["in", [None, ""]]
+            filters["owner"] = frappe.session.user
 
-    filters["owner"] = frappe.session.user
+    # filters["owner"] = frappe.session.user
+    user = frappe.session.user
+    if status in ["Verified", "Pending"]:
+        print("in if ...................", status)
+        employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+        if not employee_id:
+            return []
+
+        # Get loan groups for this employee
+        groups = frappe.get_all(
+            "Loan Group Assignment",
+            filters={"employee": employee_id},
+            pluck="loan_group"
+        )
+        if not groups:
+            groups = []
+
+        is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
+        extra_params = {"search": search} if search else {}
+
+        # 🔹 Collect filters from kwargs (all query params except the defaults)
+        filters["group"] = ["in", groups]
+        filters["status"] = status
+
+    if status == "Draft":
+        filters["owner"] = frappe.session.user
+        filters["status"] = status
+
     print("filters ...",filters)
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 

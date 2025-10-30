@@ -59,6 +59,8 @@ def create_loan_group_assigned(doc):
 
     # Step 2: Get Employee linked with the Loan Group owner (via user_id)
     employee = frappe.db.get_value("Employee", {"user_id": doc.owner}, "name")
+    if not employee:
+        return
 
     # Step 3: Create new Loan Group Assignment record
     assigned = frappe.new_doc("Loan Group Assignment")

@@ -13,7 +13,7 @@ def get_loan_members():
 
     # If logged-in user is Agent, only show records created by them
     if "Agent" in roles and not "Administrator" in roles:
-        filters["owner"] = user
+        # filters["owner"] = user
 
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
         if not employee_id:
@@ -29,7 +29,8 @@ def get_loan_members():
     assigned_members = frappe.get_all(
         "Loan Member",
         filters={"group": ["in", groups]},
-        pluck="name"
+        # pluck="name",
+        fields=["name", "member_name", "group", "status", "creation", "owner"],
     )
 
 
@@ -37,23 +38,28 @@ def get_loan_members():
     loan_members = frappe.get_all(
         "Loan Member",
         fields=["name", "member_name", "group", "status", "creation", "owner"],
-        filters=filters,
+        # filters=filters,
         order_by="creation desc"
     )
+    print("loan_members ...",loan_members)
 
     # Members without group
     without_group = [m for m in loan_members if not m.get("group")]
 
     # Count based on status
-    verified_count = sum(1 for m in loan_members if m.get("status") == "Verified")
-    rejected_count = sum(1 for m in loan_members if m.get("status") == "Rejected")
-    non_verified_count = sum(1 for m in loan_members if m.get("status") == "Open")
+    verified_count = sum(1 for m in assigned_members if m.get("status") == "Verified")
+    rejected_count = sum(1 for m in assigned_members if m.get("status") == "Rejected")
+    non_verified_count = sum(1 for m in loan_members if m.get("status") == "Draft")
+    pending_count = sum(1 for m in assigned_members if m.get("status") == "Pending")
+    draft_count = sum(1 for m in loan_members if m.get("status") == "Draft")
 
     return {
-        "loan_members": len(loan_members),
+        "loan_members": len(assigned_members),
         "verified_count": verified_count,
         "rejected_count": rejected_count,
         "non_verified_count": non_verified_count,
+        "draft_count": draft_count,
+        "pending_count": pending_count,
         "without_group_count": len(without_group),
         "assigned_members":len(assigned_members)
     }
