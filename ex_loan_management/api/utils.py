@@ -17,7 +17,8 @@ def get_paginated_data(
     extra_params=None,
     link_fields=None,  # NEW: dict of {link_field: target_field}
     image_fields=None,
-    or_filters = []
+    or_filters = [],
+    link_images_fields=None,
 ):
     filters = filters or {}
     or_filters = or_filters or []
@@ -92,6 +93,47 @@ def get_paginated_data(
             for d in data
         ]
         return data
+    
+
+    def extend_linked_images(data):
+        host_url = frappe.request.host_url.rstrip("/")
+        print("in igf ......",link_images_fields)
+        if not link_images_fields or not data:
+            return data
+
+        for fieldname, image_field in link_images_fields.items():
+            if not any(d.get(fieldname) for d in data):
+                continue
+
+            field_meta = frappe.get_meta(doctype).get_field(fieldname)
+            print("field_meta ....",field_meta)
+            if not field_meta:
+                continue
+
+            # Determine target doctype(s)
+            if field_meta.fieldtype == "Dynamic Link":
+                dt_field = field_meta.options
+                target_map = {}
+                for d in data:
+                    dt_name = d.get(dt_field)
+                    rec_name = d.get(fieldname)
+                    if dt_name and rec_name:
+                        target_map.setdefault(dt_name, []).append(rec_name)
+            else:
+                target_map = {field_meta.options: [d[fieldname] for d in data if d.get(fieldname)]}
+            print("target_map ....",target_map)
+            # Fetch and attach images
+            for target_doctype, names in target_map.items():
+                records = frappe.get_all(target_doctype, filters={"name": ["in", names]}, fields=["name", image_field])
+                values_map = {r["name"]: r.get(image_field) for r in records}
+                print("values_map ....",values_map)
+                for d in data:
+                    rec_name = d.get(fieldname)
+                    img = values_map.get(rec_name)
+                    d[f"{fieldname}_image"] = f"{host_url}{img}" if img else ""
+
+        return data
+
 
 
     if is_pagination:
@@ -120,6 +162,7 @@ def get_paginated_data(
         # extend linked fields
         data = extend_linked_fields(data)
         data = extend_image_fields(data)
+        data = extend_linked_images(data)
 
         total_pages = math.ceil(total_count / page_size) if page_size else 1
 
@@ -147,6 +190,7 @@ def get_paginated_data(
             order_by=f"{sort_by} {sort_order}"
         )
         data = extend_image_fields(data)
+        data = extend_linked_images(data)
         return extend_linked_fields(data)
 
 
