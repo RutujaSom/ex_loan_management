@@ -595,17 +595,18 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         if not employee_id:
             return []
 
-        # Get loan groups for this employee
-        groups = frappe.get_all(
-            "Loan Group Assignment",
-            filters={"employee": employee_id},
-            pluck="loan_group"
-        )
-        if not groups:
-            groups = []
+        if kwargs.get("group") == None or kwargs.get("group") == "":
+            # Get loan groups for this employee
+            groups = frappe.get_all(
+                "Loan Group Assignment",
+                filters={"employee": employee_id},
+                pluck="loan_group"
+            )
+            if not groups:
+                groups = []
 
-        # 🔹 Collect filters from kwargs (all query params except the defaults)
-        filters["group"] = ["in", groups]
+            # 🔹 Collect filters from kwargs (all query params except the defaults)
+            filters["group"] = ["in", groups]
         filters["status"] = status
 
     if status == "Draft":
