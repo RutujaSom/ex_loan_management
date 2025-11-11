@@ -180,7 +180,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 let html = `<table class="table table-bordered table-striped">
                     <thead>
                         <tr>
-                            <th data-field="lrs.loan">Loan</th>
+                            <th data-field="l.loan_id">Loan</th>
                             <th data-field="lm.member_name">Applicant</th>
                             <th data-field="rs.payment_date">Payment Date</th>
                             <th data-field="rs.principal_amount">Principal</th>
@@ -197,7 +197,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 r.message.forEach(row => {
                     html += `
                         <tr>
-                            <td>${row.loan}</td>
+                            <td>${row.loan_id}</td>
                             <td>${row.member_name || row.applicant}</td>
                             <td>${row.payment_date}</td>
                             <td>${row.principal_amount}</td>
