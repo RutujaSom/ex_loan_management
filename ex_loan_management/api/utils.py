@@ -25,10 +25,36 @@ def get_paginated_data(
     extra_params = extra_params or {}
     link_fields = link_fields or {}
 
-    # Search support
-    if search and search_fields:
-        for f in search_fields:
-            or_filters.append([doctype, f, "like", f"%{search}%"])
+    # 🔹 Dynamic Search Support (main + linked doctypes)
+    if search:
+        search = search.strip()
+        if search_fields:
+            # Search in main doctype
+            or_filters.extend([[doctype, f, "like", f"%{search}%"] for f in search_fields])
+
+        # Dynamically search in linked doctypes if link_fields are defined
+        if link_fields:
+            for link_field, target_field in link_fields.items():
+                field_meta = frappe.get_meta(doctype).get_field(link_field)
+                if not field_meta or field_meta.fieldtype not in ["Link", "Dynamic Link"]:
+                    continue
+
+                if field_meta.fieldtype == "Dynamic Link":
+                    # skip dynamic links for simplicity
+                    continue
+
+                target_doctype = field_meta.options
+
+                # Fetch linked record names that match
+                linked_names = frappe.db.sql_list(f"""
+                    SELECT name FROM `tab{target_doctype}`
+                    WHERE {target_field} LIKE %s
+                    LIMIT 100
+                """, (f"%{search}%",))
+
+                if linked_names:
+                    or_filters.append([doctype, link_field, "in", linked_names])
+
 
     def extend_linked_fields(data):
         """Add linked field values without loop-heavy queries"""
@@ -51,7 +77,6 @@ def get_paginated_data(
                 # pick the doctype from applicant_type in each row
                 target_doctype = None
                 for d in data:
-                    print('d.get(field_meta.options) ....',d.get(field_meta.options))
                     dynamic_dt = d.get(field_meta.options)  # e.g. "Loan Member"
                     if dynamic_dt:
                         target_doctype = dynamic_dt
@@ -83,8 +108,6 @@ def get_paginated_data(
             return data
 
         host_url = frappe.request.host_url.rstrip("/")  # e.g. http://127.0.0.1:8000
-        print('host_url ....',host_url)
-        print('base_url ....',base_url)
         data = [
             {
                 **d,
@@ -97,7 +120,6 @@ def get_paginated_data(
 
     def extend_linked_images(data):
         host_url = frappe.request.host_url.rstrip("/")
-        print("in igf ......",link_images_fields)
         if not link_images_fields or not data:
             return data
 
@@ -106,7 +128,6 @@ def get_paginated_data(
                 continue
 
             field_meta = frappe.get_meta(doctype).get_field(fieldname)
-            print("field_meta ....",field_meta)
             if not field_meta:
                 continue
 
@@ -121,12 +142,10 @@ def get_paginated_data(
                         target_map.setdefault(dt_name, []).append(rec_name)
             else:
                 target_map = {field_meta.options: [d[fieldname] for d in data if d.get(fieldname)]}
-            print("target_map ....",target_map)
             # Fetch and attach images
             for target_doctype, names in target_map.items():
                 records = frappe.get_all(target_doctype, filters={"name": ["in", names]}, fields=["name", image_field])
                 values_map = {r["name"]: r.get(image_field) for r in records}
-                print("values_map ....",values_map)
                 for d in data:
                     rec_name = d.get(fieldname)
                     img = values_map.get(rec_name)
@@ -157,7 +176,6 @@ def get_paginated_data(
             start=start,
             page_length=page_size
         )
-        print('data ...', len(data))
 
         # extend linked fields
         data = extend_linked_fields(data)
@@ -215,7 +233,6 @@ def api_error(e, status_code=406):
 
     # Check frappe validation errors (_server_messages or message_log)
     if hasattr(frappe.local, "message_log") and frappe.local.message_log:
-        print("frappe.local.message_log ////// .. ",frappe.local.message_log)
         for m in frappe.local.message_log:
             try:
                 if isinstance(m, dict) and "message" in m:
