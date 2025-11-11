@@ -41,7 +41,6 @@ def get_loan_members():
         # filters=filters,
         order_by="creation desc"
     )
-    print("loan_members ...",loan_members)
 
     # Members without group
     without_group = [m for m in loan_members if not m.get("group")]
