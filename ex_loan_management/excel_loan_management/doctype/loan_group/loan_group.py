@@ -177,7 +177,7 @@ def loan_group_list(page=1, page_size=10,sort_by="group_name", sort_order="asc",
 
     return get_paginated_data(
         doctype="Loan Group",
-        fields=["name", "group_name", "group_head","group_image"],
+        fields=["name", "group_name", "group_head","group_image", "workflow_state"],
         search=search,
         filters=filters,
         sort_by=sort_by,
