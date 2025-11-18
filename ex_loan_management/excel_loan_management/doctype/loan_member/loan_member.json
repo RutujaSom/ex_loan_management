@@ -44,7 +44,6 @@
   "section_break_oeil",
   "pancard",
   "pancard_image",
-  "pancard_image_back",
   "column_break_nytu",
   "pancard_verified",
   "section_break_knhg",
@@ -55,6 +54,7 @@
   "voter_id_verified",
   "section_break_siuy",
   "address_doc_type",
+  "consumer_no",
   "address_image",
   "column_break_svga",
   "address_verified",
@@ -97,7 +97,7 @@
    "fieldname": "gender",
    "fieldtype": "Select",
    "label": "Gender",
-   "options": "Male\nFemale\nOther",
+   "options": "MALE\nFEMALE\nOTHER",
    "reqd": 1
   },
   {
@@ -221,7 +221,7 @@
    "fieldname": "address_doc_type",
    "fieldtype": "Select",
    "label": "Address Document",
-   "options": "\nElectricity Bill\nRent Agreement"
+   "options": "\nELECTRICITY BILL\nRENT AGREEMENT"
   },
   {
    "fieldname": "address_image",
@@ -387,11 +387,6 @@
    "label": "Voter Id Back"
   },
   {
-   "fieldname": "pancard_image_back",
-   "fieldtype": "Attach",
-   "label": "Pan Card Image Back"
-  },
-  {
    "fieldname": "section_break_siuy",
    "fieldtype": "Section Break"
   },
@@ -453,13 +448,20 @@
    "fieldname": "geo_location",
    "fieldtype": "Small Text",
    "label": "Geo Location"
+  },
+  {
+   "depends_on": "eval: doc.address_doc_type == 'ELECTRICITY BILL'",
+   "fieldname": "consumer_no",
+   "fieldtype": "Data",
+   "label": "Consumer No",
+   "mandatory_depends_on": "eval: doc.address_doc_type == 'ELECTRICITY BILL'"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-10-29 15:35:59.985918",
+ "modified": "2025-11-18 11:42:47.716765",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

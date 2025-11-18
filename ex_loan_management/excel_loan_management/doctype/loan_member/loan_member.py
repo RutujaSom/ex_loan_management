@@ -57,9 +57,9 @@ class LoanMember(Document):
             missing_fields = []
             for fieldname in docfields:
                 value = self.get(fieldname)
-                if fieldname not in ["group","aadhar_image_back", "pancard_image_back","voter_id_image_back",
+                if fieldname not in ["group","aadhar_image_back","voter_id_image_back",
                                      "address_line_2","cibil_score","bank_address","mobile_no_2",
-                                    "cibil_date"]:
+                                    "cibil_date", "email", "geo_location","longitude", "latitude","consumer_no",]:
                     if value in [None, ""]:
                         missing_fields.append(fieldname)
 
@@ -89,10 +89,10 @@ class LoanMember(Document):
 
     def validate(self):
         # ✅ Validate Voter ID
-        if self.voter_id:
-            voter_pattern = r'^[A-Z]{3}[0-9]{7}$'
-            if not re.match(voter_pattern, self.voter_id):
-                frappe.throw("Invalid Voter ID format. It should be like 'ABC1234567' (3 letters followed by 7 digits).")
+        # if self.voter_id:
+        #     voter_pattern = r'^[A-Z]{3}[0-9]{7}$'
+        #     if not re.match(voter_pattern, self.voter_id):
+        #         frappe.throw("Invalid Voter ID format. It should be like 'ABC1234567' (3 letters followed by 7 digits).")
 
         # ✅ Validate PAN Card
         if self.pancard:
@@ -473,7 +473,7 @@ def create_loan_member():
 
         # Step 2: Handle file uploads
         for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image",
-                      "aadhar_image_back", "pancard_image_back","voter_id_image_back"]:
+                      "aadhar_image_back", "voter_id_image_back"]:
             if field in files:
                 upload = files[field]
                 if not upload or not upload.filename:
@@ -535,7 +535,7 @@ update_fields = [
     "created_by",
     "member_id", "member_image", "company", "member_name",
     "address_doc_type", "home_image","voter_id","voter_id_image",
-    "aadhar_image_back", "pancard_image_back","voter_id_image_back",
+    "aadhar_image_back","voter_id_image_back",
     "longitude", "latitude", "geo_location",
 ]
 
@@ -583,7 +583,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
                 # 🔹 Collect filters from kwargs (all query params except the defaults)
                 filters["group"] = ["in", groups]
         else:
-            # Members without a group assigned (group is null/empty)
+            # Members without a group assigned (group is null/\n"empty)
             filters["group"] = ["in", [None, ""]]
             filters["owner"] = frappe.session.user
 
@@ -625,13 +625,13 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         sort_order=sort_order,
         page=int(page),
         page_size=int(page_size),
-        search_fields=["member_name"],
+        search_fields=["member_name", "member_id",],
         is_pagination=is_pagination,
         base_url=base_url,
         extra_params=extra_params,
         link_fields={"group": "group_name"},
         image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                      "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
+                      "aadhar_image_back", "voter_id_image_back"]
     )
 
 
@@ -650,7 +650,7 @@ def update_loan_member_api(name):
         doc = frappe.get_doc("Loan Member", loan_member_id)
 
         image_fields = ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",
-                             "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
+                             "aadhar_image_back", "voter_id_image_back"]
 
         # Update text fields
         for field in update_fields:
@@ -755,7 +755,7 @@ def loan_member_get(name):
     # 🔹 Full URL for image fields
     host_url = frappe.request.host_url.rstrip("/")  # e.g. http://localhost:8000
     image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                    "aadhar_image_back", "pancard_image_back","voter_id_image_back"]
+                    "aadhar_image_back", "voter_id_image_back"]
 
     for f in image_fields:
         if member.get(f):
@@ -804,7 +804,7 @@ def loan_member_list_as_per_group_assignment(page=1, page_size=10, search=None, 
             sort_order=sort_order,
             page=int(page),
             page_size=int(page_size),
-            search_fields=["member_name"],
+            search_fields=["member_name","member_id"],
             is_pagination=is_pagination,
             base_url=base_url,
             extra_params=extra_params,
