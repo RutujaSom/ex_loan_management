@@ -11,6 +11,9 @@ frappe.ui.form.on('Loan Member', {
                 }
             };
         });
+        // Make field read-only
+        frm.toggle_enable("country", false);
+        frm.toggle_enable("state", false);
     },
 
     refresh(frm) {
@@ -64,6 +67,11 @@ frappe.ui.form.on('Loan Member', {
         if (!frm.doc.mobile_no_2) {
             frm.set_value("mobile_no_2", "+91");
         }
+
+        // Make field read-only
+        frm.toggle_enable("country", false);
+        frm.toggle_enable("state", false);
+
     },
 
     validate(frm) {
@@ -79,6 +87,13 @@ frappe.ui.form.on('Loan Member', {
                 }
             }
         });
+    },
+    address_doc_type: function(frm) {
+        // Clear dependent fields when address changes
+        frm.set_value("consumer_no", "");
+        frm.set_value("address_image", "");
+
+        frm.refresh_fields();
     }
 });
 

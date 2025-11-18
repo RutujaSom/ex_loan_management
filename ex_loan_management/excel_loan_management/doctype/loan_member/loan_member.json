@@ -155,17 +155,16 @@
    "label": "Email"
   },
   {
+   "default": "MAHARASHTRA",
    "fieldname": "state",
-   "fieldtype": "Link",
-   "label": "State",
-   "options": "State"
+   "fieldtype": "Data",
+   "label": "State"
   },
   {
-   "fetch_from": "company.country",
+   "default": "INDIA",
    "fieldname": "country",
-   "fieldtype": "Link",
-   "label": "Country",
-   "options": "Country"
+   "fieldtype": "Data",
+   "label": "Country"
   },
   {
    "fieldname": "city",
@@ -461,7 +460,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-18 11:42:47.716765",
+ "modified": "2025-11-18 18:49:12.624032",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
