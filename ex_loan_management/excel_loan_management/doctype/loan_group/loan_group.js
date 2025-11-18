@@ -9,7 +9,6 @@ frappe.ui.form.on('Loan Group', {
         });
     },
     group_name(frm) {
-        // alert("frm.doc.group_name ....",frm.doc.group_name)
         if (frm.doc.group_name) {
             frm.set_value("group_name", frm.doc.group_name.toUpperCase());
         }
