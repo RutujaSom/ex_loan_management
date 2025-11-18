@@ -34,10 +34,13 @@ def mode_of_payment_list(page=1, page_size=10,sort_by="mode_of_payment", sort_or
     extra_params = {"search": search} if search else {}
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
 
+    filters={}
+    filters['name'] = ["in", ["CASH", "ONLINE"]]
     return get_paginated_data(
         doctype="Mode of Payment",
         fields=["name", "mode_of_payment", "type"],
         search=search,
+        filters=filters,
         sort_by=sort_by,
         sort_order=sort_order,
         page=int(page),

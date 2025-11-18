@@ -19,6 +19,7 @@ def get_paginated_data(
     image_fields=None,
     or_filters = [],
     link_images_fields=None,
+    dynamic_search_fields=None,
 ):
     filters = filters or {}
     or_filters = or_filters or []
@@ -34,16 +35,20 @@ def get_paginated_data(
 
         # Dynamically search in linked doctypes if link_fields are defined
         if link_fields:
+            print("TMA00576 .....",link_fields)
             for link_field, target_field in link_fields.items():
                 field_meta = frappe.get_meta(doctype).get_field(link_field)
                 if not field_meta or field_meta.fieldtype not in ["Link", "Dynamic Link"]:
                     continue
+
+                print("field_meta.fieldtype ....",field_meta.fieldtype)
 
                 if field_meta.fieldtype == "Dynamic Link":
                     # skip dynamic links for simplicity
                     continue
 
                 target_doctype = field_meta.options
+                print("target_doctype ...",target_doctype, ' ....target_field ...',target_field,' ...link_field. ',link_field)
 
                 # Fetch linked record names that match
                 linked_names = frappe.db.sql_list(f"""
@@ -54,6 +59,39 @@ def get_paginated_data(
 
                 if linked_names:
                     or_filters.append([doctype, link_field, "in", linked_names])
+
+        
+        if dynamic_search_fields:
+            print("dynamic_search_fields ....", dynamic_search_fields)
+
+            for link_field, cfg in dynamic_search_fields.items():
+                print("in for .......",link_field, cfg)
+
+                target_doctype = cfg.get("doctype")
+                target_field = cfg.get("field")
+
+                if not target_doctype or not target_field:
+                    print("in if")
+                    continue
+
+                # Ensure link field exists
+                field_meta = frappe.get_meta(doctype).get_field(link_field)
+                print("field_meta ......",field_meta)
+                if not field_meta:
+                    continue
+
+                # Fetch matching linked names
+                linked_names = frappe.db.sql_list(f"""
+                    SELECT name FROM `tab{target_doctype}`
+                    WHERE `{target_field}` LIKE %s
+                    LIMIT 100
+                """, (f"%{search}%",))
+
+                print("linked_names ....", linked_names)
+
+                if linked_names:
+                    or_filters.append([doctype, link_field, "in", linked_names])
+
 
 
     def extend_linked_fields(data):
