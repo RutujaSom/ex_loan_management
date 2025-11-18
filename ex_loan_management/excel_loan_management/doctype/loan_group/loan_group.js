@@ -1,19 +1,18 @@
 // Copyright (c) 2025, Rutuja Somvanshi and contributors
 // For license information, please see license.txt
 
-// frappe.ui.form.on("Loan Group", {
-// 	refresh(frm) {
-
-// 	},
-// });
-
-
 
 frappe.ui.form.on('Loan Group', {
     refresh(frm) {
         frm.add_custom_button('Import Loan Group', () => {
             open_import_dialog(frm);
         });
+    },
+    group_name(frm) {
+        // alert("frm.doc.group_name ....",frm.doc.group_name)
+        if (frm.doc.group_name) {
+            frm.set_value("group_name", frm.doc.group_name.toUpperCase());
+        }
     }
 });
 

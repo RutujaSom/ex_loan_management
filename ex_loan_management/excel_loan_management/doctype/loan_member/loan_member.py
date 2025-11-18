@@ -460,6 +460,7 @@ def create_loan_member():
             "ifsc_code": data.get("ifsc_code"),
             "account_type": data.get("account_type"),
             "bank_address": data.get("bank_address"),
+            "consumer_no": data.get("consumer_no"),
 
             "longitude": data.get("longitude"),
             "latitude": data.get("latitude"),
@@ -536,7 +537,7 @@ update_fields = [
     "member_id", "member_image", "company", "member_name",
     "address_doc_type", "home_image","voter_id","voter_id_image",
     "aadhar_image_back","voter_id_image_back",
-    "longitude", "latitude", "geo_location",
+    "longitude", "latitude", "geo_location","consumer_no"
 ]
 
 """

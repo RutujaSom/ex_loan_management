@@ -64,6 +64,21 @@ frappe.ui.form.on('Loan Member', {
         if (!frm.doc.mobile_no_2) {
             frm.set_value("mobile_no_2", "+91");
         }
+    },
+
+    validate(frm) {
+        frm.meta.fields.forEach(df => {
+            // Only convert text-based fields
+            if (["Data", "Small Text", "Text", "Text Editor", ].includes(df.fieldtype)) {
+                let fieldname = df.fieldname;
+
+                if (fieldname != 'email'){
+                    if (frm.doc[fieldname] && typeof frm.doc[fieldname] === "string") {
+                        frm.set_value(fieldname, frm.doc[fieldname].toUpperCase());
+                    }
+                }
+            }
+        });
     }
 });
 
@@ -173,3 +188,5 @@ function update_status(frm, status) {
         }
     });
 }
+
+
