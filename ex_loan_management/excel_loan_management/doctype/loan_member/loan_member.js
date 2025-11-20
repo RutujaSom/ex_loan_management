@@ -14,6 +14,15 @@ frappe.ui.form.on('Loan Member', {
         // Make field read-only
         frm.toggle_enable("country", false);
         frm.toggle_enable("state", false);
+
+        frm.set_df_property("dob", "max_date", new Date());
+
+        if (frm.doc.pincode == 0) {
+            frm.set_value("pincode", "");
+        }
+        if (frm.doc.cibil_score == 0) {
+            frm.set_value("cibil_score", "");
+        }
     },
 
     refresh(frm) {
@@ -72,6 +81,13 @@ frappe.ui.form.on('Loan Member', {
         frm.toggle_enable("country", false);
         frm.toggle_enable("state", false);
 
+        if (frm.doc.pincode == 0) {
+            frm.set_value("pincode", "");
+        }
+        if (frm.doc.cibil_score == 0) {
+            frm.set_value("cibil_score", "");
+        }
+
     },
 
     validate(frm) {
@@ -94,7 +110,18 @@ frappe.ui.form.on('Loan Member', {
         frm.set_value("address_image", "");
 
         frm.refresh_fields();
-    }
+    },
+
+    dob: function(frm) {
+        if (frm.doc.dob) {
+            let today = frappe.datetime.get_today();
+
+            if (frm.doc.dob > today) {
+                frappe.msgprint("DOB cannot be a future date.");
+                frm.set_value("dob", "");
+            }
+        }
+    },
 });
 
 

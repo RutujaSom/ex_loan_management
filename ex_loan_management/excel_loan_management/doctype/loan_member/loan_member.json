@@ -122,7 +122,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 25,
+   "length": 13,
    "reqd": 1
   },
   {
@@ -192,28 +192,28 @@
   {
    "fieldname": "member_image",
    "fieldtype": "Attach",
-   "label": "Member Photo"
+   "label": "Member Image"
   },
   {
    "fieldname": "aadhar_image",
    "fieldtype": "Attach",
-   "label": "Aadhar"
+   "label": "Aadhar Card Front Image"
   },
   {
    "fieldname": "pancard_image",
    "fieldtype": "Attach",
-   "label": "Pan Card"
+   "label": "Pan Card Image"
   },
   {
    "fieldname": "aadhar",
    "fieldtype": "Data",
-   "label": "Aadhar ",
+   "label": "Aadhar Card Number ",
    "length": 12
   },
   {
    "fieldname": "pancard",
    "fieldtype": "Data",
-   "label": "Pan Card",
+   "label": "PAN Card Number",
    "length": 10
   },
   {
@@ -225,7 +225,7 @@
   {
    "fieldname": "address_image",
    "fieldtype": "Attach",
-   "label": "Address"
+   "label": "Address Proof"
   },
   {
    "fieldname": "document_column_break",
@@ -303,7 +303,8 @@
   {
    "fieldname": "ifsc_code",
    "fieldtype": "Data",
-   "label": "IFSC Code"
+   "label": "IFSC Code",
+   "length": 11
   },
   {
    "fieldname": "account_type",
@@ -361,12 +362,12 @@
   {
    "fieldname": "voter_id",
    "fieldtype": "Data",
-   "label": "Voter Id"
+   "label": "Voter ID Number"
   },
   {
    "fieldname": "voter_id_image",
    "fieldtype": "Attach",
-   "label": "Voter Id"
+   "label": "Voter ID Front Image"
   },
   {
    "default": "0",
@@ -378,12 +379,12 @@
   {
    "fieldname": "aadhar_image_back",
    "fieldtype": "Attach",
-   "label": "Aadhar Image Back"
+   "label": "Aadhar Card Back Image"
   },
   {
    "fieldname": "voter_id_image_back",
    "fieldtype": "Attach",
-   "label": "Voter Id Back"
+   "label": "Voter ID Back Image"
   },
   {
    "fieldname": "section_break_siuy",
@@ -421,7 +422,8 @@
   {
    "fieldname": "mobile_no_2",
    "fieldtype": "Data",
-   "label": "Alternate Mobile No"
+   "label": "Alternate Mobile No",
+   "length": 13
   },
   {
    "fieldname": "created_by",
@@ -460,7 +462,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-18 18:49:12.624032",
+ "modified": "2025-11-20 11:26:19.391839",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
