@@ -104,9 +104,12 @@ class LoanMember(Document):
         self.validate_mobile_no(self.mobile_no, fieldname="Mobile No",  required=True)
         self.validate_mobile_no(self.mobile_no_2, fieldname="Alternate Mobile No", required=False)
 
+        if self.pincode:
+            if len(str(self.pincode)) != 6:
+                frappe.throw("Pincode must be a 6-digit number.")
+
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
-        print("number ....",number , ' fieldname ....',fieldname)
         digits = number.replace("+91", "").strip()
         if not digits:
             if required:
