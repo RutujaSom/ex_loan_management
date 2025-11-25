@@ -70,11 +70,14 @@ class LoanMember(Document):
             print(self.address_verified , self.pancard_verified , self.aadhar_verified , self.voter_id_verified)
             if prev_status == "Draft" and self.status != "Draft":
                 frappe.throw("Status can only be changed from 'Draft' to 'Pending'.")
-            if self.address_verified and self.pancard_verified and self.aadhar_verified and self.voter_id_verified:
-                self.status = "Verified"
+            
             if self.status == "Verified" and (not self.address_verified or not self.pancard_verified or not self.aadhar_verified or not self.voter_id_verified):
                 frappe.throw("To set status as 'Verified', all verifications must be completed.")
         
+        # if self.status == "Pending":
+        #     if self.address_verified and self.pancard_verified and self.aadhar_verified and self.voter_id_verified:
+        #         self.status = "Verified"
+
         self.member_name = f"{self.first_name or ''} {self.middle_name or ''} {self.last_name or ''}".strip()
 
         existing_member = check_unique_member(self.member_name, self.pancard, self.name)
@@ -107,6 +110,15 @@ class LoanMember(Document):
         if self.pincode:
             if len(str(self.pincode)) != 6:
                 frappe.throw("Pincode must be a 6-digit number.")
+
+        if self.ifsc_code:
+            # Standard IFSC format: 4 letters + 0 + 6 alphanumeric
+            pattern = r"^[A-Z]{4}0[A-Z0-9]{6}$"
+            if not re.match(pattern, self.ifsc_code.upper()):
+                frappe.throw(
+                    f"Invalid IFSC code format. It should be like 'AAAA0BBBBBB' (4 letters, 0, 6 alphanumeric)."
+                )
+        
 
     def validate_mobile_no(self, number, fieldname="Mobile No", required=True):
         # Extract digits after +91
