@@ -18,10 +18,12 @@ frappe.ui.form.on('Loan Member', {
         frm.set_df_property("dob", "max_date", new Date());
 
         if (frm.doc.pincode == 0) {
-            frm.set_value("pincode", "");
+            frm.doc.pincode = "";        // update value
+            frm.refresh_field("pincode"); // refresh
         }
         if (frm.doc.cibil_score == 0) {
-            frm.set_value("cibil_score", "");
+            frm.doc.cibil_score = "";        // update value
+            frm.refresh_field("cibil_score"); // refresh
         }
     },
 
@@ -71,10 +73,12 @@ frappe.ui.form.on('Loan Member', {
         // --- Mobile Number Prefix Handling ---
         // Add +91 prefix automatically if missing
         if (!frm.doc.mobile_no) {
-            frm.set_value("mobile_no", "+91");
+            frm.doc.mobile_no = "+91";   
+            frm.refresh_field("mobile_no");    
         }
         if (!frm.doc.mobile_no_2) {
-            frm.set_value("mobile_no_2", "+91");
+            frm.doc.mobile_no_2 = "+91";  
+            frm.refresh_field("mobile_no_2");
         }
 
         // Make field read-only
@@ -82,10 +86,12 @@ frappe.ui.form.on('Loan Member', {
         frm.toggle_enable("state", false);
 
         if (frm.doc.pincode == 0) {
-            frm.set_value("pincode", "");
+            frm.doc.pincode = "";        // update value
+            frm.refresh_field("pincode"); // refresh
         }
         if (frm.doc.cibil_score == 0) {
-            frm.set_value("cibil_score", "");
+            frm.doc.cibil_score = "";        // update value
+            frm.refresh_field("cibil_score"); // refresh
         }
 
     },
