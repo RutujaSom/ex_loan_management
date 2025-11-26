@@ -120,7 +120,7 @@ class LoanMember(Document):
                 frappe.throw("Pincode must be a 6-digit number.")
         
         if self.aadhar:
-            if not self.aadhar.isdigit():
+            if not self.aadhar.isdigit() or len(str(self.aadhar)) != 12:
                 frappe.throw(f"Enter a valid 12-digit aadhar number.")
             
         if self.ifsc_code:
