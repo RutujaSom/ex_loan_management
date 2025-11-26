@@ -59,7 +59,8 @@ class LoanMember(Document):
                 value = self.get(fieldname)
                 if fieldname not in ["group","aadhar_image_back","voter_id_image_back",
                                      "address_line_2","cibil_score","bank_address","mobile_no_2",
-                                    "cibil_date", "email", "geo_location","longitude", "latitude","consumer_no",]:
+                                    "cibil_date", "email", "geo_location","longitude", "latitude","consumer_no",
+                                    "user_id"]:
                     if value in [None, ""]:
                         missing_fields.append(fieldname)
 
@@ -88,6 +89,13 @@ class LoanMember(Document):
             # Get the full name from the User DocType
             owner_full_name = frappe.db.get_value("User", self.owner, "full_name")
             self.db_set("created_by",owner_full_name)
+        
+        # if self.status == "Verified":
+        #     if not self.user_id:
+        #         import_update_loan_members(self, self.name)
+
+
+
 
 
     def validate(self):
@@ -110,7 +118,11 @@ class LoanMember(Document):
         if self.pincode:
             if len(str(self.pincode)) != 6:
                 frappe.throw("Pincode must be a 6-digit number.")
-
+        
+        if self.aadhar:
+            if not self.aadhar.isdigit():
+                frappe.throw(f"Enter a valid 12-digit aadhar number.")
+            
         if self.ifsc_code:
             # Standard IFSC format: 4 letters + 0 + 6 alphanumeric
             pattern = r"^[A-Z]{4}0[A-Z0-9]{6}$"
@@ -138,8 +150,7 @@ class LoanMember(Document):
         if not digits.isdigit() or len(digits) != 10:
             frappe.throw(f"Enter a valid 10-digit number after +91 for {fieldname}")
 
-
-
+    
 @frappe.whitelist()
 def import_loan_members(file_url):
     frappe.flags.in_import = True  # ✅ Set import flag
@@ -269,7 +280,8 @@ def import_loan_members(file_url):
                 doc.bank_address = row.get("BRANCH NAME")
                 doc.holder_name = member_name
                 doc.ifsc_code = row.get("IFSC CODE")
-                doc.account_type = "Saving"
+                doc.account_type = "Saving",
+                doc.company = ""
 
                 print('doc ...........', doc, '.....', member_id)
 
@@ -282,6 +294,8 @@ def import_loan_members(file_url):
                     doc.branch_code = branch_code
 
                 doc.insert(ignore_permissions=True)
+
+                # import_update_loan_members(doc,doc.name)
                 created_members.append(member_id)
             except Exception as e:
                 print(f"Error creating Loan Member {member_id}: {e}")
@@ -359,62 +373,22 @@ def calculate_member_age(dob):
 
 
 @frappe.whitelist()
-def import_update_loan_members(file_url):
-    file_doc = frappe.get_doc("File", {"file_url": file_url})
-    filename = file_doc.file_name.lower()
+def import_update_loan_members(self_doc,name):
+    loan_member_data = frappe.get_doc("Loan Member", name)
+    doc = frappe.new_doc("User")
+    doc.email = loan_member_data.email
+    doc.member_name = loan_member_data.member_name
+    doc.mobile_no = loan_member_data.mobile_no
+    doc.first_name = loan_member_data.first_name
+    doc.middle_name = loan_member_data.middle_name
+    doc.last_name = loan_member_data.last_name
+    doc.save()
+    
+    self_doc.user_id = doc.name
+    
 
-    rows = []
-
-    # Read Excel file and convert rows to dictionary
-    if filename.endswith(".xlsx"):
-        file_path = file_doc.get_full_path()
-        with open(file_path, "rb") as f:
-            wb = load_workbook(f, data_only=True)
-            ws = wb.active
-            headers = [cell.value for cell in ws[1]]  # First row as headers
-
-            for row in ws.iter_rows(min_row=2, values_only=True):
-                rows.append(dict(zip(headers, row)))
-
-    skipped = []
-    created_members = []
-
-    for row in rows:
-        member_id = str(row.get("MEMBER NO")).strip() if row.get("MEMBER NO") else None
-        if not member_id:
-            continue  # Skip if no member_id
-
-        # Member basic info
-        member_name = row.get("NAME OF MEMBER")
-        member_exists = frappe.db.exists("Loan Member", {"member_id": member_id})
-        
-        # If Loan Member already exists
-        if member_exists:
-            first_name, middle_name, last_name = split_name(member_name)
-            
-            # 5️⃣ Create Loan Member
-            doc = frappe.get_doc("Loan Member", member_exists)  
-            doc.member_name = member_name
-            doc.first_name = first_name
-            doc.middle_name = middle_name
-            doc.last_name = last_name
-            doc.status = "Verified"
-            doc.aadhar_verified = True
-            doc.pancard_verified = True
-            doc.address_verified = True
-            doc.company = "Excellminds (Demo)"
-            doc.save(ignore_permissions=True)
-            created_members.append(member_id)
-            
-    frappe.db.commit()
-
-    # Prepare Summary
-    msg = f"✅ Created {len(created_members)} Loan Members."
-    if skipped:
-        msg += f"\n⏩ Skipped {len(skipped)} existing members: {', '.join(skipped)}"
-
-    return msg
-
+    
+    
 
 
 

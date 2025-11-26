@@ -33,11 +33,7 @@ frappe.ui.form.on('Loan Member', {
         frm.add_custom_button('Import Loan Member', () => {
             open_import_dialog(frm);
         });
-        // Update existing Loan Members
-        frm.add_custom_button('Update Loan Member', () => {
-            open_import_dialog_to_update_records(frm);
-        });
-
+        
         // --- Default Status Handling ---
         // Set default status as Draft for new records
         if (frm.is_new()) {
@@ -165,51 +161,6 @@ function open_import_dialog() {
                     if (r.message) {
                         frappe.msgprint(r.message);
                         frappe.listview.refresh();  // Refresh list view after import
-                    }
-                    d.hide();
-                }
-            });
-        }
-    });
-
-    d.show();
-}
-
-
-// -----------------------------------------------------------------------------
-// Dialog to Update Existing Loan Members
-// -----------------------------------------------------------------------------
-function open_import_dialog_to_update_records() {
-    const d = new frappe.ui.Dialog({
-        title: 'Update Loan Member',
-        fields: [
-            {
-                label: 'File Type',
-                fieldname: 'file_type',
-                fieldtype: 'Select',
-                options: ['CSV', 'Excel'],
-                reqd: 1
-            },
-            {
-                label: 'File',
-                fieldname: 'file_url',
-                fieldtype: 'Attach',
-                reqd: 1
-            }
-        ],
-        primary_action_label: 'Import',
-        primary_action(values) {
-            // Call server-side method to update records
-            frappe.call({
-                method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_update_loan_members",
-                args: {
-                    file_url: values.file_url,
-                    file_type: values.file_type
-                },
-                callback(r) {
-                    if (r.message) {
-                        frappe.msgprint(r.message);
-                        frappe.listview.refresh();  // Refresh list view after update
                     }
                     d.hide();
                 }

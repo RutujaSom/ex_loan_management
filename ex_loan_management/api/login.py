@@ -38,7 +38,38 @@ def login_and_get_token():
             company = ""
             emp_details = {}
 
+            # Employee (single DB call)
+        # emp_details = frappe.db.get_value(
+        #     "Employee",
+        #     {"user_id": user_doc.name},
+        #     ["name", "company"],
+        #     as_dict=True
+        # )
+
+        # if emp_details:
+        #     company = emp_details.company
+        # else:
+        #     emp_details = {}
+        #     company = ""
+
+
+        # Loan Member (single DB call)
+        loan_member_details = frappe.db.get_value(
+            "Loan Member",
+            {"user_id": user_doc.name},
+            ["name", "member_id", "member_name"],
+            as_dict=True
+        )
+
+        if loan_member_details:
+            company = loan_member_details.company
+        else:
+            company = ""
+            loan_member_details = {}
+
+
         # 3️⃣ Return success with tokens + user info
+        frappe.local.response.http_status_code = 200
         return {
             "status": "success",
             "user": {
@@ -48,6 +79,7 @@ def login_and_get_token():
                 "roles": [r.role for r in user_doc.roles],
                 "company":company,
                 "emp_details":emp_details,
+                "loan_member_details":loan_member_details,
             },
             "token": {
                 "api_key": api_key,
@@ -57,12 +89,10 @@ def login_and_get_token():
 
     except frappe.AuthenticationError:
         frappe.local.response.http_status_code = 401
-        # return {"status": "error", "message": _("Invalid login credentials")}
         return api_error("Invalid login credentials")
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Login and Token API Error")
         frappe.local.response.http_status_code = 500
-        # return {"status": "error", "message": str(e)}
         return api_error(e)
 
 

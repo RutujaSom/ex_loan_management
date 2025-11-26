@@ -16,6 +16,7 @@
   "completed_age",
   "gender",
   "member_image",
+  "user_id",
   "loan_column",
   "company",
   "middle_name",
@@ -456,13 +457,20 @@
    "fieldtype": "Data",
    "label": "Consumer No",
    "mandatory_depends_on": "eval: doc.address_doc_type == 'ELECTRICITY BILL'"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User Id",
+   "options": "User",
+   "unique": 1
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-20 11:26:19.391839",
+ "modified": "2025-11-26 12:02:02.568571",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
