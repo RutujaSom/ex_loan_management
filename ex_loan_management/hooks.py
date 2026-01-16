@@ -27,6 +27,14 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
                 "Get Loan Group Data For Application",
             ]]
         ]
+    },
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["dt", "in", [
+                "Company"
+            ]]
+        ]
     }
 ]
 
