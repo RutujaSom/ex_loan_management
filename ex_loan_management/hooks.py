@@ -35,6 +35,21 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
                 "Company"
             ]]
         ]
+    },
+    {
+        "dt": "Print Format",
+        "filters": [
+            ["name", "in", [
+                "Policy Apply Letter",
+                "Group Declaration And Terms And Consition VERSION JAN 24",
+                "GROUP LOAN AGREEMENT version jan 24",
+                "demand promissory note",
+                "Sanction Letter",
+                "dp note cum waiver letter",
+                "Fact Sheet",
+                "Individual Decleration and Terms and Conditions version jan 24",
+            ]]
+        ]
     }
 ]
 
