@@ -190,11 +190,14 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                             <th>Status</th>
                             <th>Remaining</th>
                             <th></th>
+                            <th>WhatsApp</th>
+
                         </tr>
                     </thead>
                     <tbody>`;
 
                 r.message.forEach(row => {
+                    let show_whatsapp = row.payment_date >= today;
                     html += `
                         <tr>
                             <td>${row.loan_id}</td>
@@ -212,6 +215,21 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                                         data-applicant="${row.member_name}">
                                     Update
                                 </button>
+                            </td>
+
+                            <td class="text-center">
+                                ${
+                                    show_whatsapp
+                                    ? `<i class="fa fa-whatsapp send-whatsapp"
+                                        style="color:#25D366; font-size:20px; cursor:pointer;"
+                                        data-member="${row.member_name || row.applicant}"
+                                        data-loan="${row.loan_id}"
+                                        data-date="${row.payment_date}"
+                                        data-amount="${row.total_payment}"
+                                    >
+                                    </i>`
+                                    : ``
+                                }
                             </td>
                         </tr>`;
                 });
@@ -231,6 +249,39 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 });
 
                 // Sorting logic stays same...
+
+                $(".send-whatsapp").off("click").on("click", function () {
+                    alert("This will send a WhatsApp reminder.");
+                    let member_name = $(this).data("member");
+                    let loan_no = $(this).data("loan");
+                    let payment_date = $(this).data("date");
+                    let amount = $(this).data("amount");
+
+                    
+                    frappe.confirm(
+                        `Send WhatsApp reminder to <b>${member_name}</b>?`,
+                        function () {
+                            frappe.call({
+                                method: "ex_loan_management.api.whatsapp_msg_api.send_whatsapp_messages",  // 👈 backend method
+                                // method: 'whatsapp_messenger.api.send_whatsapp_message.send_whatsapp_messages',
+
+                                args: {
+                                    member_name: member_name,
+                                    loan_no: loan_no,
+                                    emi_date: payment_date,
+                                    emi_amount: amount,
+                                },
+                                freeze: true,
+                                freeze_message: "Sending WhatsApp...",
+                                callback: function (r) {
+                                    if (!r.exc) {
+                                        frappe.msgprint("✅ WhatsApp message sent");
+                                    }
+                                }
+                            });
+                        }
+                    );
+                });
             }
         });
     }
