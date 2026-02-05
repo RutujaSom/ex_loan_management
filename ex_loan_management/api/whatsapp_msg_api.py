@@ -1,45 +1,82 @@
 import frappe
 import requests
 from urllib.parse import urlencode, quote
+from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
 
-# @frappe.whitelist()
-# def send_whatsapp_messages(mobile_no, customer_name, loan_id, emi_amount, emi_date, emi_day):
+
+
+MARATHI_DAYS = {
+    "Monday": "सोमवार",
+    "Tuesday": "मंगळवार",
+    "Wednesday": "बुधवार",
+    "Thursday": "गुरुवार",
+    "Friday": "शुक्रवार",
+    "Saturday": "शनिवार",
+    "Sunday": "रविवार",
+}
+
+
+# वरील / खालील
 @frappe.whitelist(allow_guest=True)
-def send_whatsapp_messages():
-    customer_name="RUTUJA"
-    loan_id="LOAN123"
-    emi_amount="1000"
-    emi_date="2026-02-01"
-    emi_day="Monday"
-    # TEMPLATENAME = "loan_emi_reminder"
+def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
+    """
+    Sends a WhatsApp message reminder for a loan EMI to a specified member.
+    Args:
+        member_name (str): Name of the loan member.
+        loan_no (str): Loan number.
+        emi_amount (str): EMI amount to be paid.
+        emi_date (str or datetime): Date of the EMI.
+        extra_text (str, optional): Additional text to include in the message. Defaults to "वरील".
+    Returns:
+        dict: A dictionary containing the status ("success" or "error") and the response or error message.
+    Raises:
+        Exception: Logs and returns error details if message sending fails.
+    Notes:
+        - The function constructs a WhatsApp message URL with the provided parameters and logs the response.
+        - The weekday is translated to Marathi using the MARATHI_DAYS mapping.
+        - The function currently returns the constructed URL as the response for debugging purposes.
+    """
     try:
-        # api_url = "http://bhashsms.com/api/sendmsg.php"
-        api_url = "http://bhashsms.com/api/sendmsgutil.php"
-        # mobile_no = "7823064842"
-        mobile_no = 9923921876
-        image_url = "/files/WhatsApp Image 2026-01-31 at 11.59.33 AM.jpeg"
-        host_url = frappe.request.host_url.rstrip("/")  # e.g. http://127.0.0.1:8000
-        full_image_url = f"{host_url}{image_url}"
-        print("full_image_url....",full_image_url)
-        params = {
-            "user": "Tejraj_BWAI",
-            "pass": "123456",                # ⚠️ Move this to site_config.json ideally
-            "sender": "BUZWAP",
-            "phone": mobile_no,
-            # "text": "loan_emi_reminder",          # Template name registered in BHASH # marketing template for image
-            "text": "otp_verification",
-            # "text":"loan_emi_notification", # utility template for image
-            "priority": "wa",
-            "stype": "normal",
-            # "Params": f"{customer_name},{loan_id},{emi_amount},{emi_date},{emi_day},खालील",
-            "params": 90098,
-            "htype": "image",
-            "url": full_image_url
-        }
 
-        response = requests.get(api_url, params=params, timeout=20)
+        eng_day = frappe.utils.formatdate(
+            emi_date, "EEEE"
+        )
 
-        frappe.logger().info(f"WhatsApp API Response: {response.text}")
+        # Marathi weekday
+        marathi_day = MARATHI_DAYS.get(eng_day, eng_day)
+        print("marathi_day ...",marathi_day)
+
+        # Build params dynamically (ORDER MUST MATCH TEMPLATE)
+        params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{extra_text}"
+
+        image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
+        
+        # ✅ Get image from Frappe public files
+        # image_url = frappe.utils.get_url("/files/logo.jpeg")
+
+        encoded_params = quote(params_value)
+        encoded_image_url = quote(image_url, safe=":/")
+
+        url = (
+            "http://bhashsms.com/api/sendmsgutil.php"
+            "?user=Tejraj_BWAI"
+            "&pass=123456"
+            "&sender=BUZWAP"
+            "&phone=7823064842"
+            "&text=loan_emi_reminder"
+            "&priority=wa"
+            "&stype=normal"
+            f"&Params={encoded_params}"
+            "&htype=image"
+            f"&url={encoded_image_url}"
+        )
+
+        print("Final URL:", url)
+
+        # response = requests.get(url, timeout=20)
+        response = url
+
+        frappe.logger().info(f"WhatsApp Response: {response.text}")
 
         return {
             "status": "success",
@@ -56,57 +93,35 @@ def send_whatsapp_messages():
 
 
 
-
 @frappe.whitelist(allow_guest=True)
-def test():
-    try:
-        # url = (
-        #     "http://bhashsms.com/api/sendmsgutil.php"
-        #     "?user=Tejraj_BWAI"
-        #     "&pass=123456"
-        #     "&sender=BUZWAP"
-        #     "&phone=9923921876"
-        #     "&text=otp_verification"
-        #     "&priority=wa"
-        #     "&stype=auth"
-        #     "&params=1123"
+def send_emi_whatsapp_reminders():
+    """
+    Sends WhatsApp reminders for EMIs due today.
+    This function retrieves all EMIs that are due on the current date and attempts to send WhatsApp reminders to the associated mobile numbers. 
+    If a mobile number is not available for an EMI, it skips sending the reminder for that entry.
+    
+    Returns:
+        list: A list of EMI objects that are due today.
+    """
+
+    print("frappe.utils.today() ...",frappe.utils.today())
+    emis = get_todays_emis(selected_date=frappe.utils.today())
+    # emis = get_todays_emis()
+
+    for emi in emis:
+        
+        mobile_no = emi.mobile_no or emi.mobile_no_2
+        if not mobile_no:
+            continue
+
+        # send_whatsapp_messages(
+        #     mobile_no=mobile_no,
+        #     customer_name=emi.member_name,
+        #     loan_id=emi.loan_id or emi.loan,
+        #     emi_amount=emi.total_payment,
+        #     emi_date=emi.payment_date,
         # )
-        # print("url ...",url)
+    return emis
 
-        params_value = "Rutuja,Gl001,1010,20-24-01,Monday,खालील"
-        image_url = "http://192.168.1.127:8000/files/WhatsApp Image 2026-01-31 at 11.59.33 AM.jpeg"
 
-        encoded_params = quote(params_value)
-        encoded_image_url = quote(image_url, safe=":/")
 
-        url = (
-            "http://bhashsms.com/api/sendmsg.php"
-            "?user=Tejraj_BWAI"
-            "&pass=123456"
-            "&sender=BUZWAP"
-            "&phone=7823064842"
-            "&text=tej_marathi_util_01"
-            "&priority=wa"
-            "&stype=normal"
-            f"&params={encoded_params}"
-            "&htype=image"
-            f"&url={encoded_image_url}"
-        )
-        print("url //...",url)
-
-        response = requests.get(url, timeout=20)
-
-        frappe.logger().info(f"WhatsApp OTP Response: {response.text}")
-
-        return {
-            "status": "success",
-            "response": response.text,
-            "url": url
-        }
-
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "WhatsApp OTP Error")
-        return {
-            "status": "error",
-            "message": str(e)
-        }

@@ -61,6 +61,15 @@ doc_events = {
 }
 
 
+scheduler_events = {
+    "cron": {
+        
+        "0 8 * * *": [  # Every day at 08:00 AM
+            "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
+        ],
+    }
+}
+
 
 # hooks.py
 # Each item in the list will be shown as an app in the apps page
