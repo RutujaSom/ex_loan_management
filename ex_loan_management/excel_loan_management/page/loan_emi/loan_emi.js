@@ -226,6 +226,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                                         data-loan="${row.loan_id}"
                                         data-date="${row.payment_date}"
                                         data-amount="${row.total_payment}"
+                                        data-mobile="${row.mobile_no ||  row.mobile_no_2 || ''}"
                                     >
                                     </i>`
                                     : ``
@@ -251,11 +252,12 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 // Sorting logic stays same...
 
                 $(".send-whatsapp").off("click").on("click", function () {
-                    alert("This will send a WhatsApp reminder.");
                     let member_name = $(this).data("member");
                     let loan_no = $(this).data("loan");
-                    let payment_date = $(this).data("date");
                     let amount = $(this).data("amount");
+                    let mobile_no = $(this).data("mobile");
+                    let rawDate = $(this).data("date").split('-');
+                    let payment_date = `${rawDate[2]}-${rawDate[1]}-${rawDate[0]}`;
 
                     
                     frappe.confirm(
@@ -263,9 +265,8 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         function () {
                             frappe.call({
                                 method: "ex_loan_management.api.whatsapp_msg_api.send_whatsapp_messages",  // 👈 backend method
-                                // method: 'whatsapp_messenger.api.send_whatsapp_message.send_whatsapp_messages',
-
                                 args: {
+                                    mobile_no: mobile_no,
                                     member_name: member_name,
                                     loan_no: loan_no,
                                     emi_date: payment_date,
@@ -274,8 +275,13 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                                 freeze: true,
                                 freeze_message: "Sending WhatsApp...",
                                 callback: function (r) {
-                                    if (!r.exc) {
+                                    message = r.message || {};
+
+                                    if (message.status === "success") {
                                         frappe.msgprint("✅ WhatsApp message sent");
+                                    }
+                                    else{
+                                        frappe.msgprint("Failed to send WhatsApp message");
                                     }
                                 }
                             });
