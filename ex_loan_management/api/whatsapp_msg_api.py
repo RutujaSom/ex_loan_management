@@ -31,7 +31,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         dict: A dictionary containing the status ("success" or "error") and the response or error message.
     Raises:
         Exception: Logs and returns error details if message sending fails.
-    Notes:mobile_no
+    Notes:
         - The function constructs a WhatsApp message URL with the provided parameters and logs the response.
         - The weekday is translated to Marathi using the MARATHI_DAYS mapping.
         - The function currently returns the constructed URL as the response for debugging purposes.
@@ -53,10 +53,10 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         # Build params dynamically (ORDER MUST MATCH TEMPLATE)
         params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{extra_text}"
 
-        image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
+        # image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
         
         # ✅ Get image from Frappe public files
-        # image_url = frappe.utils.get_url("/files/logo.jpeg")
+        image_url = frappe.utils.get_url("/files/logo.jpeg")
 
         encoded_params = quote(params_value)
         encoded_image_url = quote(image_url, safe=":/")
@@ -77,13 +77,15 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         print("Final URL:", url)
 
-        response = requests.get(url, timeout=20)
-        # response = url
+        # response = requests.get(url, timeout=20)
+        response = url
 
-        frappe.logger().info(f"WhatsApp Response: {response.text}")
+        # frappe.logger().info(f"WhatsApp Response: {response.text}")
+        frappe.logger().info(f"WhatsApp Response: {response}")
         return {
             "status": "success",
-            "response": response.text
+            # "response": response.text
+            "response": response
         }
 
     except Exception as e:
