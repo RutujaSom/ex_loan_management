@@ -77,15 +77,13 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         print("Final URL:", url)
 
-        # response = requests.get(url, timeout=20)
-        response = url
+        response = requests.get(url, timeout=20)
+        # response = url
 
-        # frappe.logger().info(f"WhatsApp Response: {response.text}")
-        frappe.logger().info(f"WhatsApp Response: {response}")
+        frappe.logger().info(f"WhatsApp Response: {response.text}")
         return {
             "status": "success",
-            # "response": response.text
-            "response": response
+            "response": response.text
         }
 
     except Exception as e:
