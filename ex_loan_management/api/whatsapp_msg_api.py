@@ -38,9 +38,16 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
     """
     try:
 
+        emi_date_obj = emi_date
+
+        if isinstance(emi_date, str):
+            emi_date_obj = datetime.strptime(emi_date, "%d-%m-%Y").date()
+        
         eng_day = frappe.utils.formatdate(
-            emi_date, "EEEE"
+            emi_date_obj, "EEEE"
         )
+        
+        print("eng_day ...",eng_day, emi_date, type(emi_date))
         # Remove +91 if present
         mobile_no = str(mobile_no).strip()
         if mobile_no.startswith("+91"):
@@ -56,7 +63,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         # image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
         
         # ✅ Get image from Frappe public files
-        image_url = frappe.utils.get_url("/files/logo.jpeg")
+        image_url = frappe.utils.get_url("/files/Tejraj_scanner.jpeg")
 
         encoded_params = quote(params_value)
         encoded_image_url = quote(image_url, safe=":/")
