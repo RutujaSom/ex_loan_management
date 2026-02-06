@@ -2,7 +2,7 @@ import frappe
 import requests
 from urllib.parse import urlencode, quote
 from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
-
+from datetime import datetime
 
 
 MARATHI_DAYS = {
@@ -18,7 +18,7 @@ MARATHI_DAYS = {
 
 # वरील / खालील
 @frappe.whitelist(allow_guest=True)
-def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
+def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
     """
     Sends a WhatsApp message reminder for a loan EMI to a specified member.
     Args:
@@ -31,7 +31,7 @@ def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_tex
         dict: A dictionary containing the status ("success" or "error") and the response or error message.
     Raises:
         Exception: Logs and returns error details if message sending fails.
-    Notes:
+    Notes:mobile_no
         - The function constructs a WhatsApp message URL with the provided parameters and logs the response.
         - The weekday is translated to Marathi using the MARATHI_DAYS mapping.
         - The function currently returns the constructed URL as the response for debugging purposes.
@@ -41,6 +41,10 @@ def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_tex
         eng_day = frappe.utils.formatdate(
             emi_date, "EEEE"
         )
+        # Remove +91 if present
+        mobile_no = str(mobile_no).strip()
+        if mobile_no.startswith("+91"):
+            mobile_no = mobile_no[3:]
 
         # Marathi weekday
         marathi_day = MARATHI_DAYS.get(eng_day, eng_day)
@@ -56,13 +60,13 @@ def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_tex
 
         encoded_params = quote(params_value)
         encoded_image_url = quote(image_url, safe=":/")
-
+        print('mobile_no ...',mobile_no)
         url = (
             "http://bhashsms.com/api/sendmsgutil.php"
             "?user=Tejraj_BWAI"
             "&pass=123456"
             "&sender=BUZWAP"
-            "&phone=7823064842"
+            f"&phone={mobile_no}"
             "&text=loan_emi_reminder"
             "&priority=wa"
             "&stype=normal"
@@ -73,11 +77,10 @@ def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_tex
 
         print("Final URL:", url)
 
-        # response = requests.get(url, timeout=20)
-        response = url
+        response = requests.get(url, timeout=20)
+        # response = url
 
         frappe.logger().info(f"WhatsApp Response: {response.text}")
-
         return {
             "status": "success",
             "response": response.text
@@ -85,6 +88,7 @@ def send_whatsapp_messages(member_name, loan_no, emi_amount, emi_date, extra_tex
 
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "WhatsApp API Error")
+        # frappe.local.response["http_status_code"] = 406
         return {
             "status": "error",
             "message": str(e)
@@ -104,15 +108,20 @@ def send_emi_whatsapp_reminders():
         list: A list of EMI objects that are due today.
     """
 
-    print("frappe.utils.today() ...",frappe.utils.today())
-    emis = get_todays_emis(selected_date=frappe.utils.today())
-    # emis = get_todays_emis()
+    emis = get_todays_emis(selected_date=frappe.utils.today(), is_schedular=True)
+    
 
     for emi in emis:
         
         mobile_no = emi.mobile_no or emi.mobile_no_2
         if not mobile_no:
             continue
+
+        payment_date = emi.payment_date
+        if isinstance(payment_date, str):
+            payment_date = datetime.strptime(payment_date, "%Y-%m-%d").strftime("%d-%m-%Y")
+        else:
+            payment_date = payment_date.strftime("%d-%m-%Y")
 
         # send_whatsapp_messages(
         #     mobile_no=mobile_no,
