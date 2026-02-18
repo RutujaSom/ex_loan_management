@@ -26,10 +26,10 @@
   "doctype": "Client Script",
   "dt": "Company",
   "enabled": 1,
-  "modified": "2026-02-18 15:37:56.730628",
+  "modified": "2026-02-18 17:59:19.361579",
   "module": "Excel Loan Management",
   "name": "Update Message Schedule In Company",
-  "script": "frappe.ui.form.on('Company', {\n    custom_start_sending_messages_before_days(frm) {\n        frm.clear_table('custom_message_schedule');\n        no_of_days = frm.doc.custom_start_sending_messages_before_days\n        console.log(no_of_days ,'....')\n        if (no_of_days && no_of_days > 0) {\n            for (let i = 1; i <= no_of_days; i++) {\n                let row = frm.add_child('custom_message_schedule');\n                console.log('row ....',row)\n                row.day = `Day ${i}`;\n            }\n        }\n        frm.refresh_field('custom_message_schedule');\n    }\n});\n\n\n\n",
+  "script": "frappe.ui.form.on('Company', {\n    custom_start_sending_messages_before_days(frm) {\n        frm.clear_table('custom_message_schedule');\n        no_of_days = frm.doc.custom_start_sending_messages_before_days\n        console.log(no_of_days ,'....')\n        if (no_of_days && no_of_days > 0) {\n            for (let i = 1; i <= no_of_days; i++) {\n                let row = frm.add_child('custom_message_schedule');\n                console.log('row ....',row)\n                row.day = i;\n            }\n        }\n        frm.refresh_field('custom_message_schedule');\n    }\n});\n\n\n\n",
   "view": "Form"
  }
 ]

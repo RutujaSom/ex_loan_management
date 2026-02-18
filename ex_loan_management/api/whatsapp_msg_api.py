@@ -209,12 +209,13 @@ def send_emi_whatsapp_reminders():
             continue
 
         # 📅 Date calculation
-        selected_date = today + timedelta(days=index)
+        selected_date = today + timedelta(days=(row.day))
 
         emis = get_todays_emis(
             selected_date=selected_date,
             is_schedular=True
         )
+        print("emis ...",len(emis))
 
         for emi in emis:
             mobile_no = emi.mobile_no or emi.mobile_no_2
