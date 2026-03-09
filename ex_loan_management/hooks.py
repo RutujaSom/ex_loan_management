@@ -17,6 +17,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
             ["name", "in", [
                 "Make collection in hand amount negative",
                 "Add filter on loan group assignment",
+                "Update Message Schedule In Company",
             ]]
         ]
     },
@@ -25,6 +26,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "filters": [
             ["name", "in", [
                 "Get Loan Group Data For Application",
+                "Validate Duplicate Time in Company"
             ]]
         ]
     },
@@ -64,9 +66,13 @@ doc_events = {
 scheduler_events = {
     "cron": {
         
-        "0 8 * * *": [  # Every day at 08:00 AM
+        # "0 8 * * *": [  # Every day at 08:00 AM
+        #     "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
+        # ],
+        "0 * * * *": [   # Runs at minute 0 of every hour
             "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
         ],
+
     }
 }
 
