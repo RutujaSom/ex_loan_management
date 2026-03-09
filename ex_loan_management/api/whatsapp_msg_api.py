@@ -59,7 +59,8 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         print("marathi_day ...",marathi_day)
 
         # Build params dynamically (ORDER MUST MATCH TEMPLATE)
-        params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{extra_text}"
+        # params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{extra_text}"
+        params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day}"
 
         # image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
         
@@ -85,8 +86,8 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         print("Final URL:", url)
 
-        # response = requests.get(url, timeout=50)
-        response = "url"
+        response = requests.get(url, timeout=50)
+        # response = "url"
 
         frappe.logger().info(f"WhatsApp Response: {response}")
         message = f""" नमस्कार {member_name}, 
