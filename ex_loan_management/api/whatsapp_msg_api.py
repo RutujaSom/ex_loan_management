@@ -3,6 +3,7 @@ import requests
 from urllib.parse import urlencode, quote
 from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
 from datetime import datetime
+from frappe.utils import now_datetime
 
 
 MARATHI_DAYS = {
@@ -84,10 +85,35 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         print("Final URL:", url)
 
-        response = requests.get(url, timeout=50)
-        # response = url
+        # response = requests.get(url, timeout=50)
+        response = "url"
 
-        frappe.logger().info(f"WhatsApp Response: {response.text}")
+        frappe.logger().info(f"WhatsApp Response: {response}")
+        message = f""" नमस्कार {member_name}, 
+            तुमचा लोन क्रमांक {loan_no} याचा हप्ता (ईएमआय) 
+            रुपये {emi_amount}/- 
+            दिनांक: {emi_date} 
+            वार: {marathi_day} रोजी देय आहे. 
+            तरी कृपया खालील क्यू आर कोड वर 
+            लवकरात लवकर पेमेंट करून त्याचा स्क्रीन शॉट पाठवावा ही विनंती .. 
+            धन्यवाद तेजराज मायक्रो असोसिएशन
+        """
+        
+    
+        # Create document
+        doc = frappe.get_doc({
+            "doctype": "Whatsapp Messages",
+            "phone_number": mobile_no,
+            "user_name": member_name,
+            "message": message,
+            "attachment":"/files/Tejraj_scanner.jpeg",
+            "type":"SENT",
+            "received_on": now_datetime()
+        })
+
+        doc.insert(ignore_permissions=True)
+        frappe.db.commit()
+
         return {
             "status": "success",
             "response": response.text,
@@ -140,7 +166,6 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 #         #     emi_date=emi.payment_date,
 #         # )
 #     return emis
-
 
 
 
