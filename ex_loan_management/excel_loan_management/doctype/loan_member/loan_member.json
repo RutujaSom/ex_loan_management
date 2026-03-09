@@ -76,7 +76,9 @@
   "column_break_brge",
   "holder_name",
   "ifsc_code",
-  "account_type"
+  "account_type",
+  "passbook_image",
+  "passbook_image_2"
  ],
  "fields": [
   {
@@ -123,8 +125,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 13,
-   "reqd": 1
+   "length": 30
   },
   {
    "fieldname": "group",
@@ -305,7 +306,7 @@
    "fieldname": "ifsc_code",
    "fieldtype": "Data",
    "label": "IFSC Code",
-   "length": 11
+   "length": 30
   },
   {
    "fieldname": "account_type",
@@ -464,13 +465,23 @@
    "label": "User Id",
    "options": "User",
    "unique": 1
+  },
+  {
+   "fieldname": "passbook_image",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 1"
+  },
+  {
+   "fieldname": "passbook_image_2",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 2"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 12:02:02.568571",
+ "modified": "2026-03-09 19:13:12.129575",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
