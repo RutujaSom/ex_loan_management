@@ -248,13 +248,13 @@ def send_emi_whatsapp_reminders():
                 continue
 
             # WhatsApp API call (example)
-            # send_whatsapp_messages(
-            #     mobile_no=mobile_no,
-            #     customer_name=emi.member_name,
-            #     loan_id=emi.loan_id or emi.loan,
-            #     emi_amount=emi.total_payment,
-            #     emi_date=emi.payment_date,
-            # )
+            send_whatsapp_messages(
+                mobile_no=mobile_no,
+                customer_name=emi.member_name,
+                loan_id=emi.loan_id or emi.loan,
+                emi_amount=emi.total_payment,
+                emi_date=emi.payment_date,
+            )
 
         all_emis.extend(emis)
 
