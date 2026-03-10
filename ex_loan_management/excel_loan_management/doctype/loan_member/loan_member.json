@@ -76,7 +76,9 @@
   "column_break_brge",
   "holder_name",
   "ifsc_code",
-  "account_type"
+  "account_type",
+  "passbook_image",
+  "passbook_image_2"
  ],
  "fields": [
   {
@@ -464,13 +466,23 @@
    "label": "User Id",
    "options": "User",
    "unique": 1
+  },
+  {
+   "fieldname": "passbook_image",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 1"
+  },
+  {
+   "fieldname": "passbook_image_2",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 2"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-26 12:02:02.568571",
+ "modified": "2026-03-10 16:14:58.344280",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",

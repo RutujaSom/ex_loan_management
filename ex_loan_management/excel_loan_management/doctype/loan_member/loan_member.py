@@ -38,6 +38,8 @@ class LoanMember(Document):
             new_id = f"{prefix}{new_num}"
         self.name = new_id
         self.member_id = new_id
+        # self.name = self.member_id
+        # self.member_id = self.member_id
 
     def before_save(self):
         # ✅ Skip validation if called during import
@@ -60,7 +62,7 @@ class LoanMember(Document):
                 if fieldname not in ["group","aadhar_image_back","voter_id_image_back",
                                      "address_line_2","cibil_score","bank_address","mobile_no_2",
                                     "cibil_date", "email", "geo_location","longitude", "latitude","consumer_no",
-                                    "user_id"]:
+                                    "user_id","passbook_image_2"]:
                     if value in [None, ""]:
                         missing_fields.append(fieldname)
 
@@ -176,7 +178,7 @@ def import_loan_members(file_url):
         created_occupations = []
 
         for row in rows:
-            print("row  ....",row)
+            # print("row  ....",row)
             member_id = str(row.get("MEMBER NO")).strip() if row.get("MEMBER NO") else None
             if not member_id:
                 continue  # Skip if no member_id
@@ -186,6 +188,10 @@ def import_loan_members(file_url):
             type_of_borrower = row.get("TYPE OF BORROWER")
             mobile_no = row.get("MOB NO")
             gender = row.get("GENDER")
+            if gender == "M":
+                gender = "MALE"
+            else:
+                gender = "FEMALE"
             email = ""
             dob = row.get("DOB")
             entry_age = row.get("ENTRY AGE")
@@ -280,8 +286,8 @@ def import_loan_members(file_url):
                 doc.bank_address = row.get("BRANCH NAME")
                 doc.holder_name = member_name
                 doc.ifsc_code = row.get("IFSC CODE")
-                doc.account_type = "Saving",
-                doc.company = ""
+                doc.account_type = "Saving"
+                doc.company = "Tejraj Micro Association"
 
                 print('doc ...........', doc, '.....', member_id)
 
@@ -463,7 +469,7 @@ def create_loan_member():
 
         # Step 2: Handle file uploads
         for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image",
-                      "aadhar_image_back", "voter_id_image_back"]:
+                      "aadhar_image_back", "voter_id_image_back", "passbook_image", "passbook_image_2"]:
             if field in files:
                 upload = files[field]
                 if not upload or not upload.filename:
@@ -526,7 +532,8 @@ update_fields = [
     "member_id", "member_image", "company", "member_name",
     "address_doc_type", "home_image","voter_id","voter_id_image",
     "aadhar_image_back","voter_id_image_back",
-    "longitude", "latitude", "geo_location","consumer_no"
+    "longitude", "latitude", "geo_location","consumer_no",
+    "passbook_image", "passbook_image_2"
 ]
 
 """
@@ -621,7 +628,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         extra_params=extra_params,
         link_fields={"group": "group_name"},
         image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                      "aadhar_image_back", "voter_id_image_back"]
+                      "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
     )
 
 
@@ -640,7 +647,7 @@ def update_loan_member_api(name):
         doc = frappe.get_doc("Loan Member", loan_member_id)
 
         image_fields = ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",
-                             "aadhar_image_back", "voter_id_image_back"]
+                             "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
 
         # Update text fields
         for field in update_fields:
@@ -745,7 +752,7 @@ def loan_member_get(name):
     # 🔹 Full URL for image fields
     host_url = frappe.request.host_url.rstrip("/")  # e.g. http://localhost:8000
     image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                    "aadhar_image_back", "voter_id_image_back"]
+                    "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
 
     for f in image_fields:
         if member.get(f):
