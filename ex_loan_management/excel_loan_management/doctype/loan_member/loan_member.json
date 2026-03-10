@@ -125,7 +125,8 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "label": "Mobile Number",
-   "length": 30
+   "length": 13,
+   "reqd": 1
   },
   {
    "fieldname": "group",
@@ -306,7 +307,7 @@
    "fieldname": "ifsc_code",
    "fieldtype": "Data",
    "label": "IFSC Code",
-   "length": 30
+   "length": 11
   },
   {
    "fieldname": "account_type",
@@ -481,7 +482,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 19:13:12.129575",
+ "modified": "2026-03-10 16:14:58.344280",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Member",
