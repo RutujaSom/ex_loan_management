@@ -64,30 +64,46 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         # image_url = "https://i.ibb.co/9w4vXVY/Whats-App-Image-2022-07-26-at-2-57-21-PM.jpg"
         
-        # ✅ Get image from Frappe public files
-        image_url = frappe.utils.get_url("/files/Tejraj_scanner.jpeg")
+        # =====================================================
+        # ✅ Get WhatsApp image from Default Company
+        # =====================================================
+        company_name = frappe.db.get_single_value(
+            "Global Defaults",
+            "default_company"
+        )
+        company = frappe.get_cached_value(
+            "Company",
+            company_name,
+            "custom_whatsapp_image"
+        )
+
+        if not company:
+            frappe.throw("WhatsApp message image is missing. Please upload an image in Company.")
+
+        # Build full URL
+        image_url = frappe.utils.get_url(company)
 
         encoded_params = quote(params_value)
         encoded_image_url = quote(image_url, safe=":/")
         print('mobile_no ...',mobile_no)
-        url = (
-            "http://bhashsms.com/api/sendmsgutil.php"
-            "?user=Tejraj_BWAI"
-            "&pass=123456"
-            "&sender=BUZWAP"
-            f"&phone={mobile_no}"
-            "&text=loan_emi_reminder"
-            "&priority=wa"
-            "&stype=normal"
-            f"&Params={encoded_params}"
-            "&htype=image"
-            f"&url={encoded_image_url}"
-        )
+        # url = (
+        #     "http://bhashsms.com/api/sendmsgutil.php"
+        #     "?user=Tejraj_BWAI"
+        #     "&pass=123456"
+        #     "&sender=BUZWAP"
+        #     f"&phone={mobile_no}"
+        #     "&text=loan_emi_reminder"
+        #     "&priority=wa"
+        #     "&stype=normal"
+        #     f"&Params={encoded_params}"
+        #     "&htype=image"
+        #     f"&url={encoded_image_url}"
+        # )
 
-        print("Final URL:", url)
+        # print("Final URL:", url)
 
-        response = requests.get(url, timeout=50)
-        # response = "url"
+        # response = requests.get(url, timeout=50)
+        response = "url"
 
         frappe.logger().info(f"WhatsApp Response: {response}")
         message = f""" नमस्कार {member_name}, 
@@ -107,7 +123,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             "phone_number": mobile_no,
             "user_name": member_name,
             "message": message,
-            "attachment":"/files/Tejraj_scanner.jpeg",
+            "attachment":company,
             "type":"SENT",
             "received_on": now_datetime()
         })
@@ -117,8 +133,9 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         return {
             "status": "success",
-            "response": response.text,
-            "url": url
+            # "response": response.text,
+            "response": response,
+            # "url": url
         }
 
     except Exception as e:
@@ -189,7 +206,6 @@ def send_emi_whatsapp_reminders():
         "default_company"
     )
 
-    print("company_name ...",company_name)
     if not company_name:
         return
 
@@ -241,7 +257,6 @@ def send_emi_whatsapp_reminders():
             selected_date=selected_date,
             is_schedular=True
         )
-        print("emis ...",len(emis))
 
         for emi in emis:
             mobile_no = emi.mobile_no or emi.mobile_no_2
@@ -256,6 +271,101 @@ def send_emi_whatsapp_reminders():
                 emi_amount=emi.total_payment,
                 emi_date=emi.payment_date,
             )
+
+        all_emis.extend(emis)
+
+    return all_emis
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def send_emi_whatsapp_reminders_test():
+    """
+    Sends WhatsApp reminders based on Company -> custom_message_schedule
+    Only sends when current time matches row.time (HH:MM)
+    """
+
+    today = frappe.utils.getdate(frappe.utils.today())
+
+    # company_name = frappe.defaults.get_user_default("Company")
+    company_name = frappe.db.get_single_value(
+        "Global Defaults",
+        "default_company"
+    )
+
+    if not company_name:
+        return
+
+    # Fetch child table rows
+    message_days = frappe.get_all(
+        "Company Message Schedule",
+        filters={
+            "parent": company_name,
+            "parenttype": "Company"
+        },
+        fields=["day", "time"],
+        order_by="idx asc"
+    )
+
+    if not message_days:
+        return
+
+    all_emis = []
+
+    for index, row in enumerate(message_days, start=1):
+        # ⏰ Time check
+        if not row.time:
+            continue
+
+        now = frappe.utils.now_datetime()
+
+        row_time = frappe.utils.get_time(row.time)
+
+        # Combine today's date with row time
+        row_datetime = now.replace(
+            hour=row_time.hour,
+            minute=row_time.minute,
+            second=0,
+            microsecond=0
+        )
+
+        # ±15 minutes buffer
+        buffer_start = row_datetime - timedelta(minutes=15)
+        buffer_end = row_datetime + timedelta(minutes=15)
+
+        # Check if now is inside buffer window
+        if not (buffer_start <= now <= buffer_end):
+            continue
+
+        # 📅 Date calculation
+        selected_date = today + timedelta(days=(row.day))
+
+        emis = get_todays_emis(
+            selected_date=selected_date,
+            is_schedular=True
+        )
+
+        for emi in emis:
+            mobile_no = emi.mobile_no or emi.mobile_no_2
+            if not mobile_no:
+                continue
+            if mobile_no in ["+918275058699","+918766445967","+917218300936","+919657078050","+917397999170","+919763686369"]:
+                # print('in if ....................',emi.applicant)
+                send_whatsapp_messages(
+                    mobile_no=mobile_no,
+                    customer_name=emi.member_name,
+                    loan_id=emi.loan_id or emi.loan,
+                    emi_amount=emi.total_payment,
+                    emi_date=emi.payment_date,
+                )
 
         all_emis.extend(emis)
 
