@@ -134,7 +134,6 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         return {
             "status": "success",
             "response": response.text,
-            "response": response,
             "url": url
         }
 
