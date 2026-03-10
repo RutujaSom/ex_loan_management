@@ -86,24 +86,24 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         encoded_params = quote(params_value)
         encoded_image_url = quote(image_url, safe=":/")
         print('mobile_no ...',mobile_no)
-        # url = (
-        #     "http://bhashsms.com/api/sendmsgutil.php"
-        #     "?user=Tejraj_BWAI"
-        #     "&pass=123456"
-        #     "&sender=BUZWAP"
-        #     f"&phone={mobile_no}"
-        #     "&text=loan_emi_reminder"
-        #     "&priority=wa"
-        #     "&stype=normal"
-        #     f"&Params={encoded_params}"
-        #     "&htype=image"
-        #     f"&url={encoded_image_url}"
-        # )
+        url = (
+            "http://bhashsms.com/api/sendmsgutil.php"
+            "?user=Tejraj_BWAI"
+            "&pass=123456"
+            "&sender=BUZWAP"
+            f"&phone={mobile_no}"
+            "&text=loan_emi_reminder"
+            "&priority=wa"
+            "&stype=normal"
+            f"&Params={encoded_params}"
+            "&htype=image"
+            f"&url={encoded_image_url}"
+        )
 
         # print("Final URL:", url)
 
-        # response = requests.get(url, timeout=50)
-        response = "url"
+        response = requests.get(url, timeout=50)
+        # response = "url"
 
         frappe.logger().info(f"WhatsApp Response: {response}")
         message = f""" नमस्कार {member_name}, 
@@ -133,9 +133,9 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
         return {
             "status": "success",
-            # "response": response.text,
+            "response": response.text,
             "response": response,
-            # "url": url
+            "url": url
         }
 
     except Exception as e:
