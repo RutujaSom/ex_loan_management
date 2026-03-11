@@ -34,7 +34,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "dt": "Custom Field",
         "filters": [
             ["dt", "in", [
-                "Company"
+                "Company", "Loan"
             ]]
         ]
     },
