@@ -227,7 +227,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             "&stype=normal"
             f"&Params={encoded_params}"
             "&htype=image"
-            f"&url=https://tejrajmicro.com/files/Tejraj_scanner.jpeg"
+            f"&url={encoded_image_url}"
         )
 
         response = requests.get(url, timeout=50)
