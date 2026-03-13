@@ -50,6 +50,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
                 "dp note cum waiver letter",
                 "Fact Sheet",
                 "Individual Decleration and Terms and Conditions version jan 24",
+                "Individual Loan Agremeent",
             ]]
         ]
     }
