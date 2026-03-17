@@ -5,11 +5,9 @@ import re
 @frappe.whitelist(allow_guest=True)
 def get_whatsapp_msg():
     try:
-        data = frappe.local.form_dict  # 🔥 MOST IMPORTANT LINE
-
-        from_phone = data.get("fromphone")
-        message = data.get("message")
-        from_name = data.get("fromname")
+        from_phone = frappe.request.args.get("fromphone")
+        message = frappe.request.args.get("message")
+        from_name = frappe.request.args.get("fromname")
         external_link = ""
 
         if not from_phone or not message:
