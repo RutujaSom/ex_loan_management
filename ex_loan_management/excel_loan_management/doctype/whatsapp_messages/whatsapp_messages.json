@@ -8,12 +8,14 @@
  "field_order": [
   "phone_number",
   "message",
+  "open_url",
   "is_read",
   "column_break_irel",
   "user_name",
   "received_on",
   "type",
-  "attachment"
+  "attachment",
+  "external_link"
  ],
  "fields": [
   {
@@ -63,13 +65,26 @@
    "fieldname": "is_read",
    "fieldtype": "Check",
    "label": "Is Read"
+  },
+  {
+   "depends_on": "eval:doc.external_link",
+   "fieldname": "open_url",
+   "fieldtype": "Button",
+   "label": "View Attachment"
+  },
+  {
+   "fieldname": "external_link",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "External Link",
+   "options": "URL"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-09 11:29:31.439426",
+ "modified": "2026-03-17 15:37:54.952595",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Whatsapp Messages",
