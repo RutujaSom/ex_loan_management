@@ -20,6 +20,7 @@ def loan_application_print(
         "DP_NOTE_WAIVER_LETTER":"dp note cum waiver letter",
         "FACT_SHEET":"Fact Sheet",
         "INDIVIDUAL_DECLARATION":"Individual Decleration and Terms and Conditions version jan 24",
+        "INDIVIDUAL_LOAN_AGREMEENT":"Individual Loan Agremeent",
     }
 
     if not loan_application:
