@@ -72,7 +72,7 @@ scheduler_events = {
         # ],
 
 
-        "*/5 * * * *": [
+        "*/30 * * * *": [
             "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
         ]
     
