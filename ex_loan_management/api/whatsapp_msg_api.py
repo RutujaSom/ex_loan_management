@@ -1,10 +1,23 @@
 import frappe
-import requests
-from urllib.parse import urlencode, quote
-from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
-from datetime import datetime
-from frappe.utils import now_datetime
 from types import SimpleNamespace
+
+# ==========================================================
+# 🔥 ABSOLUTE FIRST THING – REQUEST CONTEXT FIX
+# ==========================================================
+if not hasattr(frappe.local, "request") or frappe.local.request is None:
+    frappe.local.request = SimpleNamespace(
+        host_url=frappe.utils.get_url() + "/"
+    )
+
+# ==========================================================
+# SAFE IMPORTS (NOW IT WON'T CRASH)
+# ==========================================================
+import requests
+from urllib.parse import quote
+from datetime import datetime, timedelta
+from frappe.utils import now_datetime
+from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
+
 
 MARATHI_DAYS = {
     "Monday": "सोमवार",
@@ -22,8 +35,8 @@ def ensure_request_context():
     """
     Ensures frappe.request exists for scheduler / background jobs
     """
-    if not frappe.request:
-        frappe.request = SimpleNamespace(
+    if not hasattr(frappe.local, "request") or frappe.local.request is None:
+        frappe.local.request = SimpleNamespace(
             host_url=frappe.utils.get_url() + "/"
         )
 
@@ -158,8 +171,6 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
 
 
-from datetime import timedelta
-import frappe
 
 
 @frappe.whitelist(allow_guest=True)
