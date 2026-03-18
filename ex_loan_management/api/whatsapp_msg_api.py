@@ -281,9 +281,9 @@ import frappe
 
 @frappe.whitelist(allow_guest=True)
 def send_emi_whatsapp_reminders():
-    mobile_no = '7823064842'
+    mobile_no = '+917823064842'
     
-    send_whatsapp_messages_only_to(mobile_no,'first message')
+    # send_whatsapp_messages_only_to(mobile_no,'first message')
 
     """
     Sends WhatsApp reminders based on Company -> custom_message_schedule
@@ -297,7 +297,7 @@ def send_emi_whatsapp_reminders():
         "Global Defaults",
         "default_company"
     )
-    send_whatsapp_messages_only_to(mobile_no,company_name)
+    # send_whatsapp_messages_only_to(mobile_no,company_name)
     
     if not company_name:
         return
@@ -313,7 +313,7 @@ def send_emi_whatsapp_reminders():
         order_by="idx asc"
     )
 
-    send_whatsapp_messages_only_to(mobile_no,company_name)
+    # send_whatsapp_messages_only_to(mobile_no,company_name)
 
     if not message_days:
         return
@@ -341,7 +341,7 @@ def send_emi_whatsapp_reminders():
         buffer_start = row_datetime - timedelta(minutes=15)
         buffer_end = row_datetime + timedelta(minutes=15)
         
-        send_whatsapp_messages_only_to(mobile_no, f'buffer_start: {buffer_start}, buffer_end: {buffer_end}')
+        # send_whatsapp_messages_only_to(mobile_no, f'buffer_start: {buffer_start}, buffer_end: {buffer_end}')
 
         # Check if now is inside buffer window
         if not (buffer_start <= now <= buffer_end):
@@ -355,21 +355,21 @@ def send_emi_whatsapp_reminders():
             is_schedular=True
         )
 
-        send_whatsapp_messages_only_to(mobile_no,f'len ..... {len(emis)}, selected_date : {selected_date}')
+        # send_whatsapp_messages_only_to(mobile_no,f'len ..... {len(emis)}, selected_date : {selected_date}')
 
         for emi in emis:
-            mobile_no = emi.mobile_no or emi.mobile_no_2
-            if not mobile_no:
-                continue
+            # mobile_no = emi.mobile_no or emi.mobile_no_2
+            # if not mobile_no:
+            #     continue
 
             # WhatsApp API call (example)
-            # send_whatsapp_messages(
-            #     mobile_no=mobile_no,
-            #     customer_name=emi.member_name,
-            #     loan_id=emi.loan_id or emi.loan,
-            #     emi_amount=emi.total_payment,
-            #     emi_date=emi.payment_date,
-            # )
+            send_whatsapp_messages(
+                mobile_no=mobile_no,
+                customer_name=emi.member_name,
+                loan_id=emi.loan_id or emi.loan,
+                emi_amount=emi.total_payment,
+                emi_date=emi.payment_date,
+            )
 
         all_emis.extend(emis)
 
