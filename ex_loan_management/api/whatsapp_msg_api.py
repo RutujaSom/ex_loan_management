@@ -281,6 +281,14 @@ import frappe
 
 @frappe.whitelist(allow_guest=True)
 def send_emi_whatsapp_reminders():
+    email_id = ['rutuja.somvanshi@excellminds.com']
+    
+    frappe.sendmail(
+        recipients=email_id,
+        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
+        message="first functional ....."
+    )
+
     """
     Sends WhatsApp reminders based on Company -> custom_message_schedule
     Only sends when current time matches row.time (HH:MM)
@@ -292,6 +300,12 @@ def send_emi_whatsapp_reminders():
     company_name = frappe.db.get_single_value(
         "Global Defaults",
         "default_company"
+    )
+
+    frappe.sendmail(
+        recipients=email_id,
+        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
+        message=f"functional ..... company_name {company_name}"
     )
 
     if not company_name:
@@ -306,6 +320,11 @@ def send_emi_whatsapp_reminders():
         },
         fields=["day", "time"],
         order_by="idx asc"
+    )
+    frappe.sendmail(
+        recipients=email_id,
+        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
+        message=f"functional ..... message_days {message_days}"
     )
 
     if not message_days:
@@ -333,6 +352,13 @@ def send_emi_whatsapp_reminders():
         # ±15 minutes buffer
         buffer_start = row_datetime - timedelta(minutes=15)
         buffer_end = row_datetime + timedelta(minutes=15)
+        
+        frappe.sendmail(
+            recipients=email_id,
+            subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
+            message=f"functional ..... buffer_start: {buffer_start} .... buffer_end: {buffer_end}"
+        )
+        
 
         # Check if now is inside buffer window
         if not (buffer_start <= now <= buffer_end):
@@ -346,19 +372,25 @@ def send_emi_whatsapp_reminders():
             is_schedular=True
         )
 
+        frappe.sendmail(
+            recipients=email_id,
+            subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
+            message=f"length .... {len(emis)} ...... functional ..... emis: {emis} .... "
+        )
+
         for emi in emis:
             mobile_no = emi.mobile_no or emi.mobile_no_2
             if not mobile_no:
                 continue
 
             # WhatsApp API call (example)
-            send_whatsapp_messages(
-                mobile_no=mobile_no,
-                customer_name=emi.member_name,
-                loan_id=emi.loan_id or emi.loan,
-                emi_amount=emi.total_payment,
-                emi_date=emi.payment_date,
-            )
+            # send_whatsapp_messages(
+            #     mobile_no=mobile_no,
+            #     customer_name=emi.member_name,
+            #     loan_id=emi.loan_id or emi.loan,
+            #     emi_amount=emi.total_payment,
+            #     emi_date=emi.payment_date,
+            # )
 
         all_emis.extend(emis)
 
