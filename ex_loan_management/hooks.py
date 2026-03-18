@@ -67,14 +67,18 @@ doc_events = {
 scheduler_events = {
     "cron": {
         
-        "0 * * * *": [   # Runs at minute 0 of every hour
+        # "0 * * * *": [   # Runs at minute 0 of every hour
+        #     "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
+        # ],
+
+
+        # "*/30 * * * *": [   # Runs at minute 0 and 30 of every hour
+        #     "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders_test"
+        # ],
+
+        "*/5 * * * *": [
             "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
-        ],
-
-
-        "*/30 * * * *": [   # Runs at minute 0 and 30 of every hour
-            "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders_test"
-        ],
+        ]
     
     }
 }
