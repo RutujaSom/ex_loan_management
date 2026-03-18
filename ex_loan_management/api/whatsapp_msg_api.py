@@ -17,6 +17,17 @@ MARATHI_DAYS = {
 }
 
 
+
+def ensure_request_context():
+    """
+    Ensures frappe.request exists for scheduler / background jobs
+    """
+    if not frappe.request:
+        frappe.request = SimpleNamespace(
+            host_url=frappe.utils.get_url() + "/"
+        )
+
+
 @frappe.whitelist(allow_guest=True)
 def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
     """
@@ -145,15 +156,6 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
 
 
-
-def ensure_request_context():
-    """
-    Ensures frappe.request exists for scheduler / background jobs
-    """
-    if not frappe.request:
-        frappe.request = SimpleNamespace(
-            host_url=frappe.utils.get_url() + "/"
-        )
 
 
 from datetime import timedelta
