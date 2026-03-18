@@ -281,13 +281,9 @@ import frappe
 
 @frappe.whitelist(allow_guest=True)
 def send_emi_whatsapp_reminders():
-    email_id = ['rutuja.somvanshi@excellminds.com']
+    mobile_no = '7823064842'
     
-    frappe.sendmail(
-        recipients=email_id,
-        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
-        message="first functional ....."
-    )
+    send_whatsapp_messages_only_to(mobile_no,'first message')
 
     """
     Sends WhatsApp reminders based on Company -> custom_message_schedule
@@ -301,13 +297,8 @@ def send_emi_whatsapp_reminders():
         "Global Defaults",
         "default_company"
     )
-
-    frappe.sendmail(
-        recipients=email_id,
-        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
-        message=f"functional ..... company_name {company_name}"
-    )
-
+    send_whatsapp_messages_only_to(mobile_no,company_name)
+    
     if not company_name:
         return
 
@@ -321,11 +312,8 @@ def send_emi_whatsapp_reminders():
         fields=["day", "time"],
         order_by="idx asc"
     )
-    frappe.sendmail(
-        recipients=email_id,
-        subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
-        message=f"functional ..... message_days {message_days}"
-    )
+
+    send_whatsapp_messages_only_to(mobile_no,company_name)
 
     if not message_days:
         return
@@ -353,12 +341,7 @@ def send_emi_whatsapp_reminders():
         buffer_start = row_datetime - timedelta(minutes=15)
         buffer_end = row_datetime + timedelta(minutes=15)
         
-        frappe.sendmail(
-            recipients=email_id,
-            subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
-            message=f"functional ..... buffer_start: {buffer_start} .... buffer_end: {buffer_end}"
-        )
-        
+        send_whatsapp_messages_only_to(mobile_no, f'buffer_start: {buffer_start}, buffer_end: {buffer_end}')
 
         # Check if now is inside buffer window
         if not (buffer_start <= now <= buffer_end):
@@ -372,11 +355,7 @@ def send_emi_whatsapp_reminders():
             is_schedular=True
         )
 
-        frappe.sendmail(
-            recipients=email_id,
-            subject=f'Micro Finance Schedular {frappe.utils.now_datetime()}',
-            message=f"length .... {len(emis)} ...... functional ..... emis: {emis} .... "
-        )
+        send_whatsapp_messages_only_to(mobile_no,f'len ..... {len(emis)}, selected_date : {selected_date}')
 
         for emi in emis:
             mobile_no = emi.mobile_no or emi.mobile_no_2
@@ -399,6 +378,40 @@ def send_emi_whatsapp_reminders():
 
 
 
+
+@frappe.whitelist(allow_guest=True)
+def send_whatsapp_messages_only_to(mobile_no,loan_list):
+   
+    try:
+        params_value = f"{loan_list}"
+        encoded_params = quote(params_value)
+
+        url = (
+            "http://bhashsms.com/api/sendmsgutil.php"
+            "?user=Tejraj_BWAI"
+            "&pass=123456"
+            "&sender=BUZWAP"
+            f"&phone={mobile_no}"
+            "&text=tejraj_message_sending"
+            "&priority=wa"
+            "&stype=normal"
+            f"&Params={encoded_params}"
+        )
+
+        response = requests.get(url, timeout=50)
+
+        return {
+            "status": "success",
+            "response": response.text,
+            "url": f"{url}"
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "WhatsApp API Error")
+        return {
+            "status": "error",
+            "message": str(e)
+        }
 
 
 
