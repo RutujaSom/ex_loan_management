@@ -21,6 +21,7 @@ def loan_application_print(
         "FACT_SHEET":"Fact Sheet",
         "INDIVIDUAL_DECLARATION":"Individual Decleration and Terms and Conditions version jan 24",
         "INDIVIDUAL_LOAN_AGREMEENT":"Individual Loan Agremeent",
+        "INDIVIDUAL_LOAN_AGREMEENT_FOR_CO_BORROWER": "Individual Loan Agremeent For Co-borrower",
     }
 
     if not loan_application:
