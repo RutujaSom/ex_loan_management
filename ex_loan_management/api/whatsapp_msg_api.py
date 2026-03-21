@@ -2,14 +2,6 @@ import frappe
 from types import SimpleNamespace
 
 # ==========================================================
-# 🔥 ABSOLUTE FIRST THING – REQUEST CONTEXT FIX
-# ==========================================================
-if not hasattr(frappe.local, "request") or frappe.local.request is None:
-    frappe.local.request = SimpleNamespace(
-        host_url=frappe.utils.get_url() + "/"
-    )
-
-# ==========================================================
 # SAFE IMPORTS (NOW IT WON'T CRASH)
 # ==========================================================
 import requests
@@ -31,18 +23,19 @@ MARATHI_DAYS = {
 
 
 
-def ensure_request_context():
-    """
-    Ensures frappe.request exists for scheduler / background jobs
-    """
-    if not hasattr(frappe.local, "request") or frappe.local.request is None:
-        frappe.local.request = SimpleNamespace(
-            host_url=frappe.utils.get_url() + "/"
-        )
+
+# def ensure_background_request():
+#     if not hasattr(frappe.local, "request"):
+#         frappe.local.request = SimpleNamespace()
+
+#     if not getattr(frappe.local.request, "host_url", None):
+#         frappe.local.request.host_url = frappe.utils.get_url() + "/"
 
 
 @frappe.whitelist(allow_guest=True)
 def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
+    print("in sec .......")
+    # ensure_background_request()
     """
     Sends a WhatsApp message reminder for a loan EMI to a specified member.
     Args:
@@ -63,7 +56,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
     try:
 
         # ✅ Ensure request context (VERY IMPORTANT)
-        ensure_request_context()
+        # ensure_background_request()
 
         emi_date_obj = emi_date
 
@@ -102,8 +95,9 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             )
 
         # Build full image URL
-        image_url = frappe.utils.get_url(custom_whatsapp_image)
-
+        # image_url = frappe.utils.get_url(custom_whatsapp_image)
+        image_url= "https://tejrajmicro.com"+custom_whatsapp_image
+        print("image_url ...",image_url)
         # Build params dynamically (ORDER MUST MATCH TEMPLATE)
         # params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day}"
         params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{custom_last_whatsapp_msg}"
@@ -245,6 +239,7 @@ def send_emi_whatsapp_reminders():
         )
 
         for emi in emis:
+            mobile_no = '+917823064842'
             # mobile_no = emi.mobile_no or emi.mobile_no_2
             # if not mobile_no:
             #     continue
@@ -261,6 +256,11 @@ def send_emi_whatsapp_reminders():
         all_emis.extend(emis)
 
     return all_emis
+
+
+
+
+
 
 
 
