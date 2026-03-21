@@ -2,14 +2,6 @@ import frappe
 from types import SimpleNamespace
 
 # ==========================================================
-# 🔥 ABSOLUTE FIRST THING – REQUEST CONTEXT FIX
-# ==========================================================
-if not hasattr(frappe.local, "request") or frappe.local.request is None:
-    frappe.local.request = SimpleNamespace(
-        host_url=frappe.utils.get_url() + "/"
-    )
-
-# ==========================================================
 # SAFE IMPORTS (NOW IT WON'T CRASH)
 # ==========================================================
 import requests
@@ -31,18 +23,19 @@ MARATHI_DAYS = {
 
 
 
-def ensure_request_context():
-    """
-    Ensures frappe.request exists for scheduler / background jobs
-    """
-    if not hasattr(frappe.local, "request") or frappe.local.request is None:
-        frappe.local.request = SimpleNamespace(
-            host_url=frappe.utils.get_url() + "/"
-        )
+
+# def ensure_background_request():
+#     if not hasattr(frappe.local, "request"):
+#         frappe.local.request = SimpleNamespace()
+
+#     if not getattr(frappe.local.request, "host_url", None):
+#         frappe.local.request.host_url = frappe.utils.get_url() + "/"
 
 
 @frappe.whitelist(allow_guest=True)
 def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
+    print("in sec .......")
+    # ensure_background_request()
     """
     Sends a WhatsApp message reminder for a loan EMI to a specified member.
     Args:
@@ -63,7 +56,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
     try:
 
         # ✅ Ensure request context (VERY IMPORTANT)
-        ensure_request_context()
+        # ensure_background_request()
 
         emi_date_obj = emi_date
 
@@ -102,8 +95,9 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             )
 
         # Build full image URL
-        image_url = frappe.utils.get_url(custom_whatsapp_image)
-
+        # image_url = frappe.utils.get_url(custom_whatsapp_image)
+        image_url= "https://tejrajmicro.com"+custom_whatsapp_image
+        print("image_url ...",image_url)
         # Build params dynamically (ORDER MUST MATCH TEMPLATE)
         # params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day}"
         params_value = f"{member_name},{loan_no},{emi_amount},{emi_date},{marathi_day},{custom_last_whatsapp_msg}"
@@ -257,6 +251,103 @@ def send_emi_whatsapp_reminders():
                 emi_amount=emi.total_payment,
                 emi_date=emi.payment_date,
             )
+
+        all_emis.extend(emis)
+
+    return all_emis
+
+
+
+
+
+
+
+
+
+
+def send_emi_whatsapp_reminders_test():
+    mobile_no = '+917823064842'
+    
+
+    """
+    Sends WhatsApp reminders based on Company -> custom_message_schedule
+    Only sends when current time matches row.time (HH:MM)
+    """
+
+    today = frappe.utils.getdate(frappe.utils.today())
+
+    # company_name = frappe.defaults.get_user_default("Company")
+    company_name = frappe.db.get_single_value(
+        "Global Defaults",
+        "default_company"
+    )
+    
+    if not company_name:
+        return
+
+    # Fetch child table rows
+    message_days = frappe.get_all(
+        "Company Message Schedule",
+        filters={
+            "parent": company_name,
+            "parenttype": "Company"
+        },
+        fields=["day", "time"],
+        order_by="idx asc"
+    )
+
+
+    if not message_days:
+        return
+
+    all_emis = []
+
+    for index, row in enumerate(message_days, start=1):
+        # ⏰ Time check
+        if not row.time:
+            continue
+
+        now = frappe.utils.now_datetime()
+
+        row_time = frappe.utils.get_time(row.time)
+
+        # Combine today's date with row time
+        row_datetime = now.replace(
+            hour=row_time.hour,
+            minute=row_time.minute,
+            second=0,
+            microsecond=0
+        )
+
+        # ±15 minutes buffer
+        buffer_start = row_datetime - timedelta(minutes=15)
+        buffer_end = row_datetime + timedelta(minutes=15)
+        
+        # Check if now is inside buffer window
+        if not (buffer_start <= now <= buffer_end):
+            continue
+
+        # 📅 Date calculation
+        selected_date = today + timedelta(days=(row.day))
+
+        emis = get_todays_emis(
+            selected_date=selected_date,
+            is_schedular=True
+        )
+
+        for emi in emis:
+            mobile_no = emi.mobile_no or emi.mobile_no_2
+            if not mobile_no:
+                continue
+
+            # WhatsApp API call (example)
+            # send_whatsapp_messages(
+            #     mobile_no=mobile_no,
+            #     member_name=emi.member_name,
+            #     loan_no=emi.loan_id or emi.loan,
+            #     emi_amount=emi.total_payment,
+            #     emi_date=emi.payment_date,
+            # )
 
         all_emis.extend(emis)
 
