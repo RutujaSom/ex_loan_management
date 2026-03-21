@@ -168,9 +168,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
 
 @frappe.whitelist(allow_guest=True)
-def send_emi_whatsapp_reminders():
-    mobile_no = '+917823064842'
-    
+def send_emi_whatsapp_reminders():    
 
     """
     Sends WhatsApp reminders based on Company -> custom_message_schedule
@@ -239,10 +237,9 @@ def send_emi_whatsapp_reminders():
         )
 
         for emi in emis:
-            mobile_no = '+917823064842'
-            # mobile_no = emi.mobile_no or emi.mobile_no_2
-            # if not mobile_no:
-            #     continue
+            mobile_no = emi.mobile_no or emi.mobile_no_2
+            if not mobile_no:
+                continue
 
             # WhatsApp API call (example)
             send_whatsapp_messages(
