@@ -186,9 +186,11 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                             <th data-field="rs.principal_amount">Principal</th>
                             <th data-field="rs.interest_amount">Interest</th>
                             <th data-field="rs.total_payment">Total Payment</th>
-                            <th data-field="rs.balance_loan_amount">Balance</th>
+                            <th>Remaining EMI</th>
+                           <!-- <th data-field="rs.balance_loan_amount">Balance</th> -->
+                            
                             <th>Status</th>
-                            <th>Remaining</th>
+                            <th data-field="rs.balance_loan_amount">Total Balance</th>
                             <th></th>
                             <th>WhatsApp</th>
 
@@ -198,6 +200,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
                 r.message.forEach(row => {
                     let show_whatsapp = row.payment_date >= today;
+                    let total_balance_amount = row.total_loan_amount - row.total_loan_paid
                     html += `
                         <tr>
                             <td>${row.loan_id}</td>
@@ -206,9 +209,12 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                             <td>${row.principal_amount}</td>
                             <td>${row.interest_amount}</td>
                             <td>${row.total_payment}</td>
-                            <td>${row.balance_loan_amount}</td>
-                            <td>${row.payment_status}</td>
                             <td>${row.remaining_amount}</td>
+                          <!--  <td>${row.balance_loan_amount}</td> -->
+                            
+                            <td>${row.payment_status}</td>
+                            <td>${total_balance_amount}</td>
+                             
                             <td>
                                 <button class="btn btn-sm btn-primary update-repayment" 
                                         data-loan="${row.loan}" data-payment_date="${row.payment_date}" 
