@@ -152,7 +152,9 @@ function open_import_dialog() {
         primary_action(values) {
             // Call server-side method to import members
             frappe.call({
-                method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_loan_members",
+                // method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.import_loan_members",
+                method: "ex_loan_management.excel_loan_management.doctype.loan_member.loan_member.update_import_loan_members",
+
                 args: {
                     file_url: values.file_url,
                     file_type: values.file_type

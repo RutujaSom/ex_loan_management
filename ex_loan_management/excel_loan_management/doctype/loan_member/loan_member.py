@@ -810,3 +810,87 @@ def loan_member_list_as_per_group_assignment(page=1, page_size=10, search=None, 
         )
     else:
         return {}
+    
+
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def update_import_loan_members(file_url):
+    frappe.flags.in_import = True
+
+    file_doc = frappe.get_doc("File", {"file_url": file_url})
+    file_path = file_doc.get_full_path()
+
+    rows = []
+    with open(file_path, "rb") as f:
+        wb = load_workbook(f, data_only=True)
+        ws = wb.active
+        headers = [cell.value for cell in ws[1]]
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            rows.append(dict(zip(headers, row)))
+
+    updated = []
+    skipped = []
+
+    for row in rows:
+        member_id = str(row.get("MEMBER NO")).strip() if row.get("MEMBER NO") else None
+        loan_group = str(row.get("GROUP CODE")).strip() if row.get("GROUP CODE") else None
+
+        if not member_id or not loan_group:
+            skipped.append({"member_id": member_id, "reason": "Missing member or group"})
+            continue
+
+        # -----------------------------
+        # 1️⃣ Check Loan Member exists
+        # -----------------------------
+        loan_member_exists = frappe.db.exists(
+            "Loan Member",
+            {"member_id": member_id}
+        )
+
+        if not loan_member_exists:
+            skipped.append({"member_id": member_id, "reason": "Loan Member not found"})
+            continue
+
+        # -----------------------------
+        # 2️⃣ Check Loan Group exists
+        # -----------------------------
+        loan_group_exists = frappe.db.exists(
+            "Loan Group",
+            {"name": loan_group}
+        )
+
+        if not loan_group_exists:
+            skipped.append({"member_id": member_id, "reason": "Loan Group not found"})
+            continue
+
+        # -----------------------------
+        # 3️⃣ Update using SQL
+        # -----------------------------
+        frappe.db.sql(
+            """
+            UPDATE `tabLoan Member`
+            SET `group` = %(loan_group)s
+            WHERE member_id = %(member_id)s
+            """,
+            {
+                "loan_group": loan_group,
+                "member_id": member_id
+            }
+        )
+
+        updated.append(member_id)
+
+    frappe.db.commit()
+
+    msg = f"✅ updated {len(updated)}, skipped {len(skipped)}."
+    return msg

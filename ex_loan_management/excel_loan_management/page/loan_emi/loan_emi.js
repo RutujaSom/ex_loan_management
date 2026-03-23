@@ -180,8 +180,10 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 let html = `<table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th data-field="l.group">Group</th>
                             <th data-field="l.loan_id">Loan</th>
-                            <th data-field="lm.member_name">Applicant</th>
+                            <th data-field="lm.member_id">Applicant Id</th>
+                            <th data-field="lm.member_name">Applicant Name</th>
                             <th data-field="rs.payment_date">Payment Date</th>
                             <th data-field="rs.principal_amount">Principal</th>
                             <th data-field="rs.interest_amount">Interest</th>
@@ -203,7 +205,9 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                     let total_balance_amount = row.total_loan_amount - row.total_loan_paid
                     html += `
                         <tr>
+                            <td>${row.group}</td>
                             <td>${row.loan_id}</td>
+                            <td>${row.applicant}</td>
                             <td>${row.member_name || row.applicant}</td>
                             <td>${row.payment_date}</td>
                             <td>${row.principal_amount}</td>
