@@ -35,7 +35,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "filters": [
             ["dt", "in", [
                 "Company", "Loan", "Loan Application", "Loan Repayment Schedule",
-                "Loan Repayment", "Loan Disbursement",
+                "Loan Repayment", "Loan Disbursement", "Process Loan Interest Accrual"
 
             ]]
         ]
