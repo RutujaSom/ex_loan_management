@@ -1,0 +1,596 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-08 15:14:36.116202",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "member_details_tab",
+  "member_id",
+  "first_name",
+  "last_name",
+  "group",
+  "mobile_no_2",
+  "email",
+  "completed_age",
+  "gender",
+  "member_image",
+  "user_id",
+  "loan_column",
+  "company",
+  "middle_name",
+  "member_name",
+  "mobile_no",
+  "dob",
+  "occupation",
+  "entry_age",
+  "status",
+  "created_by",
+  "member_address_tab",
+  "address_column_break",
+  "address",
+  "country",
+  "city",
+  "column_break_khge",
+  "address_line_2",
+  "state",
+  "pincode",
+  "document_tab",
+  "aadhar",
+  "aadhar_image",
+  "aadhar_image_back",
+  "document_column_break",
+  "aadhar_verified",
+  "section_break_oeil",
+  "pancard",
+  "pancard_image",
+  "column_break_nytu",
+  "pancard_verified",
+  "section_break_knhg",
+  "voter_id",
+  "voter_id_image",
+  "voter_id_image_back",
+  "column_break_lhuq",
+  "voter_id_verified",
+  "section_break_siuy",
+  "address_doc_type",
+  "consumer_no",
+  "address_image",
+  "column_break_svga",
+  "address_verified",
+  "section_break_qnda",
+  "home_image",
+  "longitude",
+  "column_break_cnpj",
+  "latitude",
+  "geo_location",
+  "cibil_tab",
+  "cibil_score",
+  "cibil_date",
+  "bank_details",
+  "bank_name",
+  "account_number",
+  "branch",
+  "bank_address",
+  "column_break_brge",
+  "holder_name",
+  "ifsc_code",
+  "account_type",
+  "passbook_image",
+  "passbook_image_2"
+ ],
+ "fields": [
+  {
+   "fieldname": "member_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member ID",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Member Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "gender",
+   "fieldtype": "Select",
+   "label": "Gender",
+   "options": "MALE\nFEMALE\nOTHER",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dob",
+   "fieldtype": "Date",
+   "label": "Date Of Birth",
+   "reqd": 1
+  },
+  {
+   "fieldname": "completed_age",
+   "fieldtype": "Int",
+   "label": "Completed Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entry_age",
+   "fieldtype": "Int",
+   "label": "Entry Age",
+   "read_only": 1
+  },
+  {
+   "fieldname": "mobile_no",
+   "fieldtype": "Data",
+   "label": "Mobile Number",
+   "length": 13,
+   "reqd": 1
+  },
+  {
+   "fieldname": "group",
+   "fieldtype": "Link",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Group",
+   "options": "Loan Group"
+  },
+  {
+   "fieldname": "loan_column",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "member_address_tab",
+   "fieldtype": "Tab Break",
+   "label": "Member Address"
+  },
+  {
+   "fieldname": "address_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "member_details_tab",
+   "fieldtype": "Tab Break",
+   "label": "Member Details"
+  },
+  {
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "label": "Email"
+  },
+  {
+   "default": "MAHARASHTRA",
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "State"
+  },
+  {
+   "default": "INDIA",
+   "fieldname": "country",
+   "fieldtype": "Data",
+   "label": "Country"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Int",
+   "label": "Pincode",
+   "length": 6
+  },
+  {
+   "fieldname": "occupation",
+   "fieldtype": "Link",
+   "label": "Occupation",
+   "options": "Occupation",
+   "reqd": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "member_image",
+   "fieldtype": "Attach",
+   "label": "Member Image"
+  },
+  {
+   "fieldname": "aadhar_image",
+   "fieldtype": "Attach",
+   "label": "Aadhar Card Front Image"
+  },
+  {
+   "fieldname": "pancard_image",
+   "fieldtype": "Attach",
+   "label": "Pan Card Image"
+  },
+  {
+   "fieldname": "aadhar",
+   "fieldtype": "Data",
+   "label": "Aadhar Card Number ",
+   "length": 12
+  },
+  {
+   "fieldname": "pancard",
+   "fieldtype": "Data",
+   "label": "PAN Card Number",
+   "length": 10
+  },
+  {
+   "fieldname": "address_doc_type",
+   "fieldtype": "Select",
+   "label": "Address Document",
+   "options": "\nELECTRICITY BILL\nRENT AGREEMENT"
+  },
+  {
+   "fieldname": "address_image",
+   "fieldtype": "Attach",
+   "label": "Address Proof"
+  },
+  {
+   "fieldname": "document_column_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "document_tab",
+   "fieldtype": "Tab Break",
+   "label": "Documents"
+  },
+  {
+   "fieldname": "cibil_tab",
+   "fieldtype": "Tab Break",
+   "label": "CIBIL"
+  },
+  {
+   "fieldname": "cibil_score",
+   "fieldtype": "Int",
+   "label": "Cibil Score"
+  },
+  {
+   "fieldname": "cibil_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "first_name",
+   "fieldtype": "Data",
+   "label": "First Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "last_name",
+   "fieldtype": "Data",
+   "label": "Last Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "bank_details",
+   "fieldtype": "Tab Break",
+   "label": "Bank Details"
+  },
+  {
+   "fieldname": "bank_name",
+   "fieldtype": "Data",
+   "label": "Bank Name"
+  },
+  {
+   "fieldname": "account_number",
+   "fieldtype": "Data",
+   "label": "Account Number"
+  },
+  {
+   "fieldname": "holder_name",
+   "fieldtype": "Data",
+   "label": "Account Holder Name"
+  },
+  {
+   "fieldname": "branch",
+   "fieldtype": "Data",
+   "label": "Branch"
+  },
+  {
+   "fieldname": "ifsc_code",
+   "fieldtype": "Data",
+   "label": "IFSC Code",
+   "length": 11
+  },
+  {
+   "fieldname": "account_type",
+   "fieldtype": "Select",
+   "label": "Account Type",
+   "options": "Saving\nCurrent\nSalaried"
+  },
+  {
+   "fieldname": "bank_address",
+   "fieldtype": "Small Text",
+   "label": "Bank Address"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Draft\nPending\nVerified\nRejected"
+  },
+  {
+   "default": "0",
+   "fieldname": "aadhar_verified",
+   "fieldtype": "Check",
+   "label": "Aadhar Verified",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "address_verified",
+   "fieldtype": "Check",
+   "label": "Address Verified",
+   "permlevel": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "pancard_verified",
+   "fieldtype": "Check",
+   "label": "Pan Card Verified",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "home_image",
+   "fieldtype": "Attach",
+   "label": "Home Image"
+  },
+  {
+   "fieldname": "column_break_khge",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_brge",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "voter_id",
+   "fieldtype": "Data",
+   "label": "Voter ID Number"
+  },
+  {
+   "fieldname": "voter_id_image",
+   "fieldtype": "Attach",
+   "label": "Voter ID Front Image"
+  },
+  {
+   "default": "0",
+   "fieldname": "voter_id_verified",
+   "fieldtype": "Check",
+   "label": "Voter Id Verified",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "aadhar_image_back",
+   "fieldtype": "Attach",
+   "label": "Aadhar Card Back Image"
+  },
+  {
+   "fieldname": "voter_id_image_back",
+   "fieldtype": "Attach",
+   "label": "Voter ID Back Image"
+  },
+  {
+   "fieldname": "section_break_siuy",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_svga",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_oeil",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_nytu",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_knhg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_lhuq",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_qnda",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "address_line_2",
+   "fieldtype": "Small Text",
+   "label": "Address LIne 2"
+  },
+  {
+   "fieldname": "mobile_no_2",
+   "fieldtype": "Data",
+   "label": "Alternate Mobile No",
+   "length": 13
+  },
+  {
+   "fieldname": "created_by",
+   "fieldtype": "Data",
+   "label": "Created By",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_cnpj",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "label": "Latitude"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "label": "Longitude"
+  },
+  {
+   "fieldname": "geo_location",
+   "fieldtype": "Small Text",
+   "label": "Geo Location"
+  },
+  {
+   "depends_on": "eval: doc.address_doc_type == 'ELECTRICITY BILL'",
+   "fieldname": "consumer_no",
+   "fieldtype": "Data",
+   "label": "Consumer No",
+   "mandatory_depends_on": "eval: doc.address_doc_type == 'ELECTRICITY BILL'"
+  },
+  {
+   "fieldname": "user_id",
+   "fieldtype": "Link",
+   "label": "User Id",
+   "options": "User",
+   "unique": 1
+  },
+  {
+   "fieldname": "passbook_image",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 1"
+  },
+  {
+   "fieldname": "passbook_image_2",
+   "fieldtype": "Attach",
+   "label": "Passbook Image 2"
+  }
+ ],
+ "grid_page_length": 50,
+ "hide_toolbar": 1,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-03-26 12:22:38.570492",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Member",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Loan Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "show_title_field_in_link": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "title_field": "member_name"
+}

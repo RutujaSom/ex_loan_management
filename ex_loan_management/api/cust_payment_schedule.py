@@ -1,0 +1,333 @@
+
+import frappe
+from frappe.utils import today, nowdate
+
+@frappe.whitelist(allow_guest=False)
+def get_todays_emis(
+    selected_date=None, 
+    search_text=None, 
+    sort_by="rs.payment_date", 
+    sort_order="ASC", 
+    employee=None,
+    loan_group=None,
+    is_pagination=False,
+    upto_date=None,
+    applicant=None,
+    is_schedular=False
+):
+    print("Selected Date:", selected_date, type(selected_date),'  .. is_schedular ... ',is_schedular)
+    if not upto_date:
+        upto_date = today()
+
+    # Validate sort_by to prevent SQL injection
+    allowed_sort_fields = [
+        "rs.payment_date", "lm.member_name", "lrs.loan", 
+        "rs.total_payment", "rs.balance_loan_amount"
+    ]
+    if sort_by not in allowed_sort_fields:
+        sort_by = "rs.payment_date"
+
+    sort_order = "ASC" if sort_order.upper() == "ASC" else "DESC"
+
+    if selected_date:
+        conditions = "WHERE rs.payment_date = %s and rs.balance_loan_amount >= 0"
+        params = [selected_date]
+
+    else:
+        conditions = "WHERE rs.payment_date <= %s and rs.balance_loan_amount >= 0"
+        params = [upto_date]
+
+
+    if loan_group:
+        conditions += " AND lm.group LIKE %s"
+        params.extend([f"%{loan_group}%"])
+
+    if applicant:
+        conditions += " AND l.applicant = %s"
+        params.extend([f"{applicant}"])
+
+    # Add dynamic search (searching applicant name or loan number)
+    if search_text:
+        conditions += " AND (lm.member_name LIKE %s OR lm.member_id LIKE %s OR lrs.loan LIKE %s)"
+        params.extend([f"%{search_text}%", f"%{search_text}%",f"%{search_text}%"])
+
+    user = frappe.session.user
+    roles = frappe.get_roles(user) 
+    if not is_schedular:
+        # Case 1: Logged in as Employee
+        if not any(role in roles for role in ["Administrator", "System Manager", "Accounts Manager","Loan Manager"]):
+            employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
+            if employee:
+                assigned_groups = _get_active_groups(employee)
+                if assigned_groups:
+                    conditions += " AND lm.group IN %s"
+                    params.append(tuple(assigned_groups))
+                else:
+                    return []
+
+        # Case 2: Logged in as Admin → optional filter by employee
+        else:
+            if employee:
+                employee = frappe.db.get_value("Employee", {"name": employee}, "name")
+                if employee:
+                    assigned_groups = _get_active_groups(employee)
+                    if assigned_groups:
+                        conditions += " AND lm.group IN %s"
+                        params.append(tuple(assigned_groups))
+                    else:
+                        return []
+    
+    host_url = ""
+    if not is_schedular:          
+        host_url = frappe.request.host_url.rstrip("/")
+
+    # query = f"""
+    #     SELECT 
+    #         rs.parent as loan_repayment_schedule,
+    #         rs.payment_date,
+    #         rs.principal_amount,
+    #         rs.interest_amount,
+    #         rs.total_payment,
+    #         rs.balance_loan_amount,
+    #         lrs.loan,
+    #         l.applicant_type,
+    #         l.applicant,
+    #         l.loan_id,
+    #         lm.member_name,
+    #         lm.group,
+    #         lm.mobile_no,
+    #         lm.mobile_no_2,
+    #         CONCAT('{host_url}', lm.member_image) as member_image,
+    #         COALESCE(SUM(lr.amount_paid), 0) as amount_paid,
+    #         CASE 
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 'Done ✅'
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) > 0 AND COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment THEN 'Partial ⚠️'
+    #             ELSE 'Pending ❌'
+    #         END as payment_status,
+    #         CASE 
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 0
+    #             ELSE rs.total_payment - COALESCE(SUM(lr.amount_paid), 0)
+    #         END as remaining_amount
+    #     FROM `tabRepayment Schedule` rs
+    #     LEFT JOIN `tabLoan Repayment Schedule` lrs ON rs.parent = lrs.name
+    #     LEFT JOIN `tabLoan` l ON l.name = lrs.loan
+    #     LEFT JOIN `tabMember` lm 
+    #         ON (l.applicant_type = 'Member' AND l.applicant = lm.name)
+    #     LEFT JOIN `tabLoan Repayment` lr 
+    #         ON lr.against_loan = lrs.loan 
+    #         AND DATE(lr.value_date) = rs.payment_date 
+    #         AND lr.workflow_state IN ('Approved', 'Pending', 'Open')
+    #     {conditions}
+    #     AND l.status IN (
+    #         'Sanctioned',
+    #         'Partially Disbursed',
+    #         'Disbursed',
+    #         'Active',
+    #         'Loan Closure Requested'
+    #     )
+    #     GROUP BY rs.name
+    #     HAVING COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment
+    #     ORDER BY {sort_by} {sort_order}
+    # """
+
+    # query = f"""
+    #     SELECT 
+    #         rs.parent AS loan_repayment_schedule,
+    #         rs.payment_date,
+    #         rs.principal_amount,
+    #         rs.interest_amount,
+    #         rs.total_payment,
+    #         rs.balance_loan_amount,
+
+    #         lrs.loan,
+    #         l.applicant_type,
+    #         l.applicant,
+    #         l.custom_loan_id,
+
+    #         lm.member_name,
+    #         lm.group,
+    #         lm.mobile_no,
+    #         lm.mobile_no_2,
+    #         CONCAT('{host_url}', lm.member_image) AS member_image,
+
+    #         /* EMI-wise paid */
+    #         COALESCE(SUM(lr.amount_paid), 0) AS amount_paid,
+
+    #         CASE 
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 'Done'
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) > 0 
+    #                 AND COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment THEN 'Partial'
+    #             ELSE 'Pending'
+    #         END AS payment_status,
+
+    #         /* EMI-wise remaining */
+    #         CASE 
+    #             WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 0
+    #             ELSE rs.total_payment - COALESCE(SUM(lr.amount_paid), 0)
+    #         END AS remaining_amount,
+
+    #         /* ✅ TOTAL LOAN PAID (Loan-wise) */
+    #         (
+    #             SELECT COALESCE(SUM(lr2.amount_paid), 0)
+    #             FROM `tabLoan Repayment` lr2
+    #             WHERE lr2.against_loan = lrs.loan
+    #             AND lr2.workflow_state IN ('Approved', 'Pending', 'Open')
+    #         ) AS total_loan_paid,
+
+    #         /* ✅ TOTAL LOAN AMOUNT (Principal + Interest) */
+    #         (
+    #             SELECT COALESCE(SUM(rs2.total_payment), 0)
+    #             FROM `tabRepayment Schedule` rs2
+    #             WHERE rs2.parent = lrs.name
+    #         ) AS total_loan_amount
+
+    #     FROM `tabRepayment Schedule` rs
+    #     LEFT JOIN `tabLoan Repayment Schedule` lrs ON rs.parent = lrs.name
+    #     LEFT JOIN `tabLoan` l ON l.name = lrs.loan
+    #     LEFT JOIN `tabMember` lm 
+    #         ON (l.applicant_type = 'Member' AND l.applicant = lm.name)
+    #     LEFT JOIN `tabLoan Repayment` lr 
+    #         ON lr.against_loan = lrs.loan 
+    #         AND DATE(lr.posting_date) = rs.payment_date 
+    #         AND lr.workflow_state IN ('Approved', 'Pending', 'Open')
+
+    #     {conditions}
+
+    #     AND l.status IN (
+    #         'Sanctioned',
+    #         'Partially Disbursed',
+    #         'Disbursed',
+    #         'Active',
+    #         'Loan Closure Requested'
+    #     )
+
+    #     GROUP BY rs.name
+    #     HAVING COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment
+    #     ORDER BY {sort_by} {sort_order}
+    #     """
+
+    query = f"""
+        SELECT 
+            rs.parent AS loan_repayment_schedule,
+            rs.payment_date,
+            rs.principal_amount,
+            rs.interest_amount,
+            rs.total_payment,
+
+            /* ✅ BALANCE LOAN AMOUNT = Loan Amount - Paid Principal */
+            (
+                l.loan_amount -
+                COALESCE(
+                    (
+                        SELECT SUM(lr3.payable_principal_amount)
+                        FROM `tabLoan Repayment` lr3
+                        WHERE lr3.against_loan = lrs.loan
+                        AND lr3.workflow_state IN ('Approved', 'Pending', 'Open')
+                    ),
+                    0
+                )
+            ) AS balance_loan_amount,
+
+            lrs.loan,
+            l.applicant_type,
+            l.applicant,
+            l.custom_loan_id,
+            l.loan_amount,
+
+            lm.member_name,
+            lm.`group`,
+            lm.mobile_no,
+            lm.mobile_no_2,
+            CONCAT('{host_url}', lm.member_image) AS member_image,
+
+            /* ✅ EMI-wise PAID AMOUNT */
+            COALESCE(SUM(lr.amount_paid), 0) AS amount_paid,
+
+            CASE 
+                WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 'Done'
+                WHEN COALESCE(SUM(lr.amount_paid), 0) > 0 
+                    AND COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment THEN 'Partial'
+                ELSE 'Pending'
+            END AS payment_status,
+
+            /* ✅ EMI-wise REMAINING AMOUNT */
+            CASE 
+                WHEN COALESCE(SUM(lr.amount_paid), 0) >= rs.total_payment THEN 0
+                ELSE rs.total_payment - COALESCE(SUM(lr.amount_paid), 0)
+            END AS remaining_amount,
+
+            /* ✅ TOTAL LOAN PAID (Loan-wise) */
+            (
+                SELECT COALESCE(SUM(lr2.amount_paid), 0)
+                FROM `tabLoan Repayment` lr2
+                WHERE lr2.against_loan = lrs.loan
+                AND lr2.workflow_state IN ('Approved', 'Pending', 'Open')
+            ) AS total_loan_paid,
+
+            /* ✅ TOTAL LOAN AMOUNT (Principal + Interest) */
+            (
+                SELECT COALESCE(SUM(rs2.total_payment), 0)
+                FROM `tabRepayment Schedule` rs2
+                WHERE rs2.parent = lrs.name
+            ) AS total_loan_amount
+
+        FROM `tabRepayment Schedule` rs
+        LEFT JOIN `tabLoan Repayment Schedule` lrs 
+            ON rs.parent = lrs.name
+        LEFT JOIN `tabLoan` l 
+            ON l.name = lrs.loan
+
+        /* ✅ JOIN LOAN APPLICATION */
+        LEFT JOIN `tabLoan Application` la 
+            ON la.name = l.loan_application
+
+        LEFT JOIN `tabMember` lm 
+            ON (l.applicant_type = 'Member' AND l.applicant = lm.name)
+
+        LEFT JOIN `tabLoan Repayment` lr 
+            ON lr.against_loan = lrs.loan 
+            AND DATE(lr.posting_date) = rs.payment_date 
+            AND lr.workflow_state IN ('Approved', 'Pending', 'Open')
+
+        {conditions}
+
+        AND l.status IN (
+            'Sanctioned',
+            'Partially Disbursed',
+            'Disbursed',
+            'Active',
+            'Loan Closure Requested'
+        )
+
+        GROUP BY rs.name
+
+        HAVING COALESCE(SUM(lr.amount_paid), 0) < rs.total_payment
+
+        ORDER BY {sort_by} {sort_order}
+    """
+
+    emis = frappe.db.sql(query, tuple(params), as_dict=True)
+    return emis
+
+
+def _get_active_groups(employee):
+    """Return active loan groups assigned to an employee today"""
+    groups = frappe.get_all(
+        "Loan Group Assignment",
+        filters={
+            "employee": employee,
+            "start_date": ("<=", nowdate()),
+            "end_date": ("in", ["", None])  # open-ended
+        },
+        pluck="loan_group"
+    )
+    extra = frappe.get_all(
+        "Loan Group Assignment",
+        filters={
+            "employee": employee,
+            "start_date": ("<=", nowdate()),
+            "end_date": (">=", nowdate())
+        },
+        pluck="loan_group"
+    )
+    return list(set(groups + extra))

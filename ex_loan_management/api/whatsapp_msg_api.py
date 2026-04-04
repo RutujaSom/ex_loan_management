@@ -8,7 +8,7 @@ import requests
 from urllib.parse import quote
 from datetime import datetime, timedelta
 from frappe.utils import now_datetime
-from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
+from ex_loan_management.api.cust_payment_schedule import get_todays_emis
 
 
 MARATHI_DAYS = {
@@ -39,7 +39,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
     """
     Sends a WhatsApp message reminder for a loan EMI to a specified member.
     Args:
-        member_name (str): Name of the loan member.
+        member_name (str): Name of the member.
         loan_no (str): Loan number.
         emi_amount (str): EMI amount to be paid.
         emi_date (str or datetime): Date of the EMI.

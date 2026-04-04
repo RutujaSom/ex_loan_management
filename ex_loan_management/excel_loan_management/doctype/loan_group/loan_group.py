@@ -114,13 +114,13 @@ def import_loan_groups(file_url):
         # Check if Loan Group exists
         group_name = frappe.db.exists("Loan Group", {"group_id": group_id})
         if group_name:
-            # Check if Loan Member exists
-            member_name = frappe.db.exists("Loan Member", {"member_name": head_name,"mobile_no":head_mobile_no})
+            # Check if Member exists
+            member_name = frappe.db.exists("Member", {"member_name": head_name,"mobile_no":head_mobile_no})
             print('member_name ......',member_name)
             if member_name:
                 # Load Loan Group and update loan_head
                 group_doc = frappe.get_doc("Loan Group", group_name)
-                group_doc.group_head = member_name  # loan_head is a Link field to Loan Member
+                group_doc.group_head = member_name  # loan_head is a Link field to Member
                 group_doc.save(ignore_permissions=True)
                 updated_groups.append(group_name)
             else:
@@ -255,7 +255,7 @@ def update_loan_group(name):
         if not loan_group_id:
             return {"status": "error", "message": "Loan Group ID is required"}
 
-        # # Fetch existing loan member doc
+        # # Fetch existing member doc
         doc = frappe.get_doc("Loan Group", loan_group_id)
 
         if doc.workflow_state == "Pending":

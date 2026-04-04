@@ -34,7 +34,7 @@ update_fields = [
 ]
 
 """
-	Get Loan Member List (with optional pagination, search & sorting)
+	Get Member List (with optional pagination, search & sorting)
 """
 
 @frappe.whitelist()

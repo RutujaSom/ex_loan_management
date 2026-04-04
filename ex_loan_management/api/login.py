@@ -53,9 +53,9 @@ def login_and_get_token():
         #     company = ""
 
 
-        # Loan Member (single DB call)
+        # Member (single DB call)
         loan_member_details = frappe.db.get_value(
-            "Loan Member",
+            "Member",
             {"user_id": user_doc.name},
             ["name", "member_id", "member_name"],
             as_dict=True

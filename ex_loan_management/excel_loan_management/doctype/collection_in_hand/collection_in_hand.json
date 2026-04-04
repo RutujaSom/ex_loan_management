@@ -66,7 +66,7 @@
    "fieldname": "applicant",
    "fieldtype": "Link",
    "label": "Loan Applicant",
-   "options": "Loan Member",
+   "options": "Member",
    "read_only": 1
   },
   {
@@ -130,7 +130,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-10-29 11:14:33.098433",
+ "modified": "2026-04-01 12:23:37.525509",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Collection In Hand",

@@ -1,0 +1,134 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "allow_rename": 1,
+ "creation": "2026-03-27 10:21:29.340756",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "app_id",
+  "loan_id",
+  "start_date",
+  "emi_date",
+  "terms",
+  "loan_amount",
+  "member_id",
+  "column_break_didk",
+  "principal_amount",
+  "int_amount",
+  "total_amount",
+  "bal_amount",
+  "roi",
+  "member_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "loan_id",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Loan ID"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Payment Start Date"
+  },
+  {
+   "fieldname": "emi_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "EMI Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Int",
+   "label": "Terms"
+  },
+  {
+   "fieldname": "column_break_didk",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "principal_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Principal AMount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "int_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Interest AMount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bal_amount",
+   "fieldtype": "Float",
+   "label": "Balance"
+  },
+  {
+   "fieldname": "roi",
+   "fieldtype": "Int",
+   "label": "ROI",
+   "reqd": 1
+  },
+  {
+   "fieldname": "loan_amount",
+   "fieldtype": "Int",
+   "label": "LOan AMount",
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Float",
+   "label": "Total amount"
+  },
+  {
+   "fieldname": "member_id",
+   "fieldtype": "Data",
+   "label": "Member_id"
+  },
+  {
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "label": "Member_name"
+  },
+  {
+   "fieldname": "app_id",
+   "fieldtype": "Data",
+   "label": "App ID",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2026-04-02 12:59:06.165359",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Data adding",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

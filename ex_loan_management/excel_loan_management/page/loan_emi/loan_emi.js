@@ -161,7 +161,8 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
     function load_emis(upto_date=null, search_text=null, sort_by=null, sort_order=null, employee=null, loan_group=null, selected_date=null) {
         frappe.call({
-            method: "lending.loan_management.doctype.repayment_schedule.repayment_schedule.get_todays_emis",
+            method: "ex_loan_management.api.cust_payment_schedule.get_todays_emis",
+            // method: "lending.loan_management.doctype.repayment_schedule.repayment_schedule.get_todays_emis",
             args: { 
                 upto_date: upto_date,
                 search_text: search_text,
@@ -181,7 +182,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                     <thead>
                         <tr>
                             <th data-field="l.group">Group</th>
-                            <th data-field="l.loan_id">Loan</th>
+                            <th data-field="l.custom_loan_id">Loan</th>
                             <th data-field="lm.member_id">Applicant Id</th>
                             <th data-field="lm.member_name">Applicant Name</th>
                             <th data-field="rs.payment_date">Payment Date</th>
@@ -189,10 +190,9 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                             <th data-field="rs.interest_amount">Interest</th>
                             <th data-field="rs.total_payment">Total Payment</th>
                             <th>Remaining EMI</th>
-                           <!-- <th data-field="rs.balance_loan_amount">Balance</th> -->
                             
                             <th>Status</th>
-                            <th data-field="rs.balance_loan_amount">Total Balance</th>
+                            <th data-field="balance_loan_amount">Total Balance</th>
                             <th></th>
                             <th>WhatsApp</th>
 
@@ -202,22 +202,21 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
                 r.message.forEach(row => {
                     let show_whatsapp = row.payment_date >= today;
-                    let total_balance_amount = row.total_loan_amount - row.total_loan_paid
                     html += `
                         <tr>
                             <td>${row.group}</td>
-                            <td>${row.loan_id}</td>
+                            <td>${row.custom_loan_id}</td>
                             <td>${row.applicant}</td>
                             <td>${row.member_name || row.applicant}</td>
                             <td>${row.payment_date}</td>
-                            <td>${row.principal_amount}</td>
-                            <td>${row.interest_amount}</td>
-                            <td>${row.total_payment}</td>
-                            <td>${row.remaining_amount}</td>
-                          <!--  <td>${row.balance_loan_amount}</td> -->
-                            
+                            <td>${Number(row.principal_amount || 0).toFixed(2)}</td>
+                            <td>${Number(row.interest_amount || 0).toFixed(2)}</td>
+                            <td>${Number(row.total_payment || 0).toFixed(2)}</td>
+                            <td>${Number(row.remaining_amount || 0).toFixed(2)}</td>
+
                             <td>${row.payment_status}</td>
-                            <td>${total_balance_amount}</td>
+
+                            <td>${Number(row.balance_loan_amount || 0).toFixed(2)}</td>
                              
                             <td>
                                 <button class="btn btn-sm btn-primary update-repayment" 
@@ -233,7 +232,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                                     ? `<i class="fa fa-whatsapp send-whatsapp"
                                         style="color:#25D366; font-size:20px; cursor:pointer;"
                                         data-member="${row.member_name || row.applicant}"
-                                        data-loan="${row.loan_id}"
+                                        data-loan="${row.custom_loan_id}"
                                         data-date="${row.payment_date}"
                                         data-amount="${row.total_payment}"
                                         data-mobile="${row.mobile_no ||  row.mobile_no_2 || ''}"
@@ -250,12 +249,13 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
                 // 🔄 Update button
                 $(".update-repayment").off("click").on("click", function() {
-                    let loan_id = $(this).data("loan");
+                    let custom_loan_id = $(this).data("loan");
                     let value_date = $(this).data("payment_date");
 
                     frappe.new_doc("Loan Repayment", {
-                        against_loan: loan_id,
-                        value_date: value_date
+                        against_loan: custom_loan_id,
+                        value_date: value_date,
+                        posting_date: value_date
                     });
                 });
 

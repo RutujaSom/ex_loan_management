@@ -1,6 +1,6 @@
 import frappe
 from frappe.utils import nowdate,get_first_day, get_last_day
-from lending.loan_management.doctype.repayment_schedule.repayment_schedule import get_todays_emis
+from ex_loan_management.api.cust_payment_schedule import get_todays_emis
 
 
 @frappe.whitelist()
@@ -27,16 +27,16 @@ def get_loan_members():
         )
 
     assigned_members = frappe.get_all(
-        "Loan Member",
+        "Member",
         filters={"group": ["in", groups]},
         # pluck="name",
         fields=["name", "member_name", "group", "status", "creation", "owner"],
     )
 
 
-    # Fetch Loan Members
+    # Fetch Members
     loan_members = frappe.get_all(
-        "Loan Member",
+        "Member",
         fields=["name", "member_name", "group", "status", "creation", "owner"],
         # filters=filters,
         order_by="creation desc"
@@ -89,7 +89,7 @@ def get_loan_summary(group=None):
     repayment_filters = {}
 
     assigned_members = frappe.get_all(
-        "Loan Member",
+        "Member",
         pluck="name"
     )
 
@@ -102,7 +102,7 @@ def get_loan_summary(group=None):
         )
 
         assigned_members = frappe.get_all(
-            "Loan Member",
+            "Member",
             filters={"group": ["in", groups]},
             pluck="name"
         )
@@ -135,7 +135,7 @@ def get_loan_summary(group=None):
     monthly_collection = frappe.db.sql("""
         SELECT COALESCE(SUM(amount_paid), 0)
         FROM `tabLoan Repayment`
-        WHERE created_by = %s
+        WHERE custom_created_by = %s
           AND docstatus = 1
           AND reference_date BETWEEN %s AND %s
     """, (employee.name, first_day, last_day))[0][0] or 0
@@ -145,7 +145,7 @@ def get_loan_summary(group=None):
     todays_collection = frappe.db.sql("""
         SELECT COALESCE(SUM(amount_paid), 0)
         FROM `tabLoan Repayment`
-        WHERE created_by = %s
+        WHERE custom_created_by = %s
           AND docstatus = 1
           AND reference_date = %s
     """, (employee.name, nowdate(),))[0][0] or 0

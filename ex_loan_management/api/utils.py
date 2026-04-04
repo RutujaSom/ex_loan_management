@@ -106,7 +106,7 @@ def get_paginated_data(
                 # pick the doctype from applicant_type in each row
                 target_doctype = None
                 for d in data:
-                    dynamic_dt = d.get(field_meta.options)  # e.g. "Loan Member"
+                    dynamic_dt = d.get(field_meta.options)  # e.g. "Member"
                     if dynamic_dt:
                         target_doctype = dynamic_dt
                         break
@@ -291,8 +291,8 @@ def clean_error_message(msg: str) -> str:
     msg = msg.strip()
 
     # Handle "missing value" type
-    if msg.startswith("Error: Value missing for Loan Member:"):
-        field = msg.replace("Error: Value missing for Loan Member:", "").strip()
+    if msg.startswith("Error: Value missing for Member:"):
+        field = msg.replace("Error: Value missing for Member:", "").strip()
         return f"{field} is required"
 
     # Otherwise, return message as it is

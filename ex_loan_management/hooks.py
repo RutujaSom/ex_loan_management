@@ -34,7 +34,9 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "dt": "Custom Field",
         "filters": [
             ["dt", "in", [
-                "Company", "Loan"
+                "Company", "Loan", "Loan Application", "Loan Repayment Schedule",
+                "Loan Repayment", "Loan Disbursement",
+
             ]]
         ]
     },
@@ -60,17 +62,29 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
 doc_events = {
     "File": {
         "before_insert": "ex_loan_management.api.make_all_files_public.make_all_files_public"
+    },
+     "Loan": {
+        "validate": "ex_loan_management.api.holiday_validation.validate_custom_repayment_start_date"
+    },
+    "Loan Repayment Schedule": {
+        "validate": "ex_loan_management.api.loan_repayment_schedule.adjust_repayment_schedule_for_holidays"
+    },
+    "Loan": {
+        "before_insert": "ex_loan_management.api.cust_loan.set_loan_id"
     }
 }
+
+override_doctype_class = {
+    "Process Loan Interest Accrual":"ex_loan_management.api.process_interest_override.ProcessLoanInterestAccrualOverride",
+
+    "Loan Repayment": "ex_loan_management.loan_repayment.loan_repayment.CustomLoanRepayment"
+}
+
 
 
 scheduler_events = {
     "cron": {
         
-        # "0 * * * *": [   # Runs at minute 0 of every hour
-        #     "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
-        # ],
-
 
         "*/30 * * * *": [
             "ex_loan_management.api.whatsapp_msg_api.send_emi_whatsapp_reminders"
@@ -79,6 +93,15 @@ scheduler_events = {
     }
 }
 
+doctype_js = {
+    "Loan Application": "public/js/loan_application_custom.js",
+    "Loan Disbursement": "public/js/loan_disbursement_custom.js",
+    "Loan Repayment": "public/js/loan_repayment_custom.js"
+}
+
+
+
+# boot_session = "ex_loan_management.overrides.loan_repayment.apply_patch"
 
 # hooks.py
 # Each item in the list will be shown as an app in the apps page
@@ -312,4 +335,5 @@ scheduler_events = {
 # default_log_clearing_doctypes = {
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
+
 
