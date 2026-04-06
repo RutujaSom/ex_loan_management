@@ -18,7 +18,7 @@ update_fields = [
 	"repayment_schedule_type",
 	"loan_product",
 	"company",
-	"value_date",
+	"posting_date",
 	"loan_restructure",
 	"clearance_date",
 	"rate_of_interest",
@@ -44,7 +44,7 @@ update_fields = [
 	"custom_manual_remarks",
 	"payment_account",
 	"workflow_state",
-	"payment_proof",
+	"custom_payment_proof",
 ]
 
 """
@@ -131,8 +131,8 @@ def loan_repayment_list(page=1, page_size=10, search=None, sort_by="name", sort_
         is_pagination=is_pagination,
         base_url=base_url,
         extra_params=extra_params,
-		image_fields=["payment_proof"],
-        link_fields={"applicant": "member_name","against_loan": "loan_id"},
+		image_fields=["custom_payment_proof"],
+        link_fields={"applicant": "member_name","against_loan": "custom_loan_id"},
 		link_images_fields={"applicant": "member_image"} ,
 		dynamic_search_fields = {"applicant":{"doctype": "Member", "field": "member_id"},}
     )
@@ -169,7 +169,7 @@ def create_loan_repayment():
 			"loan_adjustment":data.get("loan_adjustment"),
             "company": company,
             "loan_product": data.get("loan_product"),
-            "value_date": data.get("value_date"),
+            "posting_date": data.get("posting_date"),
             "amount_paid": float(data.get("amount_paid")),
 			"custom_mode_of_payment":data.get("custom_mode_of_payment"),
             "reference_number": data.get("reference_number"),
@@ -179,8 +179,8 @@ def create_loan_repayment():
 			"repayment_schedule_type":"Monthly as per repayment start date"
         })
 
-        if "payment_proof" in files:
-            upload = files.get("payment_proof")
+        if "custom_payment_proof" in files:
+            upload = files.get("custom_payment_proof")
             if upload or upload.filename:
                 file_doc = save_file(
 					fname=upload.filename,
@@ -190,7 +190,7 @@ def create_loan_repayment():
 					dn=1,
 					is_private=0
 				)
-                doc.set("payment_proof", file_doc.file_url)
+                doc.set("custom_payment_proof", file_doc.file_url)
 
         # Step 3: Insert Loan Application (runs validate() automatically)
         doc.insert(ignore_permissions=True)
@@ -241,6 +241,6 @@ def loan_repayment_get(name):
         
         repayment["applicant_image"] = f"{host_url}{member_doc['member_image']}" if member_doc.get("member_image") else ""
 
-    if repayment.get("payment_proof"):
-       repayment["payment_proof"] = urljoin(host_url, repayment["payment_proof"])
+    if repayment.get("custom_payment_proof"):
+       repayment["custom_payment_proof"] = urljoin(host_url, repayment["custom_payment_proof"])
     return repayment

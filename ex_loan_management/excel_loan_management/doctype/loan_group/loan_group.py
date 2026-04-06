@@ -154,7 +154,7 @@ def loan_group_list(page=1, page_size=10,sort_by="group_name", sort_order="asc",
 
     user = frappe.session.user
     filters = {}
-    if "Agent" in frappe.get_roles(user):
+    if "Agent" in frappe.get_roles(user) and not ("Account Manager" in frappe.get_roles(user) or "Loan Manager" in frappe.get_roles(user)):
         print("in if ....")
         # Get employee id
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")

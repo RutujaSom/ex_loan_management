@@ -60,10 +60,13 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
 
 
 doc_events = {
-    "File": {
-        "before_insert": "ex_loan_management.api.make_all_files_public.make_all_files_public"
+    # "File": {
+    #     "before_insert": "ex_loan_management.api.make_all_files_public.make_all_files_public"
+    # },
+    "Loan Application": {
+        "validate": "ex_loan_management.api.cust_loan_application.validate_loan_application"
     },
-     "Loan": {
+    "Loan": {
         "validate": "ex_loan_management.api.holiday_validation.validate_custom_repayment_start_date"
     },
     "Loan Repayment Schedule": {

@@ -314,7 +314,6 @@ def import_loan_members(file_url):
 
                 doc.insert(ignore_permissions=True)
 
-                # import_update_loan_members(doc,doc.name)
                 created_members.append(member_id)
             except Exception as e:
                 print(f"Error creating Member {member_id}: {e}")
@@ -391,24 +390,8 @@ def calculate_member_age(dob):
     return  completed_age, current_age
 
 
-@frappe.whitelist()
-def import_update_loan_members(self_doc,name):
-    loan_member_data = frappe.get_doc("Member", name)
-    doc = frappe.new_doc("User")
-    doc.email = loan_member_data.email
-    doc.member_name = loan_member_data.member_name
-    doc.mobile_no = loan_member_data.mobile_no
-    doc.first_name = loan_member_data.first_name
-    doc.middle_name = loan_member_data.middle_name
-    doc.last_name = loan_member_data.last_name
-    doc.save()
-    
-    self_doc.user_id = doc.name
-    
 
     
-    
-
 
 
 @frappe.whitelist()
@@ -553,13 +536,15 @@ update_fields = [
 	Get Member List (with optional pagination, search & sorting)
 """
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", sort_order="asc",status=None, is_pagination=False, **kwargs):
     is_pagination = frappe.utils.sbool(is_pagination)  # convert "true"/"false"/1/0 into bool
     extra_params = {"search": search} if search else {}
     print("kwargs ...",kwargs)
     kwargs.pop('cmd', None)
     user = frappe.session.user
+    user_roles = frappe.get_roles(user)
+    is_manager = "Account Manager" in user_roles or "Loan Manager" in user_roles
 
     # 🔹 Collect filters from kwargs (all query params except the defaults)
     filters = {}
@@ -568,6 +553,10 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
             if v not in [None, ""]:   # skip empty params
                 filters[k] = v
 
+    employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
+    if not employee_id:
+        return []
+
     # 🔹 Handle is_group filter for Link field
     is_group = kwargs.get("is_group")
     if is_group is not None:
@@ -575,12 +564,39 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         if is_group:
             # Members with a group assigned (group is not null/empty)
             # filters["group"] = ["!=", ""]
-            employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-            if not employee_id:
-                return []
-            
-            if kwargs.get("group") == None or kwargs.get("group") == "":
+            if is_manager:
+                # For managers: show all members who have groups (no restriction to specific groups)
+                filters["group"] = ["!=", ""]
+            else:
+                if kwargs.get("group") == None or kwargs.get("group") == "":
 
+                    # Get loan groups for this employee
+                    groups = frappe.get_all(
+                        "Loan Group Assignment",
+                        filters={"employee": employee_id},
+                        pluck="loan_group"
+                    )
+                    if not groups:
+                        groups = []
+
+                    # 🔹 Collect filters from kwargs (all query params except the defaults)
+                    filters["group"] = ["in", groups]
+        else:
+            # Members without a group assigned (group is null/\n"empty)
+            filters["group"] = ["in", [None, ""]]
+            filters["owner"] = frappe.session.user
+
+    # filters["owner"] = frappe.session.user
+    
+    if status in ["Verified", "Pending"]:
+        print("in if ...................", status)
+        
+        if is_manager:
+            # For managers: show all members with any group (no restriction)
+            if kwargs.get("group") == None or kwargs.get("group") == "":
+                filters["group"] = ["!=", ""]
+        else:
+            if kwargs.get("group") == None or kwargs.get("group") == "":
                 # Get loan groups for this employee
                 groups = frappe.get_all(
                     "Loan Group Assignment",
@@ -592,31 +608,6 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
 
                 # 🔹 Collect filters from kwargs (all query params except the defaults)
                 filters["group"] = ["in", groups]
-        else:
-            # Members without a group assigned (group is null/\n"empty)
-            filters["group"] = ["in", [None, ""]]
-            filters["owner"] = frappe.session.user
-
-    # filters["owner"] = frappe.session.user
-    
-    if status in ["Verified", "Pending"]:
-        print("in if ...................", status)
-        employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
-        if not employee_id:
-            return []
-
-        if kwargs.get("group") == None or kwargs.get("group") == "":
-            # Get loan groups for this employee
-            groups = frappe.get_all(
-                "Loan Group Assignment",
-                filters={"employee": employee_id},
-                pluck="loan_group"
-            )
-            if not groups:
-                groups = []
-
-            # 🔹 Collect filters from kwargs (all query params except the defaults)
-            filters["group"] = ["in", groups]
         filters["status"] = status
 
     if status == "Draft":

@@ -3,6 +3,33 @@ import pandas as pd
 from datetime import datetime
 from ex_loan_management.api.utils import get_paginated_data, api_error
 
+def validate_loan_application(doc, method=None):
+    if doc.custom_co_borrower:
+        # Step 1: get all approved loan applications with same co_borrower
+        applications = frappe.get_all(
+            "Loan Application",
+            filters={
+                "custom_co_borrower": doc.custom_co_borrower,
+                "status": "Approved"
+            },
+            fields=["name"]
+        )
+        if applications:
+            application_names = [app.name for app in applications]
+
+            # Step 2: get all Loans linked to these applications
+            loans = frappe.get_all(
+                "Loan",
+                filters={
+                    "loan_application": ["in", application_names],
+                    "status": ["not in", ["Closed", "Loan Closure Requested", "Written Offs"]]
+                },
+                fields=["name", "status", "applicant", "loan_application"]
+            )
+            if len(loans)>0:
+                frappe.throw("Selected co-borrower is already associated with active loan(s). Please select another co-borrower.")
+               
+
 
 
 def get_permission_query_conditions(user):
@@ -280,30 +307,30 @@ def create_loan_application():
 
 from frappe.model.workflow import apply_workflow
 
-@frappe.whitelist()
-def send_for_verification(application_name):
-    """
-    Trigger workflow action 'Submit for verification'
-    """
-    try:
-        # Load the Loan Application
-        doc = frappe.get_doc("Loan Application", application_name)
+# @frappe.whitelist()
+# def send_for_verification(application_name):
+#     """
+#     Trigger workflow action 'Submit for verification'
+#     """
+#     try:
+#         # Load the Loan Application
+#         doc = frappe.get_doc("Loan Application", application_name)
 
-        # Apply workflow transition
-        new_doc = apply_workflow(doc, "Submit for verification")
+#         # Apply workflow transition
+#         new_doc = apply_workflow(doc, "Submit for verification")
 
-        frappe.db.commit()
+#         frappe.db.commit()
 
-        return {
-            "status": "success",
-            "status_code": 201,
-            "msg": f"Loan Application {application_name} submitted for verification",
-        }
+#         return {
+#             "status": "success",
+#             "status_code": 201,
+#             "msg": f"Loan Application {application_name} submitted for verification",
+#         }
 
-    except Exception as e:
-        frappe.log_error(frappe.get_traceback(), "Send for Verification API Error")
-        # return {"status": "error", "message": str(e)}
-        return api_error(e)
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "Send for Verification API Error")
+#         # return {"status": "error", "message": str(e)}
+#         return api_error(e)
 
 
 
@@ -488,12 +515,12 @@ def get_loan_members_for_user(doctype, txt, searchfield, start, page_len, filter
 def loan_application_get(name):
     """
     Get Loan Application by name (primary key)
-    Returns linked Loan Group name and full URLs for image fields
+    Returns all fields same as in loan_application_list, including linked data and image URLs
     """
     if not name:
         frappe.throw("Loan Application name is required")
 
-    # Fetch Member
+    # Fetch Loan Application with all fields from update_fields
     applications = frappe.get_all(
         "Loan Application",
         filters={"name": name},
@@ -504,6 +531,31 @@ def loan_application_get(name):
         return {}
 
     application = applications[0]
+
+    # 🔹 Get linked data (same as list view)
+    if application.get("custom_nominee"):
+        nominee_name = frappe.get_value("Member", application["custom_nominee"], "member_name")
+        application["custom_nominee_member_name"] = nominee_name or ""
+    
+    if application.get("custom_co_borrower"):
+        co_borrower_name = frappe.get_value("Member", application["custom_co_borrower"], "member_name")
+        application["custom_co_borrower_member_name"] = co_borrower_name or ""
+    
+    if application.get("applicant"):
+        applicant_member_id = frappe.get_value("Member", application["applicant"], "member_id")
+        application["applicant_member_id"] = applicant_member_id or ""
+
+    # 🔹 Full URL for image fields (same as list view)
+    host_url = frappe.request.host_url.rstrip("/")
+    image_fields = ["member_image"]  # From link_images_fields in list
+    
+    # Get applicant's member image
+    if application.get("applicant"):
+        member_image = frappe.get_value("Member", application["applicant"], "member_image")
+        if member_image:
+            application["applicant_member_image"] = host_url + "/" + member_image.lstrip("/")
+        else:
+            application["applicant_member_image"] = ""
 
     return application
 
