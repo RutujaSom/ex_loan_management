@@ -211,7 +211,6 @@ update_fields = [
 	"repayment_frequency",
 	"repayment_start_date",
 	"maturity_date",
-	"repayment_days",
 	"total_installments_paid",
 	"total_installments_raised",
 	"total_installments_overdue",

@@ -173,7 +173,6 @@ update_fields = [
 	"moratorium_tenure",
 	"repayment_frequency",
 	"treatment_of_interest",
-	"repayment_days",
 	"limit_applicable_start",
 	"maximum_limit_amount",
 	"limit_applicable_end",

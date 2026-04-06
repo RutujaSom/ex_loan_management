@@ -47,20 +47,12 @@ class CustomLoanRepayment(CoreLoanRepayment):
 
 	def before_save(doc, method=None):
 		try:
-			if doc.applicant_type == "Loan Member" and doc.applicant:
-				loan_group = frappe.db.get_value(
-					"Loan Member", doc.applicant, "group"
-				)
+			if doc.applicant:
+				user = frappe.session.user
+				employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
 
-				if loan_group:
-					employee = frappe.db.get_value(
-						"Loan Group Assignment",
-						{"loan_group": loan_group},
-						"employee",
-					)
-
-					if employee:
-						doc.created_by = employee
+				if employee:
+					doc.created_by = employee
 		except Exception as e:
 			frappe.log_error(frappe.get_traceback(), "Loan Repayment Before Save Error")
       

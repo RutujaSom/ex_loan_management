@@ -199,7 +199,6 @@ update_fields = [
 	"repayment_start_date",
 	"is_term_loan",
 	"withhold_security_deposit",
-	"repayment_days",
 	"disbursement_date",
 	"clearance_date",
 	"bpi_difference_date",
@@ -239,7 +238,7 @@ def loan_disbursement_list(page=1, page_size=10, search=None, sort_by="name", so
 
 	# 🔹 Handle loan_group filter (from Member)
     user = frappe.session.user
-    if "Agent" in frappe.get_roles(user):
+    if "Agent" in frappe.get_roles(user) and not ("Account Manager" in frappe.get_roles(user) or "Loan Manager" in frappe.get_roles(user)):
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
         if not employee_id:
             return None  # No employee mapped
@@ -303,7 +302,7 @@ def loan_disbursement_list(page=1, page_size=10, search=None, sort_by="name", so
         is_pagination=is_pagination,
         base_url=base_url,
         extra_params=extra_params,
-		link_fields={"applicant": "member_name","against_loan": "loan_id"},
+		link_fields={"applicant": "member_name","against_loan": "custom_loan_id"},
 		link_images_fields={"applicant": "member_image"},
 		dynamic_search_fields = {"applicant":{"doctype": "Member", "field": "member_id"},}
     )
