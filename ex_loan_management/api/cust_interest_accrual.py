@@ -254,3 +254,102 @@ def on_int_submit(doc, method=None):
     )
 
     make_loan_interest_accrual_entry(args)
+
+
+
+
+def process_loan_interest_accrual(posting_date=None, loan_product=None, loan=None):
+
+	if not term_loan_accrual_pending(posting_date or nowdate(), loan=loan):
+		return
+
+	loan_process = frappe.new_doc("Process Loan Interest Accrual")
+	loan_process.posting_date = posting_date or nowdate()
+	loan_process.loan_product = loan_product
+	loan_process.process_type = "Term Loans"
+	loan_process.loan = loan
+
+	loan_process.submit()
+
+	return loan_process.name
+
+
+def term_loan_accrual_pending(date, loan=None):
+	filters = {"payment_date": ("<=", date), "is_accrued": 0}
+
+	if loan:
+		loan_repayment_schedule = frappe.db.get_value(
+			"Loan Repayment Schedule", {"loan": loan, "status": "Active"}
+		)
+		filters.update({"parent": loan_repayment_schedule})
+
+	pending_accrual = frappe.db.get_value("Repayment Schedule", filters)
+
+	return pending_accrual
+
+
+@frappe.whitelist()
+def process_selected_emis(emis):
+	"""
+	Process loan interest accrual for selected EMIs from the frontend.
+	
+	Args:
+	    emis: List of dictionaries containing loan, payment_date, and amount
+	
+	Returns:
+	    Dictionary with success status and processed count
+	"""
+	import json
+	
+	if isinstance(emis, str):
+		emis = json.loads(emis)
+	
+	if not emis or not isinstance(emis, list):
+		frappe.throw("No EMIs provided for processing")
+	
+	successful = 0
+	failed = 0
+	errors = []
+	
+	for emi in emis:
+		try:
+			loan = emi.get("loan")
+			payment_date = emi.get("payment_date")
+			
+			if not loan or not payment_date:
+				failed += 1
+				errors.append(f"Missing loan or payment_date for EMI: {emi}")
+				continue
+			
+			# Process accrual for this loan
+			interest_accrual = process_loan_interest_accrual(
+				posting_date=payment_date,
+				loan=loan
+			)
+			if interest_accrual:
+				successful += 1
+			
+		except Exception as e:
+			failed += 1
+			errors.append(f"Error processing loan {emi.get('loan')}: {str(e)}")
+			frappe.log_error(
+				title="Loan Accrual Processing Error",
+				message=f"Failed to process EMI: {json.dumps(emi)}\nError: {str(e)}"
+			)
+	
+	# Prepare result message
+	message = f"Successfully processed {successful} EMI(s)"
+	if failed > 0:
+		message += f". Failed: {failed}"
+	
+	if errors:
+		frappe.log_error(
+			title="Loan Accrual Processing Summary",
+			message=f"Processed: {successful}, Failed: {failed}\nErrors:\n" + "\n".join(errors)
+		)
+	
+	return {
+		"message": message,
+		"successful": successful,
+		"failed": failed
+	}

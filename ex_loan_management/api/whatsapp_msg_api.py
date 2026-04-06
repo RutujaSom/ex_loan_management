@@ -23,15 +23,6 @@ MARATHI_DAYS = {
 
 
 
-
-# def ensure_background_request():
-#     if not hasattr(frappe.local, "request"):
-#         frappe.local.request = SimpleNamespace()
-
-#     if not getattr(frappe.local.request, "host_url", None):
-#         frappe.local.request.host_url = frappe.utils.get_url() + "/"
-
-
 @frappe.whitelist(allow_guest=True)
 def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date, extra_text="वरील"):
     print("in sec .......")
@@ -67,7 +58,6 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             emi_date_obj, "EEEE"
         )
         
-        # print("eng_day ...",eng_day, emi_date, type(emi_date))
         # Remove +91 if present
         mobile_no = str(mobile_no).strip()
         if mobile_no.startswith("+91"):
@@ -87,7 +77,7 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
         company = frappe.get_doc("Company", company_name)
 
         custom_whatsapp_image = company.custom_whatsapp_image
-        custom_last_whatsapp_msg = company.custom_last_whatapp_msg
+        custom_last_whatsapp_msg = company.custom_last_whatapp_msg if company.custom_last_whatapp_msg else "लवकरात लवकर पेमेंट करून त्याचा स्क्रीन शॉट पाठवावा ही विनंती .."
 
         if not custom_whatsapp_image:
             frappe.throw(
@@ -165,6 +155,82 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
 
 
 
+@frappe.whitelist(allow_guest=True)
+def send_bulk_whatsapp(rows):
+    """
+    Process bulk WhatsApp messages for selected EMI rows.
+    Loops through each row and calls send_whatsapp_messages.
+    
+    Args:
+        rows: List of dictionaries containing mobile, member, loan, date, amount
+    
+    Returns:
+        dict: Summary of successful and failed messages
+    """
+    import json
+    
+    if isinstance(rows, str):
+        rows = json.loads(rows)
+    
+    if not rows or not isinstance(rows, list):
+        frappe.throw("No rows provided for WhatsApp messaging")
+    
+    successful = 0
+    failed = 0
+    errors = []
+    
+    for row in rows:
+        try:
+            mobile = row.get("mobile")
+            member = row.get("member")
+            loan = row.get("loan")
+            date = row.get("date")
+            amount = row.get("amount")
+            
+            if not all([mobile, member, loan, date, amount]):
+                failed += 1
+                errors.append(f"Missing data for row: {row}")
+                continue
+            
+            # Call the existing send_whatsapp_messages function
+            result = send_whatsapp_messages(
+                mobile_no=mobile,
+                member_name=member,
+                loan_no=loan,
+                emi_amount=amount,
+                emi_date=date
+            )
+            
+            if result.get("status") == "success":
+                successful += 1
+            else:
+                failed += 1
+                errors.append(f"Failed for {member} ({loan}): {result.get('message', 'Unknown error')}")
+                
+        except Exception as e:
+            failed += 1
+            errors.append(f"Error for {row.get('member', 'Unknown')}: {str(e)}")
+            frappe.log_error(
+                title="Bulk WhatsApp Error",
+                message=f"Failed to process row: {json.dumps(row)}\nError: {str(e)}"
+            )
+    
+    # Prepare result message
+    message = f"Successfully sent {successful} WhatsApp message(s)"
+    if failed > 0:
+        message += f". Failed: {failed}"
+    
+    if errors:
+        frappe.log_error(
+            title="Bulk WhatsApp Summary",
+            message=f"Sent: {successful}, Failed: {failed}\nErrors:\n" + "\n".join(errors)
+        )
+    
+    return {
+        "message": message,
+        "successful": successful,
+        "failed": failed
+    }
 
 
 @frappe.whitelist(allow_guest=True)

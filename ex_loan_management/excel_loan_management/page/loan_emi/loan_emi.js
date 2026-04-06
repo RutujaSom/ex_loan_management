@@ -6,9 +6,16 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
         single_column: true
     });
 
+    // Set page width to 1600px (WORKING)
+    setTimeout(() => {
+        $(".page-container, .container, .page-body, .layout-main-section").css({
+            "max-width": "1600px",
+            "margin": "0 auto"
+        });
+    }, 0);
     let current_sort = { field: null, order: null }; // keep track of current sorting
     $(page.body).append(`
-        <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap">
+        <div class="mb-4 d-flex justify-content-between align-items-start flex-wrap">
             <!-- Left Side -->
             <div class="d-flex gap-3 align-items-center flex-wrap">
 
@@ -38,12 +45,33 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
             </div>
 
             <!-- Right Side -->
-            <div class="d-flex gap-2 align-items-end flex-wrap">
-                <div class="d-flex flex-column" style="margin-right: 1rem;">
-                    <label for="emi-search" class="form-label" style="font-weight: 500;">Search</label>
-                    <input type="text" id="emi-search" class="input-with-feedback form-control" style="width:200px;" placeholder="Search loan/applicant" />
+            <div class="d-flex flex-column align-items-end gap-2" style="row-gap: 20px;">
+
+                <!-- Search Row -->
+                <div class="d-flex gap-2 align-items-end flex-wrap">
+                    <div class="d-flex flex-column" style="margin-right: 1rem;">
+                        <label for="emi-search" class="form-label" style="font-weight: 500;">Search</label>
+                        <input type="text" id="emi-search" class="input-with-feedback form-control"
+                            style="width:200px;" placeholder="Search loan/applicant" />
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="filter-emi" style="height:38px;">
+                        Search
+                    </button>
                 </div>
-                <button class="btn btn-primary btn-sm" id="filter-emi" style="height:38px;">Search</button>
+
+                <!-- Action Buttons Row -->
+                <div class="d-flex gap-2 align-items-center" style="gap: 10px;">
+                    <button class="btn btn-warning btn-sm" id="process-accrual">
+                        Process Loan Interest
+                    </button>
+
+                    <button class="btn btn-success btn-sm" id="send-whatsapp-all">
+                        Send WhatsApp
+                    </button>
+
+                    <span id="selected-count" class="text-muted"></span>
+                </div>
+
             </div>
         </div>
 
@@ -181,6 +209,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                 let html = `<table class="table table-bordered table-striped">
                     <thead>
                         <tr>
+                            <th><input type="checkbox" id="select-all-emi"></th>
                             <th data-field="l.group">Group</th>
                             <th data-field="l.custom_loan_id">Loan</th>
                             <th data-field="lm.member_id">Applicant Id</th>
@@ -204,6 +233,15 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                     let show_whatsapp = row.payment_date >= today;
                     html += `
                         <tr>
+                        <td>
+                            <input type="checkbox" class="emi-row"
+                                data-loan="${row.loan}"
+                                data-custom-loan="${row.custom_loan_id}"
+                                data-member="${row.member_name || row.applicant}"
+                                data-mobile="${row.mobile_no || row.mobile_no_2 || ''}"
+                                data-date="${row.payment_date}"
+                                data-amount="${row.total_payment}">
+                        </td>
                             <td>${row.group}</td>
                             <td>${row.custom_loan_id}</td>
                             <td>${row.applicant}</td>
@@ -336,3 +374,89 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
 };
 
+
+
+
+$(document).on("change", "#select-all-emi", function () {
+    $(".emi-row").prop("checked", this.checked);
+});
+
+$(document).on("change", ".emi-row", function () {
+    if (!this.checked) {
+        $("#select-all-emi").prop("checked", false);
+    }
+});
+
+
+$(document).on("click", "#process-accrual", function () {
+
+    let selected = $(".emi-row:checked");
+
+    if (!selected.length) {
+        frappe.msgprint("Please select at least one EMI");
+        return;
+    }
+
+    let emi_list = [];
+    selected.each(function () {
+        emi_list.push({
+            loan: $(this).data("loan"),
+            payment_date: $(this).data("date"),
+            amount: $(this).data("amount")
+        });
+    });
+
+    frappe.confirm(
+        `Process loan accrual for <b>${emi_list.length}</b> EMI(s)?`,
+        function () {
+            frappe.call({
+                method: "ex_loan_management.api.cust_interest_accrual.process_selected_emis",
+                args: { emis: emi_list },
+                freeze: true,
+                freeze_message: "Processing Loan Accrual...",
+                callback: function (r) {
+                    frappe.msgprint(r.message);
+                    load_emis();
+                }
+            });
+        }
+    );
+});
+
+$(document).on("click", "#send-whatsapp-all", function () {
+
+    let selected = $(".emi-row:checked");
+
+    if (!selected.length) {
+        frappe.msgprint("Please select EMI records");
+        return;
+    }
+
+    let rows = [];
+    selected.each(function () {
+        rows.push({
+            mobile: $(this).data("mobile"),
+            member: $(this).data("member"),
+            loan: $(this).data("custom-loan"),
+            date: $(this).data("date"),
+            amount: $(this).data("amount")
+        });
+    });
+
+    frappe.call({
+        method: "ex_loan_management.api.whatsapp_msg_api.send_bulk_whatsapp",
+        args: { rows: rows },
+        freeze: true,
+        freeze_message: "Sending WhatsApp messages...",
+        callback: function (r) {
+            frappe.msgprint(r.message);
+        }
+    });
+});
+
+function update_selected_count() {
+    let count = $(".emi-row:checked").length;
+    $("#selected-count").text(count ? `${count} selected` : "");
+}
+
+$(document).on("change", ".emi-row, #select-all-emi", update_selected_count);
