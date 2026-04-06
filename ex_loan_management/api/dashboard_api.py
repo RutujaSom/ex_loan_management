@@ -79,11 +79,15 @@ def get_loan_summary(group=None):
     Get loan application and repayment counts, filtered by group and role.
     """
     user = frappe.session.user
+    print('user ....', user)
     roles = frappe.get_roles(user)
     try:
+        print('int')
         employee = frappe.get_doc("Employee", {"user_id": user}, "name")
     except:
         employee = ""
+
+    print(employee ,'....')
 
     loan_filters = {}
     repayment_filters = {}
@@ -93,7 +97,7 @@ def get_loan_summary(group=None):
         pluck="name"
     )
 
-    if "Agent" in roles and not "Administrator" in roles:
+    if "Agent" in roles and not "Administrator" in roles and (not "Account Manager" in roles and not "Loan Manager" in roles):
         # Fetch loan groups assigned to this employee
         groups = frappe.get_all(
             "Loan Group Assignment",
@@ -123,6 +127,7 @@ def get_loan_summary(group=None):
     emis = get_todays_emis(
         selected_date=nowdate(), 
         employee=employee,
+        is_schedular=True
     )
 
     total_emis = len(emis)
@@ -136,19 +141,22 @@ def get_loan_summary(group=None):
         SELECT COALESCE(SUM(amount_paid), 0)
         FROM `tabLoan Repayment`
         WHERE custom_created_by = %s
-          AND docstatus = 1
-          AND reference_date BETWEEN %s AND %s
+        AND docstatus != 2 
+        AND workflow_state IN ("Approved", "Draft", "Pending")
+        AND reference_date BETWEEN %s AND %s
     """, (employee.name, first_day, last_day))[0][0] or 0
 
 
-    # ------------------ Todays's collection by this user ------------------
+
+   # ------------------ Today's collection by this user ------------------
     todays_collection = frappe.db.sql("""
         SELECT COALESCE(SUM(amount_paid), 0)
         FROM `tabLoan Repayment`
         WHERE custom_created_by = %s
-          AND docstatus = 1
-          AND reference_date = %s
-    """, (employee.name, nowdate(),))[0][0] or 0
+        AND docstatus != 2
+        AND workflow_state IN ("Approved", "Draft", "Pending")
+        AND reference_date = %s
+    """, (employee.name, nowdate()))[0][0] or 0
 
     # ------------------ Employee collection by this user ------------------
     collection_in_hand = frappe.db.sql("""
