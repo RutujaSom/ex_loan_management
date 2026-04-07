@@ -306,5 +306,16 @@ def loan_payment_schedule_list(page=1, page_size=10, search=None, sort_by="loan"
     for doc in parent_results:
         doc["repayment_schedule"] = children_map.get(doc["name"], [])
 
+        schedules = children_map.get(doc["name"], [])
+        # ✅ Set maturity_date as last EMI date
+        if schedules:
+            last_emi = max(
+                schedules,
+                key=lambda x: getdate(x["payment_date"])
+            )
+            doc["maturity_date"] = last_emi["payment_date"]
+        else:
+            doc["maturity_date"] = None
+
 
     return parent_data
