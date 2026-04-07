@@ -4,6 +4,7 @@ from datetime import datetime
 from ex_loan_management.api.utils import get_paginated_data, api_error
 
 def validate_loan_application(doc, method=None):
+    print("in validate_loan_application ......")
     if doc.custom_co_borrower:
         # Step 1: get all approved loan applications with same co_borrower
         applications = frappe.get_all(
@@ -29,6 +30,13 @@ def validate_loan_application(doc, method=None):
             if len(loans)>0:
                 frappe.throw("Selected co-borrower is already associated with active loan(s). Please select another co-borrower.")
                
+    print(doc.workflow_state ,'...doc.workflow_state',doc.docstatus)
+    if doc.workflow_state == "Approved":
+        doc.status = "Approved"
+        # doc.save()
+
+    if doc.workflow_state == "Approved" and doc.docstatus == 0:
+        doc.submit()
 
 
 
@@ -515,12 +523,12 @@ def get_loan_members_for_user(doctype, txt, searchfield, start, page_len, filter
 def loan_application_get(name):
     """
     Get Loan Application by name (primary key)
-    Returns all fields same as in loan_application_list, including linked data and image URLs
+    Returns linked Loan Group name and full URLs for image fields
     """
     if not name:
         frappe.throw("Loan Application name is required")
 
-    # Fetch Loan Application with all fields from update_fields
+    # Fetch Member
     applications = frappe.get_all(
         "Loan Application",
         filters={"name": name},
@@ -531,31 +539,6 @@ def loan_application_get(name):
         return {}
 
     application = applications[0]
-
-    # 🔹 Get linked data (same as list view)
-    if application.get("custom_nominee"):
-        nominee_name = frappe.get_value("Member", application["custom_nominee"], "member_name")
-        application["custom_nominee_member_name"] = nominee_name or ""
-    
-    if application.get("custom_co_borrower"):
-        co_borrower_name = frappe.get_value("Member", application["custom_co_borrower"], "member_name")
-        application["custom_co_borrower_member_name"] = co_borrower_name or ""
-    
-    if application.get("applicant"):
-        applicant_member_id = frappe.get_value("Member", application["applicant"], "member_id")
-        application["applicant_member_id"] = applicant_member_id or ""
-
-    # 🔹 Full URL for image fields (same as list view)
-    host_url = frappe.request.host_url.rstrip("/")
-    image_fields = ["member_image"]  # From link_images_fields in list
-    
-    # Get applicant's member image
-    if application.get("applicant"):
-        member_image = frappe.get_value("Member", application["applicant"], "member_image")
-        if member_image:
-            application["applicant_member_image"] = host_url + "/" + member_image.lstrip("/")
-        else:
-            application["applicant_member_image"] = ""
 
     return application
 

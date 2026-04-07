@@ -45,28 +45,30 @@ class CustomLoanRepayment(CoreLoanRepayment):
 	# created against employee and not against system user.
 	# Added by Rutuja on 3-APR-2026
 
-	def before_save(doc, method=None):
+	def before_save(self):
+		
 		try:
-			if doc.applicant:
+			if self.applicant:
 				user = frappe.session.user
 				employee = frappe.db.get_value("Employee", {"user_id": user}, "name")
 
 				if employee:
-					doc.created_by = employee
+					self.custom_created_by = employee
 		except Exception as e:
 			frappe.log_error(frappe.get_traceback(), "Loan Repayment Before Save Error")
       
-	def after_save(doc, method=None):
-		if not doc.amount_paid:
+	def after_insert(self):
+
+		if not self.amount_paid:
 			return
 
-		if doc.mode_of_payment != "Cash":
+		if str(self.custom_mode_of_payment).upper() != "CASH":
 			return
 
 		# prevent duplicate entry
 		if frappe.db.exists(
 			"Collection In Hand",
-			{"loan_repayment": doc.name}
+			{"loan_repayment": self.name}
 		):
 			return
 
@@ -75,19 +77,19 @@ class CustomLoanRepayment(CoreLoanRepayment):
 		if ("Agent" in roles or "Employee" in roles) and "Administrator" not in roles:
 			collection = frappe.get_doc({
 				"doctype": "Collection In Hand",
-				"loan_repayment": doc.name,
-				"amount": doc.amount_paid,
+				"loan_repayment": self.name,
+				"amount": self.amount_paid,
 				"posting_date": nowdate(),
-				"employee": doc.created_by,
-				"loan": doc.against_loan,
-				"applicant": doc.applicant,
+				"employee": self.custom_created_by,
+				"loan": self.against_loan,
+				"applicant": self.applicant,
 			})
 			collection.insert(ignore_permissions=True)
 
 
 
 	def before_submit(self):
-		print("in overide subnit before ....")
+		print("in overide submit before ....")
 		self.book_unaccrued_interest()
 
 	def on_submit(self):
