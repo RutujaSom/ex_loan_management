@@ -157,6 +157,12 @@ def create_loan_repayment():
         except:
             company = ""
 
+        if str(data.get("custom_mode_of_payment")).upper() == "ONLINE" and (data.get("amount_paid")):
+            payable_account = frappe.db.get_value("Loan Product", data.get("loan_product"), "custom_online_repayment_account")
+        else:
+            payable_account = frappe.db.get_value("Loan Product", data.get("loan_product"), "payment_account")
+               
+
         print('data.get("amount_paid") ///',data.get("amount_paid"), type(data.get("amount_paid")))
 
         # Step 1: Prepare Loan Application doc
@@ -176,7 +182,8 @@ def create_loan_repayment():
             "custom_manual_remarks": data.get("custom_manual_remarks"),
             "reference_date": data.get("reference_date"),
             "status": "Open",
-			"repayment_schedule_type":"Monthly as per repayment start date"
+			"repayment_schedule_type":"Monthly as per repayment start date",
+            "payment_account": payable_account,
         })
 
         if "custom_payment_proof" in files:

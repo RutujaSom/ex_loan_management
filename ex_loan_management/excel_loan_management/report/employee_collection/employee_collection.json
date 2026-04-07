@@ -1,0 +1,59 @@
+{
+ "add_total_row": 0,
+ "add_translate_data": 0,
+ "columns": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee",
+   "width": 0
+  }
+ ],
+ "creation": "2026-04-06 17:50:37.593705",
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "filters": [
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Time",
+   "label": "To Date",
+   "mandatory": 1,
+   "wildcard_filter": 0
+  }
+ ],
+ "idx": 0,
+ "is_standard": "Yes",
+ "letter_head": null,
+ "modified": "2026-04-06 17:52:41.459271",
+ "modified_by": "Administrator",
+ "module": "Excel Loan Management",
+ "name": "Employee Collection",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Collection In Hand",
+ "report_name": "Employee Collection",
+ "report_type": "Script Report",
+ "roles": [
+  {
+   "role": "System Manager"
+  },
+  {
+   "role": "Loan Manager"
+  },
+  {
+   "role": "Accounts Manager"
+  },
+  {
+   "role": "Agent"
+  }
+ ],
+ "timeout": 0
+}
