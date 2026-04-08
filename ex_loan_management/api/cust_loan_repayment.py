@@ -7,6 +7,9 @@ from ex_loan_management.api.utils import get_paginated_data, api_error
 import frappe
 from frappe.utils import nowdate
 
+from frappe.model.workflow import apply_workflow
+from urllib.parse import urljoin
+
 
 update_fields = [
     "name",
@@ -150,21 +153,25 @@ def create_loan_repayment():
         data = frappe.form_dict  # works for JSON body and form-data
         user_doc = frappe.get_doc("User", frappe.session.user)
         files = frappe.request.files 
-        print('user_doc ......',user_doc)
+
         try:
             emp_details = frappe.get_doc("Employee", {"user_id": user_doc.name})
             company = emp_details.company
         except:
             company = ""
+        
+        loan_product = ""
+        try:
+            loan_product = frappe.get_doc("Loan", data.get("against_loan")).loan_product
+        except:
+            frappe.throw("Loan not found")
 
-        if str(data.get("custom_mode_of_payment")).upper() == "ONLINE" and (data.get("amount_paid")):
-            payable_account = frappe.db.get_value("Loan Product", data.get("loan_product"), "custom_online_repayment_account")
+
+        if (data.get("custom_mode_of_payment") or "").strip().upper() == "ONLINE" and (data.get("amount_paid")):
+            payable_account = frappe.db.get_value("Loan Product", loan_product, "custom_online_repayment_account")
         else:
-            payable_account = frappe.db.get_value("Loan Product", data.get("loan_product"), "payment_account")
+            payable_account = frappe.db.get_value("Loan Product", loan_product, "payment_account")
                
-
-        print('data.get("amount_paid") ///',data.get("amount_paid"), type(data.get("amount_paid")))
-
         # Step 1: Prepare Loan Application doc
         doc = frappe.get_doc({
             "doctype": "Loan Repayment",
@@ -201,7 +208,15 @@ def create_loan_repayment():
 
         # Step 3: Insert Loan Application (runs validate() automatically)
         doc.insert(ignore_permissions=True)
-        new_doc = apply_workflow(doc, "Submit for verification")
+        # ✅ Apply workflow
+        apply_workflow(doc, "Submit for verification")
+
+        # ✅ Reload to reflect workflow changes
+        doc.reload()
+
+        # ✅ Save workflow changes
+        doc.save(ignore_permissions=True)
+
         frappe.db.commit()
 
 
@@ -217,8 +232,6 @@ def create_loan_repayment():
         return api_error(e)
 
 
-from frappe.model.workflow import apply_workflow
-from urllib.parse import urljoin
 
 @frappe.whitelist()
 def loan_repayment_get(name):
