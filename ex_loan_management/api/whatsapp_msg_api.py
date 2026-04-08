@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import requests
 from urllib.parse import quote
 from datetime import datetime, timedelta
-from frappe.utils import now_datetime
+from frappe.utils import now_datetime, getdate
 from ex_loan_management.api.cust_payment_schedule import get_todays_emis
 
 
@@ -192,6 +192,16 @@ def send_bulk_whatsapp(rows):
                 failed += 1
                 errors.append(f"Missing data for row: {row}")
                 continue
+
+             # ✅ NORMALIZE DATE HERE
+            # Supports: YYYY-MM-DD, DD-MM-YYYY, date object
+            try:
+                date_obj = getdate(date)   # safest in Frappe
+                formatted_date = date_obj.strftime("%d-%m-%Y")
+            except Exception:
+                failed += 1
+                errors.append(f"Invalid date format: {date}")
+                continue
             
             # Call the existing send_whatsapp_messages function
             result = send_whatsapp_messages(
@@ -199,7 +209,7 @@ def send_bulk_whatsapp(rows):
                 member_name=member,
                 loan_no=loan,
                 emi_amount=amount,
-                emi_date=date
+                emi_date=formatted_date
             )
             
             if result.get("status") == "success":
@@ -230,7 +240,8 @@ def send_bulk_whatsapp(rows):
     return {
         "message": message,
         "successful": successful,
-        "failed": failed
+        "failed": failed,
+        "errors": errors
     }
 
 

@@ -89,14 +89,16 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
     // ✅ Employee & Loan Group filter
     frappe.call({
-        method: "frappe.client.get_value",
-        args: {
-            doctype: "Employee",
-            filters: { user_id: frappe.session.user },
-            fieldname: ["name"]
-        },
-        callback: function(res) {
-            let employee_id = res.message ? res.message.name : null;
+        // method: "frappe.client.get_value",
+        // args: {
+        //     doctype: "Employee",
+        //     filters: { user_id: frappe.session.user },
+        //     fieldname: ["name"]
+        // },
+        // callback: function(res) {
+        method: "ex_loan_management.api.employee.get_current_employee",
+        callback: function (res) {
+            let employee_id = res.message ? res.message : null;
 
             // If Admin/System Manager → Show all employees & loan groups
             if (frappe.user_roles.includes("Administrator") || frappe.user_roles.includes("System Manager")) {
@@ -182,7 +184,6 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         }
                     }
                 });
-
             }
         }
     });
@@ -336,9 +337,6 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         }
                     );
                 });
-
-                // Reset selected count after reloading the list
-                update_selected_count();
             }
         });
     }
@@ -446,15 +444,20 @@ $(document).on("click", "#send-whatsapp-all", function () {
         });
     });
 
-    frappe.call({
-        method: "ex_loan_management.api.whatsapp_msg_api.send_bulk_whatsapp",
-        args: { rows: rows },
-        freeze: true,
-        freeze_message: "Sending WhatsApp messages...",
-        callback: function (r) {
-            frappe.msgprint(r.message);
+     frappe.confirm(
+        `Sent whatsapp message for <b>${rows.length}</b> EMI(s)?`,
+        function () {
+            frappe.call({
+                method: "ex_loan_management.api.whatsapp_msg_api.send_bulk_whatsapp",
+                args: { rows: rows },
+                freeze: true,
+                freeze_message: "Sending WhatsApp messages...",
+                callback: function (r) {
+                    frappe.msgprint(r.message);
+                }
+            });
         }
-    });
+    );
 });
 
 function update_selected_count() {
