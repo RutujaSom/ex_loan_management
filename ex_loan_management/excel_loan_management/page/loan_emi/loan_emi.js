@@ -336,9 +336,6 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         }
                     );
                 });
-
-                // Reset selected count after reloading the list
-                update_selected_count();
             }
         });
     }
@@ -446,15 +443,20 @@ $(document).on("click", "#send-whatsapp-all", function () {
         });
     });
 
-    frappe.call({
-        method: "ex_loan_management.api.whatsapp_msg_api.send_bulk_whatsapp",
-        args: { rows: rows },
-        freeze: true,
-        freeze_message: "Sending WhatsApp messages...",
-        callback: function (r) {
-            frappe.msgprint(r.message);
+     frappe.confirm(
+        `Sent whatsapp message for <b>${rows.length}</b> EMI(s)?`,
+        function () {
+            frappe.call({
+                method: "ex_loan_management.api.whatsapp_msg_api.send_bulk_whatsapp",
+                args: { rows: rows },
+                freeze: true,
+                freeze_message: "Sending WhatsApp messages...",
+                callback: function (r) {
+                    frappe.msgprint(r.message);
+                }
+            });
         }
-    });
+    );
 });
 
 function update_selected_count() {
