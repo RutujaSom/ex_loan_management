@@ -216,6 +216,7 @@ update_fields = [
 	"reference_date",
 	"days_past_due",
 	"status",
+    "docstatus",
 	"reference_number",
 	"amended_from",
 ]
@@ -302,7 +303,17 @@ def loan_disbursement_list(page=1, page_size=10, search=None, sort_by="name", so
         is_pagination=is_pagination,
         base_url=base_url,
         extra_params=extra_params,
-		link_fields={"applicant": "member_name","against_loan": "custom_loan_id"},
+		link_fields={"applicant": "member_name","against_loan": "custom_loan_id","against_loan": "loan_amount", "against_loan": "repayment_start_date",
+               "against_loan": "total_principal_paid"},
+        link_fields_test = {
+            "applicant": ["member_name"],
+            "against_loan": [
+                "custom_loan_id",
+                "loan_amount",
+                "repayment_start_date",
+                "total_principal_paid"
+            ]
+        },
 		link_images_fields={"applicant": "member_image"},
 		dynamic_search_fields = {"applicant":{"doctype": "Member", "field": "member_id"},}
     )

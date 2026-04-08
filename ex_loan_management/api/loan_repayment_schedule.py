@@ -268,6 +268,9 @@ def loan_payment_schedule_list(page=1, page_size=10, search=None, sort_by="loan"
         search_fields=["name"],
         is_pagination=is_pagination,
         base_url=base_url,
+        link_fields = {
+            "loan": "loan_amount",
+        },
         extra_params=extra_params,
     )
 
