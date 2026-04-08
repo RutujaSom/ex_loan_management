@@ -1,19 +1,28 @@
 import frappe
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=False)
 def get_relation_select_options():
     """
-    Fetch dynamic options for the Select field 'nominee_relation' in Loan Application doctype
+    Fetch dynamic options for the Select field 'custom_nominee_relation'
+    from Loan Application (including Custom Fields)
     """
-    # Get the DocType
-    doc = frappe.get_doc('DocType', 'Loan Application')
 
-    # Find your Select field
-    loan_field = next((f for f in doc.fields if f.fieldname == 'nominee_relation'), None)
+    meta = frappe.get_meta("Loan Application")
 
-    if loan_field and loan_field.fieldtype == "Select":
-        # Split newline-separated options into list of dicts
-        options = [{"value": opt} for opt in loan_field.options.split("\n") if opt]
+    # Debug (optional)
+    for field in meta.fields:
+        frappe.logger().info(
+            f"{field.fieldname} | {field.fieldtype} | {field.options}"
+        )
+
+    field = meta.get_field("custom_nominee_relation")
+
+    if field and field.fieldtype == "Select":
+        options = [
+            {"value": opt.strip()}
+            for opt in (field.options or "").split("\n")
+            if opt.strip()
+        ]
     else:
         options = []
 

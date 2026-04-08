@@ -336,6 +336,9 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         }
                     );
                 });
+
+                // Reset selected count after reloading the list
+                update_selected_count();
             }
         });
     }
