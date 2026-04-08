@@ -12,7 +12,7 @@ def get_loan_members():
     filters = {}
 
     # If logged-in user is Agent, only show records created by them
-    if "Agent" in roles and not "Administrator" in roles:
+    if "Agent" in roles and not "Administrator" in roles and not "Account Manager" in roles and not "Loan Manager" in roles:
         # filters["owner"] = user
 
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
@@ -26,10 +26,16 @@ def get_loan_members():
             pluck="loan_group"
         )
 
-    assigned_members = frappe.get_all(
+    if groups:
+        assigned_members = frappe.get_all(
+            "Member",
+            filters={"group": ["in", groups]},
+            # pluck="name",
+            fields=["name", "member_name", "group", "status", "creation", "owner"],
+        )
+    else:
+        assigned_members = frappe.get_all(
         "Member",
-        filters={"group": ["in", groups]},
-        # pluck="name",
         fields=["name", "member_name", "group", "status", "creation", "owner"],
     )
 
