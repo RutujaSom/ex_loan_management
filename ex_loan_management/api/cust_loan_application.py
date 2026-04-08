@@ -393,7 +393,7 @@ def loan_application_list(page=1, page_size=10, search=None, sort_by="name", sor
     # 🔹 Handle loan_group filter (from Member)
     user = frappe.session.user
 
-    if "Agent" in frappe.get_roles(user):
+    if "Agent" in frappe.get_roles(user) and not ("Account Manager" in frappe.get_roles(user) or "Loan Manager" in frappe.get_roles(user)):
         employee_id = frappe.db.get_value("Employee", {"user_id": user}, "name")
         if not employee_id:
             return None  # No employee mapped

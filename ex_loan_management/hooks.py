@@ -35,7 +35,8 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
         "filters": [
             ["dt", "in", [
                 "Company", "Loan", "Loan Application", "Loan Repayment Schedule",
-                "Loan Repayment", "Loan Disbursement", "Process Loan Interest Accrual"
+                "Loan Repayment", "Loan Disbursement", "Process Loan Interest Accrual",
+                "Loan Charges"
 
             ]]
         ]
@@ -53,6 +54,7 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
                 "Fact Sheet",
                 "Individual Decleration and Terms and Conditions version jan 24",
                 "Individual Loan Agremeent",
+                "Individual Loan Agremeent For Co Borrower",
             ]]
         ]
     }

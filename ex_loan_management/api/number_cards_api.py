@@ -11,7 +11,7 @@ def get_active_loans():
     """
     return frappe.get_all(
         "Loan",
-        filters={"status": ["not in", "Draft"]},
+        filters={"status": ["not in", "Draft", "Closed","Loan Closure Requested"]},
         pluck="name"
     )
 
