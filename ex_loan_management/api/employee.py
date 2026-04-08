@@ -49,3 +49,19 @@ def employee_list(page=1, page_size=10, search=None, sort_by="employee_name", so
         # link_fields={"employee": "employee_name"},
     )
 
+
+
+
+import frappe
+
+@frappe.whitelist()
+def get_current_employee():
+    emp = frappe.get_all(
+        "Employee",
+        filters={"user_id": frappe.session.user},
+        fields=["name"],
+        limit=1,
+        ignore_permissions=True
+    )
+
+    return emp[0].name if emp else None
