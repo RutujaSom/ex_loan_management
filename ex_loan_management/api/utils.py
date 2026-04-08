@@ -16,6 +16,7 @@ def get_paginated_data(
     base_url=None,
     extra_params=None,
     link_fields=None,  # NEW: dict of {link_field: target_field}
+    link_fields_test=None, 
     image_fields=None,
     or_filters = [],
     link_images_fields=None,
@@ -25,6 +26,7 @@ def get_paginated_data(
     or_filters = or_filters or []
     extra_params = extra_params or {}
     link_fields = link_fields or {}
+    link_fields_test = link_fields_test or {}
 
     # 🔹 Dynamic Search Support (main + linked doctypes)
     if search:
@@ -131,6 +133,69 @@ def get_paginated_data(
         return data
 
     
+    def extend_linked_fields_test(data):
+        if not link_fields_test or not data:
+            return data
+
+        meta = frappe.get_meta(doctype)
+
+        for link_field, target_fields in link_fields_test.items():
+            if isinstance(target_fields, str):
+                target_fields = [target_fields]
+
+            field_meta = meta.get_field(link_field)
+            if not field_meta:
+                continue
+
+            # ------------------------
+            # 🔹 LINK FIELD
+            # ------------------------
+            if field_meta.fieldtype == "Link":
+                target_doctype = field_meta.options
+                ids = [d.get(link_field) for d in data if d.get(link_field)]
+                if not ids:
+                    continue
+
+                records = frappe.get_all(
+                    target_doctype,
+                    filters={"name": ["in", ids]},
+                    fields=["name"] + target_fields
+                )
+                value_map = {r["name"]: r for r in records}
+
+                for d in data:
+                    for f in target_fields:
+                        d[f"{link_field}_{f}"] = value_map.get(d.get(link_field), {}).get(f, "")
+
+            # ------------------------
+            # 🔹 DYNAMIC LINK FIELD
+            # ------------------------
+            elif field_meta.fieldtype == "Dynamic Link":
+                dynamic_type_field = f"{link_field}_type"
+
+                grouped = {}
+                for d in data:
+                    dt = d.get(dynamic_type_field)
+                    name = d.get(link_field)
+                    if dt and name:
+                        grouped.setdefault(dt, []).append(name)
+
+
+                for target_doctype, names in grouped.items():
+                    records = frappe.get_all(
+                        target_doctype,
+                        filters={"name": ["in", names]},
+                        fields=["name"] + target_fields
+                    )
+                    value_map = {r["name"]: r for r in records}
+
+                    for d in data:
+                        if d.get(dynamic_type_field) == target_doctype:
+                            for f in target_fields:
+                                d[f"{link_field}_{f}"] = value_map.get(d.get(link_field), {}).get(f, "")
+
+        return data
+
     def extend_image_fields(data):
         """Prefix image fields with full host URL"""
         if not image_fields or not data:
@@ -208,6 +273,7 @@ def get_paginated_data(
 
         # extend linked fields
         data = extend_linked_fields(data)
+        data = extend_linked_fields_test(data)
         data = extend_image_fields(data)
         data = extend_linked_images(data)
 
@@ -238,6 +304,7 @@ def get_paginated_data(
         )
         data = extend_image_fields(data)
         data = extend_linked_images(data)
+        data = extend_linked_fields_test(data)
         return extend_linked_fields(data)
 
 

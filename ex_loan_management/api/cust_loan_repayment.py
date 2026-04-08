@@ -14,6 +14,7 @@ from urllib.parse import urljoin
 update_fields = [
     "name",
 	"against_loan",
+    "applicant_type",
 	"applicant",
 	"repayment_type",
 	"loan_disbursement",
@@ -135,9 +136,18 @@ def loan_repayment_list(page=1, page_size=10, search=None, sort_by="name", sort_
         base_url=base_url,
         extra_params=extra_params,
 		image_fields=["custom_payment_proof"],
-        link_fields={"applicant": "member_name","against_loan": "custom_loan_id"},
+        # link_fields={"applicant": "member_name","against_loan": "custom_loan_id"},
+        link_fields_test = {
+            "applicant": ["member_name", "member_id"],
+            "against_loan": [
+                "custom_loan_id",
+                "loan_amount",
+                "repayment_start_date",
+                "total_principal_paid"
+            ]
+        },
 		link_images_fields={"applicant": "member_image"} ,
-		dynamic_search_fields = {"applicant":{"doctype": "Member", "field": "member_id"},}
+		dynamic_search_fields = {"applicant":{"doctype": "Member", "field": "member_id"}}
     )
 
 
