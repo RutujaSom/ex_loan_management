@@ -564,6 +564,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         if is_group:
             # Members with a group assigned (group is not null/empty)
             # filters["group"] = ["!=", ""]
+            print(is_manager,'..........is_manager')
             if is_manager:
                 # For managers: show all members who have groups (no restriction to specific groups)
                 filters["group"] = ["!=", ""]
@@ -581,14 +582,17 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
 
                     # 🔹 Collect filters from kwargs (all query params except the defaults)
                     filters["group"] = ["in", groups]
+            print("filte in is greoup.....", filters)
         else:
             # Members without a group assigned (group is null/\n"empty)
             filters["group"] = ["in", [None, ""]]
             filters["owner"] = frappe.session.user
     
-    if status in ["Verified", "Pending"]:
+    if str(status).lower() in ["verified", "pending"]:
+        print("in if ....")
         
         if is_manager:
+            print(kwargs.get("group"),'........kwargs.get("group")')
             # For managers: show all members with any group (no restriction)
             if kwargs.get("group") == None or kwargs.get("group") == "":
                 filters["group"] = ["!=", ""]
@@ -605,6 +609,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
 
                 # 🔹 Collect filters from kwargs (all query params except the defaults)
                 filters["group"] = ["in", groups]
+        print('verified ...',filters)
         filters["status"] = status
 
     if status == "Draft":
@@ -612,7 +617,8 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
             filters["owner"] = frappe.session.user
         filters["status"] = status
     
-    if kwargs.get('group') != "" or kwargs.get('group') != None:
+    if kwargs.get('group') != "" and kwargs.get('group') != None:
+        print("in ig .......")
         filters["group"] = ["in", kwargs.get('group')]
 
     print("filters ...",filters)
