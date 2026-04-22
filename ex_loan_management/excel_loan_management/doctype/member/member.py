@@ -585,11 +585,8 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
             # Members without a group assigned (group is null/\n"empty)
             filters["group"] = ["in", [None, ""]]
             filters["owner"] = frappe.session.user
-
-    # filters["owner"] = frappe.session.user
     
     if status in ["Verified", "Pending"]:
-        print("in if ...................", status)
         
         if is_manager:
             # For managers: show all members with any group (no restriction)
@@ -611,8 +608,12 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         filters["status"] = status
 
     if status == "Draft":
-        filters["owner"] = frappe.session.user
+        if not is_manager:
+            filters["owner"] = frappe.session.user
         filters["status"] = status
+    
+    if kwargs.get('group') != "" or kwargs.get('group') != None:
+        filters["group"] = ["in", kwargs.get('group')]
 
     print("filters ...",filters)
     base_url = frappe.request.host_url.rstrip("/") + frappe.request.path
