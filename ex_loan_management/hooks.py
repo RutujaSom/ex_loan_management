@@ -82,7 +82,8 @@ doc_events = {
 override_doctype_class = {
     "Process Loan Interest Accrual":"ex_loan_management.api.process_interest_override.ProcessLoanInterestAccrualOverride",
 
-    "Loan Repayment": "ex_loan_management.loan_repayment.loan_repayment.CustomLoanRepayment"
+    "Loan Repayment": "ex_loan_management.loan_repayment.loan_repayment.CustomLoanRepayment",
+ "Loan Repayment Schedule": "ex_loan_management.api.loan_repayment_schedule_overide.LoanRepaymentSchedule"
 }
 
 
