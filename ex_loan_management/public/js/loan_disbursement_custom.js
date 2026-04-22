@@ -15,7 +15,9 @@ frappe.ui.form.on("Loan Disbursement", {
         // }
 
         // ✅ Trigger auto-fetch when opened via ➕ from Loan
-        frm.trigger("fetch_loan_charges");
+        if (frm.is_new()) {
+            frm.trigger("fetch_loan_charges");
+        }
     },
 
     against_loan(frm) {
