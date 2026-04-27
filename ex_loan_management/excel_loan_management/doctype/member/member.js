@@ -21,10 +21,6 @@ frappe.ui.form.on('Member', {
             frm.doc.pincode = "";        // update value
             frm.refresh_field("pincode"); // refresh
         }
-        if (frm.doc.cibil_score == 0) {
-            frm.doc.cibil_score = "";        // update value
-            frm.refresh_field("cibil_score"); // refresh
-        }
     },
 
     refresh(frm) {
@@ -85,11 +81,6 @@ frappe.ui.form.on('Member', {
             frm.doc.pincode = "";        // update value
             frm.refresh_field("pincode"); // refresh
         }
-        if (frm.doc.cibil_score == 0) {
-            frm.doc.cibil_score = "";        // update value
-            frm.refresh_field("cibil_score"); // refresh
-        }
-
     },
 
     validate(frm) {

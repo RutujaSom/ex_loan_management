@@ -441,6 +441,8 @@ def create_loan_member():
 
             "cibil_score": data.get("cibil_score"),
             "cibil_date": data.get("cibil_date"),
+            "micro_fin_cibil_score": data.get("micro_fin_cibil_score"),
+            "cibil_report": data.get("cibil_report"),
 
             # Bank details
             "bank_details": data.get("bank_details"),
@@ -465,7 +467,7 @@ def create_loan_member():
 
         # Step 2: Handle file uploads
         for field in ["member_image", "aadhar_image", "pancard_image","address_image","home_image","voter_id_image",
-                      "aadhar_image_back", "voter_id_image_back", "passbook_image", "passbook_image_2"]:
+                      "aadhar_image_back", "voter_id_image_back", "passbook_image", "passbook_image_2","cibil_report"]:
             if field in files:
                 upload = files[field]
                 if not upload or not upload.filename:
@@ -517,6 +519,9 @@ update_fields = [
     "address_verified",
     "cibil_score",
     "cibil_date",
+    "cibil_remark",
+    "micro_fin_cibil_score",
+    "cibil_report",
     "bank_name",
     "account_number",
     "holder_name",
@@ -639,7 +644,7 @@ def loan_member_list(page=1, page_size=10, search=None, sort_by="occupation", so
         extra_params=extra_params,
         link_fields={"group": "group_name"},
         image_fields=['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                      "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
+                      "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2","cibil_report"]
     )
 
 
@@ -658,7 +663,7 @@ def update_loan_member_api(name):
         doc = frappe.get_doc("Member", loan_member_id)
 
         image_fields = ["member_image", "aadhar_image", "pancard_image","voter_id_image","home_image","address_image",
-                             "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
+                             "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2","cibil_report"]
 
         # Update text fields
         for field in update_fields:
@@ -763,7 +768,7 @@ def loan_member_get(name):
     # 🔹 Full URL for image fields
     host_url = frappe.request.host_url.rstrip("/")  # e.g. http://localhost:8000
     image_fields = ['member_image','aadhar_image','pancard_image','address_image','home_image','voter_id_image',
-                    "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2"]
+                    "aadhar_image_back", "voter_id_image_back","passbook_image", "passbook_image_2","cibil_report"]
 
     for f in image_fields:
         if member.get(f):
