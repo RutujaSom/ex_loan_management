@@ -67,6 +67,10 @@
   "cibil_tab",
   "cibil_score",
   "cibil_date",
+  "cibil_remark",
+  "column_break_ipny",
+  "micro_fin_cibil_score",
+  "cibil_report",
   "bank_details",
   "bank_name",
   "account_number",
@@ -249,7 +253,7 @@
   {
    "fieldname": "cibil_score",
    "fieldtype": "Int",
-   "label": "Cibil Score"
+   "label": "Retail Cibil Score"
   },
   {
    "fieldname": "cibil_date",
@@ -478,13 +482,32 @@
    "fieldname": "passbook_image_2",
    "fieldtype": "Attach",
    "label": "Passbook Image 2"
+  },
+  {
+   "fieldname": "cibil_remark",
+   "fieldtype": "Small Text",
+   "label": "Admin Cibil Remark"
+  },
+  {
+   "fieldname": "column_break_ipny",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "micro_fin_cibil_score",
+   "fieldtype": "Int",
+   "label": "Micro Finance Cibil Score"
+  },
+  {
+   "fieldname": "cibil_report",
+   "fieldtype": "Attach",
+   "label": "Cibil Report"
   }
  ],
  "grid_page_length": 50,
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-03-26 12:22:38.570492",
+ "modified": "2026-04-27 15:29:20.932612",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Member",
