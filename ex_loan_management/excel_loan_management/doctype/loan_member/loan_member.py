@@ -62,7 +62,7 @@ class LoanMember(Document):
                 if fieldname not in ["group","aadhar_image_back","voter_id_image_back",
                                      "address_line_2","cibil_score","bank_address","mobile_no_2",
                                     "cibil_date", "email", "geo_location","longitude", "latitude","consumer_no",
-                                    "user_id","passbook_image_2"]:
+                                    "user_id","passbook_image_2","cibil_remark"]:
                     if value in [None, ""]:
                         missing_fields.append(fieldname)
 

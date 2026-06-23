@@ -40,7 +40,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-01 12:22:24.459370",
+ "modified": "2026-04-29 19:28:21.245526",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Group",
@@ -67,6 +67,19 @@
    "read": 1,
    "report": 1,
    "role": "Employee",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Agent",
+   "select": 1,
    "share": 1,
    "write": 1
   }
