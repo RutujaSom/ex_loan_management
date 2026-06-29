@@ -2,7 +2,11 @@ frappe.ui.form.on("Loan Application", {
     refresh(frm) {
         // add_import_button(frm);
         add_download_button(frm);
-        set_applicant_query(frm);
+        // set_applicant_query(frm);
+        if (frm.doc.repayment_periods > 0) {
+            frm.set_df_property("repayment_periods", "read_only", 1);
+        }
+        
     },
 
     applicant(frm) {
@@ -67,36 +71,14 @@ function set_group_based_filters(frm) {
     frappe.db.get_value("Member", frm.doc.applicant, "group", (r) => {
         if (!r || !r.group) return;
 
-        frm.set_query("co_borrower", () => ({
+        frm.set_query("custom_co_borrower", () => ({
             filters: {
                 group: r.group,
                 name: ["!=", frm.doc.applicant]
             }
         }));
 
-        frm.set_query("nominee", () => ({
-            filters: {
-                group: r.group,
-                name: ["!=", frm.doc.applicant]
-            }
-        }));
-    });
-}
-
-function set_group_based_filters(frm) {
-    if (!frm.doc.applicant) return;
-
-    frappe.db.get_value("Member", frm.doc.applicant, "group", (r) => {
-        if (!r || !r.group) return;
-
-        frm.set_query("co_borrower", () => ({
-            filters: {
-                group: r.group,
-                name: ["!=", frm.doc.applicant]
-            }
-        }));
-
-        frm.set_query("nominee", () => ({
+        frm.set_query("custom_nominee", () => ({
             filters: {
                 group: r.group,
                 name: ["!=", frm.doc.applicant]

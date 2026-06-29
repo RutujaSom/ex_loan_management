@@ -7,6 +7,8 @@ frappe.ui.form.on('Loan Group', {
         frm.add_custom_button('Import Loan Group', () => {
             open_import_dialog(frm);
         });
+
+        set_loan_tenure_readonly(frm);
     },
     group_name(frm) {
         if (frm.doc.group_name) {
@@ -16,6 +18,21 @@ frappe.ui.form.on('Loan Group', {
 });
 
 
+
+function set_loan_tenure_readonly(frm) {
+    if (frm.is_new()) return;
+
+    frappe.db.count("Loan Application", {
+        filters: {
+            custom_loan_group: frm.doc.name,
+            workflow_state: "Approved"
+        }
+    }).then(count => {
+        if (count > 0) {
+            frm.set_df_property("loan_tenure", "read_only", 1);
+        }
+    });
+}
 
 function open_import_dialog() {
     const d = new frappe.ui.Dialog({

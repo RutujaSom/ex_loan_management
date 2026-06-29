@@ -9,7 +9,8 @@
   "group_id",
   "group_name",
   "group_head",
-  "group_image"
+  "group_image",
+  "loan_tenure"
  ],
  "fields": [
   {
@@ -35,12 +36,17 @@
    "fieldname": "group_image",
    "fieldtype": "Attach",
    "label": "Group Image"
+  },
+  {
+   "fieldname": "loan_tenure",
+   "fieldtype": "Int",
+   "label": "Loan Tenure"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-04-29 19:28:21.245526",
+ "modified": "2026-06-29 11:47:24.371355",
  "modified_by": "Administrator",
  "module": "Excel Loan Management",
  "name": "Loan Group",
