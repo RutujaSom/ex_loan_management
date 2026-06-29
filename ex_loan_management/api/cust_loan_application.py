@@ -273,6 +273,17 @@ def create_loan_application():
         except:
             company = ""
 
+        try:
+            loan_member = frappe.get_doc("Member", {"member_id": data.get("applicant")})
+            loan_group_detail = frappe.get_doc("Loan Group", {"group_id": loan_member.group})
+            loan_tenure = loan_group_detail.loan_tenure
+        except:
+            loan_tenure = 0
+
+        if not loan_tenure or loan_tenure <= 0:
+            return api_error("Loan Tenure not found for the applicant's group.")
+        
+
         # Step 1: Prepare Loan Application doc
         doc = frappe.get_doc({
             "doctype": "Loan Application",
@@ -289,7 +300,7 @@ def create_loan_application():
             "rate_of_interest": data.get("rate_of_interest"),
             "description": data.get("description"),
             "repayment_method": "Repay Over Number of Periods",
-            "repayment_periods": data.get("repayment_periods"),
+            # "repayment_periods": data.get("repayment_periods"),
             "status": "Open",
         })
 
