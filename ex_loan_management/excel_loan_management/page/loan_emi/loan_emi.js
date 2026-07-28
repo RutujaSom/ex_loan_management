@@ -225,6 +225,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                             <th data-field="balance_loan_amount">Total Balance</th>
                             <th></th>
                             <th>WhatsApp</th>
+                            <th>Send Notice</th>
 
                         </tr>
                     </thead>
@@ -232,6 +233,7 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
 
                 r.message.forEach(row => {
                     let show_whatsapp = row.payment_date >= today;
+                    let show_notice = row.payment_date < today;
                     html += `
                         <tr>
                         <td>
@@ -271,6 +273,22 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                                     ? `<i class="fa fa-whatsapp send-whatsapp"
                                         style="color:#25D366; font-size:20px; cursor:pointer;"
                                         data-member="${row.member_name || row.applicant}"
+                                        data-loan="${row.custom_loan_id}"
+                                        data-date="${row.payment_date}"
+                                        data-amount="${row.total_payment}"
+                                        data-mobile="${row.mobile_no ||  row.mobile_no_2 || ''}"
+                                    >
+                                    </i>`
+                                    : ``
+                                }
+                            </td>
+
+                            <td class="text-center">
+                                ${
+                                    show_notice
+                                    ? `<i class="fa fa-telegram send-notice"
+                                        style="font-size:20px; cursor:pointer;"
+                                        data-loan_repayment_schedule="${row.loan_repayment_schedule}"
                                         data-loan="${row.custom_loan_id}"
                                         data-date="${row.payment_date}"
                                         data-amount="${row.total_payment}"
@@ -337,6 +355,75 @@ frappe.pages['loan-emi'].on_page_load = function(wrapper) {
                         }
                     );
                 });
+
+
+
+                $(".send-notice").off("click").on("click", function () {
+                    let member_name = $(this).data("member");
+                    let loan_no = $(this).data("loan");
+                    let amount = $(this).data("amount");
+                    let loan_repayment_schedule = $(this).data("loan_repayment_schedule");
+                    let rawDate = $(this).data("date").split('-');
+                    let payment_date = `${rawDate[2]}-${rawDate[1]}-${rawDate[0]}`;
+
+                    let dialog_id = "notice-recipients-" + Date.now();
+
+                    let message = `
+                        <p>Send EMI notice for <b>${payment_date}</b>?</p>
+                        <div id="${dialog_id}">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="notice-recipient" value="borrower">
+                                    Borrower 
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" class="notice-recipient" value="co_borrower">
+                                    Co-Borrower
+                                </label>
+                            </div>
+                        </div>
+                    `;
+
+                    frappe.confirm(
+                        message,
+                        function () {
+                            let send_to_borrower = $(`#${dialog_id} .notice-recipient[value="borrower"]`).is(":checked");
+                            let send_to_co_borrower = $(`#${dialog_id} .notice-recipient[value="co_borrower"]`).is(":checked");
+
+                            if (!send_to_borrower && !send_to_co_borrower) {
+                                frappe.msgprint("Please select at least one recipient");
+                                return;
+                            }
+
+                            frappe.call({
+                                method: "ex_loan_management.api.whatsapp_msg_api.send_due_notice",
+                                args: {
+                                    loan_repayment_schedule:loan_repayment_schedule,
+                                    loan_no: loan_no,
+                                    emi_date: payment_date,
+                                    emi_amount: amount,
+                                    send_to_borrower: send_to_borrower,
+                                    send_to_co_borrower: send_to_co_borrower,
+                                },
+                                freeze: true,
+                                freeze_message: "Sending Notice...",
+                                callback: function (r) {
+                                    let msg = r.message || {};
+                                    if (msg.status === "success") {
+                                        frappe.msgprint("✅ Notice sent");
+                                    } else if (msg.status === "partial") {
+                                        frappe.msgprint("⚠️ Notice sent to some recipients only");
+                                    } else {
+                                        frappe.msgprint("Failed to send notice");
+                                    }
+                                }
+                            });
+                        }
+                    );
+                });
+     
             }
         });
     }

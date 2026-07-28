@@ -55,6 +55,8 @@ fixtures = ["Workflow", "Workflow State", "Workflow Action Master",
                 "Individual Decleration and Terms and Conditions version jan 24",
                 "Individual Loan Agremeent",
                 "Individual Loan Agremeent For Co Borrower",
+                "EMI Reminder Notice",
+                "Co-Borrower EMI Reminder Notice"
             ]]
         ]
     }
