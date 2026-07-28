@@ -179,14 +179,15 @@ def send_due_notice(loan_repayment_schedule, loan_no, emi_date, emi_amount,
         )
 
         loan_doc = frappe.get_doc("Loan", loan_no)
-        loan_app_doc = frappe.get_doc("Loan Application", loan_doc.loan_application)
+        
 
         # Build list of recipients based on the checkboxes
         recipients = []
         print("send_to_borrower, send_to_co_borrower ...",send_to_borrower, type(send_to_borrower), send_to_co_borrower,type(send_to_co_borrower))
         if str(send_to_borrower).lower() == "true":
-            recipients.append({"member": loan_app_doc.applicant, "type": "Borrower"})
+            recipients.append({"member": loan_doc.applicant, "type": "Borrower"})
         if str(send_to_co_borrower).lower() == "true":
+            loan_app_doc = frappe.get_doc("Loan Application", loan_doc.loan_application)
             if not loan_app_doc.custom_co_borrower:
                 frappe.msgprint("No co-borrower is set on this loan application")
             else:
