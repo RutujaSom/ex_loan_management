@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import requests
 from urllib.parse import quote
 from datetime import datetime, timedelta
-from frappe.utils import now_datetime, getdate
+from frappe.utils import now_datetime, getdate, flt, money_in_words
 from ex_loan_management.api.cust_payment_schedule import get_todays_emis
 
 
@@ -21,6 +21,10 @@ MARATHI_DAYS = {
     "Sunday": "रविवार",
 }
 
+from frappe.utils.pdf import get_pdf
+from frappe.utils.file_manager import save_file
+
+from num_to_words import num_to_word
 
 
 @frappe.whitelist(allow_guest=True)
@@ -151,6 +155,193 @@ def send_whatsapp_messages(mobile_no,member_name, loan_no, emi_amount, emi_date,
             "status": "error",
             "message": str(e)
         }
+
+
+
+
+def emi_amount_in_marathi_words(amount):
+    """Converts a numeric amount to Marathi words, e.g. 3181 -> 'तीन हजार एकशे एक्याऐंशी'"""
+    return num_to_word(int(flt(amount)), lang='mr') + " रुपये"
+
+
+@frappe.whitelist(allow_guest=True)
+def send_due_notice(loan_repayment_schedule, loan_no, emi_date, emi_amount, 
+                     send_to_borrower, send_to_co_borrower):
+    """
+    Sends a WhatsApp EMI due notice PDF to the borrower and/or co-borrower.
+    Each recipient gets their own personalized PDF.
+    """
+    try:
+        emi_number = frappe.db.get_value(
+            "Repayment Schedule",
+            {"parent": loan_repayment_schedule, "payment_date": datetime.strptime(emi_date, "%d-%m-%Y").date()},
+            "idx"
+        )
+
+        loan_doc = frappe.get_doc("Loan", loan_no)
+        loan_app_doc = frappe.get_doc("Loan Application", loan_doc.loan_application)
+
+        # Build list of recipients based on the checkboxes
+        recipients = []
+        print("send_to_borrower, send_to_co_borrower ...",send_to_borrower, type(send_to_borrower), send_to_co_borrower,type(send_to_co_borrower))
+        if str(send_to_borrower).lower() == "true":
+            recipients.append({"member": loan_app_doc.applicant, "type": "Borrower"})
+        if str(send_to_co_borrower).lower() == "true":
+            if not loan_app_doc.custom_co_borrower:
+                frappe.msgprint("No co-borrower is set on this loan application")
+            else:
+                recipients.append({"member": loan_app_doc.custom_co_borrower, "type": "Co-Borrower"})
+
+        if not recipients:
+            return {"status": "error", "message": "No recipients selected"}
+
+        params_value = f"{emi_date}"
+        encoded_params = quote(params_value)
+
+        results = []
+
+        for recipient in recipients:
+            user_doc = frappe.get_doc("Member", recipient["member"])
+
+            # ---- Existing reminder count for this member + EMI ----
+            existing_reminder_count = frappe.db.count(
+                "Notice Reminder",
+                filters={
+                    "member": user_doc.name,
+                    "emi_date": datetime.strptime(emi_date, "%d-%m-%Y").date(),
+                    "emi_no": emi_number,
+                }
+            )
+            print("existing_reminder_count ...",existing_reminder_count)
+
+            # ---- Last created record's ID (docname) for this member + EMI ----
+            last_notice = frappe.db.get_value(
+                "Notice Reminder",
+                filters={},
+                fieldname="name",
+                order_by="creation desc"
+            )
+            # last_notice is None if the table is empty, else the last autoincrement id as a string, e.g. "42"
+            print("last_notice .....",last_notice)
+            last_notice_no = int(last_notice) if last_notice else 0
+
+            reminder_no = existing_reminder_count + 1
+
+            mobile_no = str(user_doc.mobile_no or "").strip()
+            if not mobile_no:
+                results.append({
+                    "type": recipient["type"],
+                    "status": "error",
+                    "message": "No mobile number on file"
+                })
+                continue
+
+            if mobile_no.startswith("+91"):
+                mobile_no = mobile_no[3:]
+
+            member_name = user_doc.member_name or user_doc.name
+
+            # ---- Personalize loan_doc for THIS recipient before printing ----
+            loan_doc.emi_amount = flt(emi_amount, 2)                      # ad-hoc attribute, not a real field
+            loan_doc.emi_amount_in_words = emi_amount_in_marathi_words(emi_amount)
+            loan_doc.emi_date = emi_date
+            loan_doc.emi_number = emi_number
+            loan_doc.notice_recipient_name = member_name                # ad-hoc, used by print format
+            loan_doc.notice_recipient_type = recipient["type"]          # ad-hoc, "Borrower" / "Co-Borrower"
+            loan_doc.reminder_no = reminder_no
+            loan_doc.notice_no = str(last_notice_no + 1).zfill(4)
+
+            if recipient["type"] == "Co-Borrower":
+                print_format="Co-Borrower EMI Reminder Notice"
+            else:
+                print_format="EMI Reminder Notice"
+
+            html = frappe.get_print(
+                doctype="Loan",
+                name=loan_no,
+                print_format=print_format,
+                doc=loan_doc,
+            )
+            pdf_content = get_pdf(html)
+
+            # Unique filename per recipient so borrower's and co-borrower's PDFs don't overwrite each other
+            file_doc = save_file(
+                fname=f"EMI_Reminder_{loan_no}_{recipient['type'].replace('-', '_')}.pdf",
+                content=pdf_content,
+                dt="Loan",
+                dn=loan_no,
+                is_private=0,
+            )
+            pdf_url = frappe.utils.get_url(file_doc.file_url)
+
+            url = (
+                "http://bhashsms.com/api/sendmsgutil.php"
+                "?user=Tejraj_BWAI"
+                "&pass=123456"
+                "&sender=BUZWAP"
+                f"&phone={mobile_no}"
+                "&text=due_emi_notice_temp_2707"
+                "&priority=wa"
+                "&stype=normal"
+                f"&Params={encoded_params}"
+                "&htype=document"
+                f"&url={quote(pdf_url, safe=':/')}"
+            )
+
+            response = requests.get(url, timeout=50)
+            # response = ""
+
+            message = f"EMI Due Notice for the payment due on {emi_date}"
+
+            doc = frappe.get_doc({
+                "doctype": "Whatsapp Messages",
+                "phone_number": mobile_no,
+                "user_name": member_name,
+                "message": message,
+                "attachment": file_doc.file_url,
+                "type": "SENT",
+                "received_on": now_datetime()
+            })
+            doc.insert(ignore_permissions=True)
+            print("doc ....",doc)
+            reminder_doc = frappe.get_doc({
+                "doctype": "Notice Reminder",
+                "member": user_doc.name,
+                "emi_date" : datetime.strptime(emi_date, "%d-%m-%Y").date(),
+                "emi_no": emi_number,
+                "reminder_no": reminder_no,
+            })
+            print("reminder_doc ...",reminder_doc)
+            reminder_doc.insert(ignore_permissions=True)
+
+            results.append({
+                "type": recipient["type"],
+                "response":response,
+                "status": "success",
+                "mobile_no": mobile_no,
+                "url": url
+            })
+
+        frappe.db.commit()
+
+        successes = [r for r in results if r["status"] == "success"]
+        failures = [r for r in results if r["status"] == "error"]
+
+        if failures and successes:
+            overall_status = "partial"
+        elif failures:
+            overall_status = "error"
+        else:
+            overall_status = "success"
+
+        return {"status": overall_status, "results": results}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "WhatsApp API Error")
+        return {"status": "error", "message": str(e)}
+
+
+
 
 
 
