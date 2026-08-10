@@ -29,32 +29,50 @@ def execute(filters=None):
 
 def get_columns():
 	return [
-		{"label": "Type of Borrower", "fieldname": "borrower_type", "fieldtype": "Data", "width": 130},
-		{"label": "Loan ID", "fieldname": "loan_id", "fieldtype": "Link", "options": "Loan", "width": 130},
+		# Company Details
+		{"label": "Branch Name", "fieldname": "company_branch", "fieldtype": "Data", "width": 130},
+		{"label": "Branch Code", "fieldname": "center_number", "fieldtype": "Data", "options": "Loan", "width": 130},
+		
+		# Loan Group
 		{"label": "Loan Group", "fieldname": "loan_group", "fieldtype": "Link", "options": "Loan Group", "width": 120},
 		{"label": "Loan Group Name", "fieldname": "group_name", "fieldtype": "Data", "width": 220},
+		
+		# Loan ID and Member ID
+		{"label": "Loan ID", "fieldname": "loan_id", "fieldtype": "Link", "options": "Loan", "width": 130},
+		{"label": "Member ID", "fieldname": "member_id", "fieldtype": "Link", "options": "Member", "width": 130},
+		
+		# Loan Group
 		{"label": "Group Head Code", "fieldname": "group_head", "fieldtype": "Data", "width": 180},
 		{"label": "Group Head Name", "fieldname": "group_head_name", "fieldtype": "Data", "width": 180},
 		{"label": "Group Head Mobile", "fieldname": "group_head_mobile", "fieldtype": "Data", "width": 130},
 		{"label": "Group Head Address", "fieldname": "group_head_address", "fieldtype": "Data", "width": 200},
 
-		{"label": "Member ID", "fieldname": "member_id", "fieldtype": "Link", "options": "Member", "width": 130},
+		# Member Details
 		{"label": "Member Name", "fieldname": "member_name", "fieldtype": "Data", "width": 200},
-		{"label": "Mobile No", "fieldname": "mobile_no", "fieldtype": "Data", "width": 120},
+		{"label": "Type of Borrower", "fieldname": "borrower_type", "fieldtype": "Data", "width": 130},
 		{"label": "Gender", "fieldname": "gender", "fieldtype": "Data", "width": 90},
 		{"label": "Date of Birth", "fieldname": "dob", "fieldtype": "Date", "width": 110},
 		{"label": "Entry Age", "fieldname": "entry_age", "fieldtype": "Int", "width": 90},
 		{"label": "Completed Age", "fieldname": "completed_age", "fieldtype": "Int", "width": 110},
-		{"label": "Occupation", "fieldname": "occupation", "fieldtype": "Data", "width": 130},
+		{"label": "Mobile No", "fieldname": "mobile_no", "fieldtype": "Data", "width": 120},
 		{"label": "Aadhar Number", "fieldname": "aadhar", "fieldtype": "Data", "width": 140},
 		{"label": "PAN Number", "fieldname": "pancard", "fieldtype": "Data", "width": 120},
 		{"label": "Voter Id", "fieldname": "voter_id", "fieldtype": "Data", "width": 120},
+		
+		# Nominee Details
+		{"label": "Nominee Code", "fieldname": "nominee_code", "fieldtype": "Link", "options": "Member", "width": 130},
+		{"label": "Nominee Name", "fieldname": "nominee_name", "fieldtype": "Data", "width": 180},
+		{"label": "Nominee Relation", "fieldname": "nominee_relation", "fieldtype": "Data", "width": 130},
+
+		# Member Address Details
+		{"label": "Occupation", "fieldname": "occupation", "fieldtype": "Data", "width": 130},
 		{"label": "Address", "fieldname": "address", "fieldtype": "Data", "width": 250},
 		{"label": "City", "fieldname": "city", "fieldtype": "Data", "width": 120},
 		{"label": "State", "fieldname": "state", "fieldtype": "Data", "width": 120},
 		{"label": "Country", "fieldname": "country", "fieldtype": "Data", "width": 120},
 		{"label": "Pincode", "fieldname": "pincode", "fieldtype": "Data", "width": 100},
 
+		# Member Bank Details
 		{"label": "Bank Name", "fieldname": "bank_name", "fieldtype": "Data", "width": 150},
 		{"label": "Account Number", "fieldname": "account_number", "fieldtype": "Data", "width": 150},
 		{"label": "Branch", "fieldname": "branch", "fieldtype": "Data", "width": 130},
@@ -63,16 +81,12 @@ def get_columns():
 		{"label": "IFSC Code", "fieldname": "ifsc_code", "fieldtype": "Data", "width": 120},
 		{"label": "Account Type", "fieldname": "account_type", "fieldtype": "Data", "width": 120},
 
-
-		{"label": "Nominee Code", "fieldname": "nominee_code", "fieldtype": "Link", "options": "Member", "width": 130},
-		{"label": "Nominee Name", "fieldname": "nominee_name", "fieldtype": "Data", "width": 180},
-		{"label": "Nominee Relation", "fieldname": "nominee_relation", "fieldtype": "Data", "width": 130},
-
+		# Loan Detials
 		{"label": "Loan Amount", "fieldname": "loan_amount", "fieldtype": "Currency", "width": 130},
 		{"label": "Tenure", "fieldname": "tenure", "fieldtype": "Int", "width": 90},
-		{"label": "Monthly Repayment Amount", "fieldname": "monthly_repayment_amount", "fieldtype": "Currency", "width": 150},
 		{"label": "Sanction Date", "fieldname": "posting_date", "fieldtype": "Date", "width": 120},
 		{"label": "Disbursement Date", "fieldname": "disbursement_date", "fieldtype": "Date", "width": 130},
+		{"label": "Monthly Repayment Amount", "fieldname": "monthly_repayment_amount", "fieldtype": "Currency", "width": 150},
 		{"label": "Loan Application", "fieldname": "loan_application", "fieldtype": "Link", "options": "Loan Application", "width": 150},
 
 		{"label": "Processing Fee (incl. GST)", "fieldname": "processing_fee", "fieldtype": "Currency", "width": 160},
@@ -117,6 +131,7 @@ def get_data(filters):
 		f"""
 		SELECT
 			l.name AS loan_id,
+			l.company AS company,
 			l.loan_amount AS loan_amount,
 			l.repayment_periods AS tenure,
 			l.monthly_repayment_amount AS monthly_repayment_amount,
@@ -126,6 +141,9 @@ def get_data(filters):
 			l.total_principal_paid AS total_principal_paid,
 			l.total_amount_paid As total_amount_paid,
 			(l.total_payment - IFNULL(l.total_amount_paid, 0)) AS pending_amount,
+
+			c.custom_center_number AS center_number,
+			c.custom_branch AS company_branch,
 
 			COALESCE(l.custom_loan_group, m_applicant.group) AS loan_group,
 			lg.group_name AS group_name,
@@ -230,6 +248,9 @@ def get_data(filters):
 
 		FROM `tabLoan` l
 
+		LEFT JOIN `tabCompany` c
+			ON c.name = l.company
+
 		LEFT JOIN `tabLoan Application` la
 			ON la.name = l.loan_application
 
@@ -279,6 +300,7 @@ def build_rows(loans):
 		"loan_group", "group_name", "group_head", "group_head_name",
 		"group_head_mobile", "group_head_address",
 		"processing_fee", "insurance_amount", "other_charges",
+		"center_number", "company_branch",
 	]
 
 	for loan in loans:
