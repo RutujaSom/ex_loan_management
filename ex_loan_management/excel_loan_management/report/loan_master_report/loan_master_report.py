@@ -55,6 +55,14 @@ def get_columns():
 		{"label": "Country", "fieldname": "country", "fieldtype": "Data", "width": 120},
 		{"label": "Pincode", "fieldname": "pincode", "fieldtype": "Data", "width": 100},
 
+		{"label": "Bank Name", "fieldname": "bank_name", "fieldtype": "Data", "width": 150},
+		{"label": "Account Number", "fieldname": "account_number", "fieldtype": "Data", "width": 150},
+		{"label": "Branch", "fieldname": "branch", "fieldtype": "Data", "width": 130},
+		{"label": "Bank Address", "fieldname": "bank_address", "fieldtype": "Data", "width": 200},
+		{"label": "Account Holder Name", "fieldname": "holder_name", "fieldtype": "Data", "width": 180},
+		{"label": "IFSC Code", "fieldname": "ifsc_code", "fieldtype": "Data", "width": 120},
+		{"label": "Account Type", "fieldname": "account_type", "fieldtype": "Data", "width": 120},
+
 		{"label": "Nominee Code", "fieldname": "nominee_code", "fieldtype": "Link", "options": "Member", "width": 130},
 		{"label": "Nominee Name", "fieldname": "nominee_name", "fieldtype": "Data", "width": 180},
 		{"label": "Nominee Relation", "fieldname": "nominee_relation", "fieldtype": "Data", "width": 130},
@@ -69,9 +77,8 @@ def get_columns():
 		{"label": "Processing Fee (incl. GST)", "fieldname": "processing_fee", "fieldtype": "Currency", "width": 160},
 		{"label": "Insurance Amount", "fieldname": "insurance_amount", "fieldtype": "Currency", "width": 130},
 		{"label": "Other Charges", "fieldname": "other_charges", "fieldtype": "Currency", "width": 130},
-		{"label": "Total Upfront Charges", "fieldname": "total_upfront_charges", "fieldtype": "Currency", "width": 150},
 
-		{"label": "Paid Amount", "fieldname": "total_principal_paid", "fieldtype": "Currency", "width": 150},
+		{"label": "Paid Amount", "fieldname": "total_amount_paid", "fieldtype": "Currency", "width": 150},
 		{"label": "Pending Amount", "fieldname": "pending_amount", "fieldtype": "Currency", "width": 150},
 	]
 
@@ -116,7 +123,8 @@ def get_data(filters):
 			l.disbursement_date AS disbursement_date,
 			l.loan_application AS loan_application,
 			l.total_principal_paid AS total_principal_paid,
-			(l.loan_amount - IFNULL(l.total_principal_paid, 0)) AS pending_amount,
+			l.total_amount_paid As total_amount_paid,
+			(l.total_payment - IFNULL(l.total_amount_paid, 0)) AS pending_amount,
 
 			COALESCE(l.custom_loan_group, m_applicant.group) AS loan_group,
 			lg.group_name AS group_name,
@@ -141,6 +149,13 @@ def get_data(filters):
 			m_applicant.state AS applicant_state,
 			m_applicant.country AS applicant_country,
 			m_applicant.pincode AS applicant_pincode,
+			m_applicant.bank_name AS applicant_bank_name,
+			m_applicant.account_number AS applicant_account_number,
+			m_applicant.branch AS applicant_branch,
+			m_applicant.bank_address AS applicant_bank_address,
+			m_applicant.holder_name AS applicant_holder_name,
+			m_applicant.ifsc_code AS applicant_ifsc_code,
+			m_applicant.account_type AS applicant_account_type,
 
 			la.custom_co_borrower AS co_borrower,
 			m_co_borrower.member_name AS co_borrower_name,
@@ -158,6 +173,13 @@ def get_data(filters):
 			m_co_borrower.state AS co_borrower_state,
 			m_co_borrower.country AS co_borrower_country,
 			m_co_borrower.pincode AS co_borrower_pincode,
+			m_co_borrower.bank_name AS co_borrower_bank_name,
+			m_co_borrower.account_number AS co_borrower_account_number,
+			m_co_borrower.branch AS co_borrower_branch,
+			m_co_borrower.bank_address AS co_borrower_bank_address,
+			m_co_borrower.holder_name AS co_borrower_holder_name,
+			m_co_borrower.ifsc_code AS co_borrower_ifsc_code,
+			m_co_borrower.account_type AS co_borrower_account_type,
 
 			la.custom_nominee AS nominee_code,
 			m_nominee.member_name AS nominee_name,
@@ -252,7 +274,7 @@ def build_rows(loans):
 	loan_level_fields = [
 		"loan_id", "loan_amount", "tenure", "monthly_repayment_amount",
 		"posting_date", "disbursement_date", "loan_application",
-		"total_principal_paid", "pending_amount",
+		"total_principal_paid","total_amount_paid", "pending_amount",
 		"loan_group", "group_name", "group_head", "group_head_name",
 		"group_head_mobile", "group_head_address",
 		"processing_fee", "insurance_amount", "other_charges",
@@ -291,6 +313,13 @@ def build_rows(loans):
 			"nominee_code": loan.get("nominee_code"),
 			"nominee_name": loan.get("nominee_name"),
 			"nominee_relation": loan.get("nominee_relation"),
+			"bank_name": loan.get("applicant_bank_name"),
+			"account_number": loan.get("applicant_account_number"),
+			"branch": loan.get("applicant_branch"),
+			"bank_address": loan.get("applicant_bank_address"),
+			"holder_name": loan.get("applicant_holder_name"),
+			"ifsc_code": loan.get("applicant_ifsc_code"),
+			"account_type": loan.get("applicant_account_type"),
 		})
 
 		# Co-borrower row (only if one exists on this loan)
@@ -314,6 +343,13 @@ def build_rows(loans):
 				"state": normalize_state(loan.get("co_borrower_state")),
 				"country": loan.get("co_borrower_country"),
 				"pincode": loan.get("co_borrower_pincode"),
+				"bank_name": loan.get("co_borrower_bank_name"),
+				"account_number": loan.get("co_borrower_account_number"),
+				"branch": loan.get("co_borrower_branch"),
+				"bank_address": loan.get("co_borrower_bank_address"),
+				"holder_name": loan.get("co_borrower_holder_name"),
+				"ifsc_code": loan.get("co_borrower_ifsc_code"),
+				"account_type": loan.get("co_borrower_account_type"),
 			})
 
 	return rows
