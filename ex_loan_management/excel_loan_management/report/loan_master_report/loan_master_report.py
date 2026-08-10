@@ -63,6 +63,7 @@ def get_columns():
 		{"label": "IFSC Code", "fieldname": "ifsc_code", "fieldtype": "Data", "width": 120},
 		{"label": "Account Type", "fieldname": "account_type", "fieldtype": "Data", "width": 120},
 
+
 		{"label": "Nominee Code", "fieldname": "nominee_code", "fieldtype": "Link", "options": "Member", "width": 130},
 		{"label": "Nominee Name", "fieldname": "nominee_name", "fieldtype": "Data", "width": 180},
 		{"label": "Nominee Relation", "fieldname": "nominee_relation", "fieldtype": "Data", "width": 130},
