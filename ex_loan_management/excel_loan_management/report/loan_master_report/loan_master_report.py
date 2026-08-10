@@ -140,7 +140,7 @@ def get_data(filters):
 			l.loan_application AS loan_application,
 			l.total_principal_paid AS total_principal_paid,
 			l.total_amount_paid As total_amount_paid,
-			(l.total_payment - IFNULL(l.total_amount_paid, 0)) AS pending_amount,
+			ROUND(l.total_payment - IFNULL(l.total_amount_paid, 0), 2) AS pending_amount,
 
 			c.custom_center_number AS center_number,
 			c.custom_branch AS company_branch,
